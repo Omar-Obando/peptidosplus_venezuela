@@ -1,0 +1,206 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import Section from '@/components/Section.astro';
+import ArrowRight from '@lucide/astro/icons/arrow-right';
+
+export const prerender = false;
+
+const orderId = Astro.url.searchParams.get('order_id');
+---
+
+<BaseLayout title="Order Complete">
+    <Header />
+    <main id="main-content">
+        <div class="relative overflow-hidden bg-gradient-to-br from-success/5 via-surface to-primary-light/5 min-h-[calc(100vh-5rem)]">
+            <div class="absolute inset-0 bg-[linear-gradient(to_right,var(--color-outline)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-outline)_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20"></div>
+            <Section padding="lg" class="relative z-10">
+                <div class="max-w-2xl mx-auto">
+                    <!-- Success State -->
+                    <div id="order-success" class="bg-surface rounded-2xl border border-outline p-8 lg:p-12 text-center shadow-xl shadow-black/5">
+                        <div class="w-20 h-20 mx-auto mb-8 rounded-2xl bg-success/10 flex items-center justify-center">
+                            <svg class="w-10 h-10 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        
+                        <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-content mb-4">Thank You for Your Order!</h1>
+                        <p id="order-subtitle" class="text-lg text-content-light mb-8 max-w-md mx-auto">
+                            Your order has been received and is being processed.
+                            {orderId && <span>Your order number is <strong class="text-content font-bold">#{orderId}</strong>.</span>}
+                        </p>
+                        
+                        <div id="order-details" class="text-left bg-surface-alt rounded-xl p-6 mb-8">
+                            <h2 class="font-semibold text-content mb-4">Order Details</h2>
+                            <div id="order-info" class="space-y-3 text-sm">
+                                <p class="text-content-lighter">Loading order details...</p>
+                            </div>
+                        </div>
+                        
+                        <p class="text-sm text-content-lighter mb-8">
+                            A confirmation email will be sent to your email address shortly.
+                        </p>
+                        
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                            <a href="/shop" class="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-3.5 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
+                                Continue Shopping
+                                <ArrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            </a>
+                            {orderId && (
+                                <a href={`/account/orders/${orderId}`} class="inline-flex items-center justify-center gap-2 bg-surface border border-outline text-content px-8 py-3.5 rounded-xl font-semibold hover:border-primary hover:text-primary transition-all cursor-pointer">
+                                    View Order
+                                </a>
+                            )}
+                        </div>
+                    </div>
+                    
+                    <!-- Error State -->
+                    <div id="order-error" class="hidden bg-surface rounded-2xl border border-outline p-8 lg:p-12 text-center shadow-xl shadow-black/5">
+                        <div class="w-20 h-20 mx-auto mb-8 rounded-2xl bg-error/10 flex items-center justify-center">
+                            <svg class="w-10 h-10 text-error" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </div>
+                        
+                        <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-content mb-4">Something Went Wrong</h1>
+                        <p class="text-lg text-content-light mb-8 max-w-md mx-auto" id="error-message">
+                            We couldn't find your order details. Please check your email for confirmation or contact support.
+                        </p>
+                        
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                            <a href="/shop" class="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-3.5 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
+                                Continue Shopping
+                                <ArrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            </a>
+                            <a href="/contact" class="inline-flex items-center justify-center gap-2 bg-surface border border-outline text-content px-8 py-3.5 rounded-xl font-semibold hover:border-primary hover:text-primary transition-all cursor-pointer">
+                                Contact Support
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </Section>
+        </div>
+    </main>
+    <Footer />
+</BaseLayout>
+
+<script>
+    import { authFetch, getToken } from '../lib/auth';
+    import { clearCart } from '../lib/cart';
+    
+    clearCart();
+    
+    function escapeHtml(str: string): string {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+    
+    const orderSuccess = document.getElementById('order-success');
+    const orderError = document.getElementById('order-error');
+    const orderInfo = document.getElementById('order-info');
+    
+    const params = new URLSearchParams(window.location.search);
+    const rawOrderId = params.get('order_id');
+    const orderKey = params.get('order_key');
+    
+    // Validate order_id is numeric to prevent injection
+    const orderId = rawOrderId && /^\d+$/.test(rawOrderId) ? rawOrderId : null;
+    
+    async function loadOrderDetails() {
+        if (!orderId || !orderInfo) return;
+        
+        const safeOrderId = escapeHtml(orderId);
+        
+        try {
+            const fetchUrl = orderKey
+                ? `/api/orders/${encodeURIComponent(orderId)}?order_key=${encodeURIComponent(orderKey)}`
+                : `/api/orders/${encodeURIComponent(orderId)}`;
+            const response = await fetch(fetchUrl);
+            
+            if (!response.ok) {
+                orderInfo.innerHTML = `
+                    <div class="flex justify-between py-3 border-b border-outline">
+                        <span class="text-content-light">Order Number</span>
+                        <span class="text-content font-semibold">#${safeOrderId}</span>
+                    </div>
+                    <p class="text-content-lighter text-sm mt-4">
+                        Check your email for complete order details.
+                    </p>
+                `;
+                return;
+            }
+            
+            const order = await response.json();
+            
+            const safeNumber = escapeHtml(String(order.number || orderId));
+            const safeEmail = escapeHtml(order.billing?.email || 'N/A');
+            const safePayment = escapeHtml(order.payment_method_title || 'N/A');
+            const safeTotal = escapeHtml(String(order.total || '0.00'));
+            const safeCurrency = escapeHtml(order.currency_symbol || (order.currency ? order.currency + ' ' : ''));
+            const safeDate = order.date_created ? new Date(order.date_created).toLocaleDateString() : 'N/A';
+            
+            const isBacs = order.payment_method === 'bacs';
+            
+            if (isBacs) {
+                const subtitle = document.getElementById('order-subtitle');
+                if (subtitle) {
+                    subtitle.innerHTML = `Your order has been received and is awaiting payment. ${orderId ? `Your order number is <strong class="text-content font-bold">#${safeNumber}</strong>.` : ''}`;
+                }
+            }
+            
+            orderInfo.innerHTML = `
+                <div class="flex justify-between py-3 border-b border-outline">
+                    <span class="text-content-light">Order Number</span>
+                    <span class="text-content font-semibold">#${safeNumber}</span>
+                </div>
+                <div class="flex justify-between py-3 border-b border-outline">
+                    <span class="text-content-light">Date</span>
+                    <span class="text-content">${safeDate}</span>
+                </div>
+                <div class="flex justify-between py-3 border-b border-outline">
+                    <span class="text-content-light">Email</span>
+                    <span class="text-content">${safeEmail}</span>
+                </div>
+                <div class="flex justify-between py-3 border-b border-outline">
+                    <span class="text-content-light">Payment Method</span>
+                    <span class="text-content">${safePayment}</span>
+                </div>
+                <div class="flex justify-between py-3 font-bold">
+                    <span class="text-content">Total</span>
+                    <span class="text-content">${safeCurrency}${safeTotal}</span>
+                </div>
+                ${isBacs ? `
+                    <div class="mt-4 p-4 bg-warning/10 border border-warning/30 rounded-xl text-sm">
+                        <p class="font-semibold text-content mb-1">Bank Transfer Payment</p>
+                        <p class="text-content-light">
+                            Please transfer <strong>${safeCurrency}${safeTotal}</strong> to our bank account. 
+                            Your order will be processed once the payment is confirmed by the store.
+                            Check your email for bank account details.
+                        </p>
+                    </div>
+                ` : ''}
+            `;
+        } catch (error) {
+            orderInfo.innerHTML = `
+                <div class="flex justify-between py-3 border-b border-outline">
+                    <span class="text-content-light">Order Number</span>
+                    <span class="text-content font-semibold">#${safeOrderId}</span>
+                </div>
+                <p class="text-content-lighter text-sm mt-4">
+                    Check your email for complete order details.
+                </p>
+            `;
+        }
+    }
+    
+    if (orderId) {
+        loadOrderDetails();
+    } else if (rawOrderId) {
+        // Invalid order_id format
+        if (orderInfo) {
+            orderInfo.innerHTML = '<p class="text-content-lighter text-sm">Invalid order reference.</p>';
+        }
+    }
+</script>

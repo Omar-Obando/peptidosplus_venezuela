@@ -1,0 +1,128 @@
+---
+/**
+ * WooCommerce Header Component
+ * 
+ * Includes navigation, cart icon, and account links.
+ * Cart drawer is included globally via CartDrawer component.
+ */
+import MainMenu from './menus/MainMenu.astro';
+import CartDrawer from './react/CartDrawer.tsx';
+import LayoutGrid from '@lucide/astro/icons/layout-grid';
+import Search from '@lucide/astro/icons/search';
+import ShoppingCart from '@lucide/astro/icons/shopping-cart';
+import User from '@lucide/astro/icons/user';
+---
+
+<header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" id="main-header">
+    <div class="absolute inset-0 bg-surface/80 backdrop-blur-xl border-b border-outline/50"></div>
+    <div class="container mx-auto px-4 relative z-10">
+        <nav class="flex items-center justify-between h-16 md:h-20">
+            <!-- Logo -->
+            <a href="/" class="group flex items-center gap-3 font-bold text-xl text-content hover:text-primary no-underline transition-all duration-300">
+                <div class="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg shadow-primary/20">
+                    <LayoutGrid class="w-5 h-5 text-white" />
+                </div>
+                <span class="hidden sm:inline">My Store</span>
+            </a>
+            
+            <!-- Navigation Menu Component -->
+            <MainMenu />
+            
+            <!-- Actions: Search, Account & Cart -->
+            <div class="flex items-center gap-2 md:gap-3">
+                <!-- Search Link -->
+                <a 
+                    href="/search"
+                    class="flex items-center justify-center w-10 h-10 text-content-light hover:text-primary transition-colors cursor-pointer rounded-lg hover:bg-surface-alt"
+                    aria-label="Search products"
+                >
+                    <Search class="w-5 h-5" />
+                </a>
+                
+                <!-- Account Link -->
+                <a 
+                    href="/account"
+                    class="hidden md:flex items-center gap-2 px-4 py-2 text-content-light hover:text-primary transition-colors cursor-pointer"
+                    id="account-link"
+                >
+                    <User class="w-5 h-5" />
+                    <span class="text-sm font-medium" id="account-text">Account</span>
+                </a>
+                
+                <!-- Cart Button -->
+                <button 
+                    id="cart-button"
+                    class="relative flex items-center gap-2 px-4 py-2.5 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-xl transition-all duration-300 cursor-pointer"
+                    aria-label="Open shopping cart"
+                >
+                    <ShoppingCart class="w-5 h-5" />
+                    <span class="hidden sm:inline text-sm font-medium">Cart</span>
+                    <!-- Cart count badge -->
+                    <span 
+                        id="cart-count"
+                        class="absolute -top-1 -right-1 w-5 h-5 bg-error text-white text-xs font-bold rounded-full flex items-center justify-center hidden"
+                    >
+                        0
+                    </span>
+                </button>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<!-- Spacer for fixed header -->
+<div class="h-16 md:h-20"></div>
+
+<!-- Cart Drawer (browser-only React component) -->
+<CartDrawer client:only="react" />
+
+<script>
+    import { $cart, $cartCount, initCart, openCartDrawer } from '../lib/cart';
+    import { $isLoggedIn, initAuth } from '../lib/auth';
+    
+    // Initialize stores
+    initCart();
+    initAuth();
+    
+    const cartButton = document.getElementById('cart-button');
+    const cartCount = document.getElementById('cart-count');
+    const accountLink = document.getElementById('account-link');
+    const accountText = document.getElementById('account-text');
+    
+    // Open cart drawer on button click
+    cartButton?.addEventListener('click', () => {
+        openCartDrawer();
+    });
+    
+    // Update cart count badge
+    function updateCartCount() {
+        const count = $cartCount.get();
+        if (cartCount) {
+            if (count > 0) {
+                cartCount.textContent = count > 99 ? '99+' : String(count);
+                cartCount.classList.remove('hidden');
+            } else {
+                cartCount.classList.add('hidden');
+            }
+        }
+    }
+    
+    // Update account link based on auth state
+    function updateAccountLink() {
+        const isLoggedIn = $isLoggedIn.get();
+        if (accountText) {
+            accountText.textContent = isLoggedIn ? 'My Account' : 'Sign In';
+        }
+        if (accountLink) {
+            accountLink.setAttribute('href', isLoggedIn ? '/account' : '/login');
+        }
+    }
+    
+    // Subscribe to changes
+    $cartCount.subscribe(updateCartCount);
+    $isLoggedIn.subscribe(updateAccountLink);
+    
+    // Initial update
+    updateCartCount();
+    updateAccountLink();
+</script>

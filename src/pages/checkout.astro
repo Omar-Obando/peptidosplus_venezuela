@@ -1,0 +1,1526 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import Section from '@/components/Section.astro';
+import ShieldCheck from '@lucide/astro/icons/shield-check';
+import Lock from '@lucide/astro/icons/lock';
+import Truck from '@lucide/astro/icons/truck';
+
+export const prerender = true;
+
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
+---
+
+<BaseLayout title="Checkout">
+    <Header />
+    <main id="main-content">
+        <!-- Header -->
+        <div class="bg-surface border-b border-outline">
+            <Section padding="none" class="py-8">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-content">Checkout</h1>
+                    <div class="hidden sm:flex items-center gap-2 text-sm text-content-lighter">
+                        <Lock class="w-4 h-4 text-success" />
+                        <span>Secure checkout</span>
+                    </div>
+                </div>
+            </Section>
+        </div>
+
+        <Section padding="lg" bg="surface-alt">
+            <!-- Loading State -->
+            <div id="checkout-loading" class="text-center py-20">
+                <div class="inline-flex items-center gap-3 text-content-light">
+                    <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Loading checkout...</span>
+                </div>
+            </div>
+
+            <!-- Empty Cart -->
+            <div id="empty-cart-notice" class="hidden text-center py-20 bg-surface rounded-2xl border border-outline">
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-primary/10 mb-6">
+                    <svg class="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-content mb-2">Your cart is empty</h2>
+                <p class="text-content-lighter mb-8">Add some products to checkout.</p>
+                <a href="/shop" class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
+                    Browse Products
+                </a>
+            </div>
+            
+            <!-- Login Required -->
+            <div id="login-required" class="hidden">
+                <div class="max-w-md mx-auto bg-surface rounded-2xl border border-outline p-8">
+                    <div class="text-center mb-6">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
+                            <Lock class="w-8 h-8 text-primary" />
+                        </div>
+                        <h2 class="text-2xl font-bold text-content mb-2">Sign in to checkout</h2>
+                        <p class="text-content-lighter text-sm">Please log in to your account to complete your purchase.</p>
+                    </div>
+
+                    <form id="checkout-login-form" class="space-y-4">
+                        <div>
+                            <label for="login-email" class="block text-sm font-medium text-content mb-1">Email</label>
+                            <input type="email" id="login-email" required
+                                class="w-full px-4 py-3 rounded-xl border border-outline bg-surface text-content focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" 
+                                placeholder="you@example.com" />
+                        </div>
+                        <div>
+                            <label for="login-password" class="block text-sm font-medium text-content mb-1">Password</label>
+                            <input type="password" id="login-password" required
+                                class="w-full px-4 py-3 rounded-xl border border-outline bg-surface text-content focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" 
+                                placeholder="Your password" />
+                        </div>
+                        {turnstileSiteKey && (
+                            <div id="login-turnstile-container" data-turnstile-site-key={turnstileSiteKey}></div>
+                        )}
+                        <div id="login-error" class="hidden p-3 bg-error/10 text-error rounded-xl text-sm"></div>
+                        <button type="submit" id="login-submit-btn"
+                            class="w-full bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                            <span id="login-btn-text">Sign In</span>
+                            <span id="login-btn-loading" class="hidden">
+                                <svg class="animate-spin h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </span>
+                        </button>
+                    </form>
+
+                    <div class="mt-6 text-center space-y-2">
+                        <a href="/forgot-password" class="text-sm text-primary hover:underline cursor-pointer">Forgot your password?</a>
+                        <p class="text-sm text-content-lighter">
+                            Don't have an account? <a href="/register?redirect=/checkout" class="text-primary hover:underline cursor-pointer">Create one</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Checkout Form -->
+            <form id="checkout-form" class="hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Left Column: Billing, Shipping Address, Shipping Method -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Contact Information -->
+                        <div class="bg-surface rounded-2xl border border-outline p-6 lg:p-8">
+                            <h2 class="text-lg font-semibold text-content mb-6">Contact Information</h2>
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-content mb-2">
+                                    Email Address <span class="text-error">*</span>
+                                </label>
+                                <input 
+                                    type="email" 
+                                    id="email" 
+                                    name="email" 
+                                    required
+                                    class="w-full px-4 py-3 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface transition-colors"
+                                    placeholder="your@email.com"
+                                />
+                            </div>
+                        </div>
+                        
+                        <!-- Billing Address -->
+                        <div class="bg-surface rounded-2xl border border-outline p-6 lg:p-8">
+                            <h2 class="text-lg font-semibold text-content mb-6">Billing Address</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="billing_first_name" class="block text-sm font-medium text-content mb-2">
+                                        First Name <span class="text-error">*</span>
+                                    </label>
+                                    <input type="text" id="billing_first_name" name="billing_first_name" required
+                                        class="w-full px-4 py-3 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface transition-colors" />
+                                </div>
+                                <div>
+                                    <label for="billing_last_name" class="block text-sm font-medium text-content mb-2">
+                                        Last Name <span class="text-error">*</span>
+                                    </label>
+                                    <input type="text" id="billing_last_name" name="billing_last_name" required
+                                        class="w-full px-4 py-3 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface transition-colors" />
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label for="billing_company" class="block text-sm font-medium text-content mb-2">Company (optional)</label>
+                                    <input type="text" id="billing_company" name="billing_company"
+                                        class="w-full px-4 py-3 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface transition-colors" />
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label for="billing_address_1" class="block text-sm font-medium text-content mb-2">
+                                        Street Address <span class="text-error">*</span>
+                                    </label>
+                                    <input type="text" id="billing_address_1" name="billing_address_1" required placeholder="House number and street name"
+                                        class="w-full px-4 py-3 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface transition-colors" />
+                                </div>
+                                <div class="md:col-span-2">
+                                    <input type="text" id="billing_address_2" name="billing_address_2" placeholder="Apartment, suite, unit, etc. (optional)"
+                                        class="w-full px-4 py-3 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface transition-colors" />
+                                </div>
+                                <div>
+                                    <label for="billing_city" class="block text-sm font-medium text-content mb-2">City <span class="text-error">*</span></label>
+                                    <input type="text" id="billing_city" name="billing_city" required
+                                        class="w-full px-4 py-3 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface transition-colors" />
+                                </div>
+                                <div>
+                                    <label for="billing_state" class="block text-sm font-medium text-content mb-2">State/Province <span class="text-error">*</span></label>
+                                    <input type="text" id="billing_state" name="billing_state" required
+                                        class="w-full px-4 py-3 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface transition-colors" />
+                                </div>
+                                <div>
+                                    <label for="billing_postcode" class="block text-sm font-medium text-content mb-2">ZIP/Postal Code <span class="text-error">*</span></label>
+                                    <input type="text" id="billing_postcode" name="billing_postcode" required
+                                        class="w-full px-4 py-3 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface transition-colors" />
+                                </div>
+                                <div>
+                                    <label for="billing_country" class="block text-sm font-medium text-content mb-2">Country <span class="text-error">*</span></label>
+                                    <select id="billing_country" name="billing_country" required
+                                        class="w-full px-4 py-3 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface cursor-pointer transition-colors">
+                                        <option value="US">United States</option>
+                                        <option value="CA">Canada</option>
+                                        <option value="GB">United Kingdom</option>
+                                        <option value="AU">Australia</option>
+                                        <option value="DE">Germany</option>
+                                        <option value="FR">France</option>
+                                        <option value="NL">Netherlands</option>
+                                        <option value="IT">Italy</option>
+                                        <option value="ES">Spain</option>
+                                        <option value="BR">Brazil</option>
+                                        <option value="IN">India</option>
+                                        <option value="JP">Japan</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="billing_phone" class="block text-sm font-medium text-content mb-2">Phone (optional)</label>
+                                    <input type="tel" id="billing_phone" name="billing_phone"
+                                        class="w-full px-4 py-3 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface transition-colors" />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Shipping Method -->
+                        <div id="shipping-section" class="bg-surface rounded-2xl border border-outline p-6 lg:p-8">
+                            <div class="flex items-center gap-3 mb-6">
+                                <Truck class="w-5 h-5 text-primary" />
+                                <h2 class="text-lg font-semibold text-content">Shipping Method</h2>
+                            </div>
+                            <div id="shipping-methods" class="space-y-3">
+                                <p class="text-content-lighter text-sm">Loading shipping methods...</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Order Notes -->
+                        <div class="bg-surface rounded-2xl border border-outline p-6 lg:p-8">
+                            <h2 class="text-lg font-semibold text-content mb-6">Additional Information</h2>
+                            <div>
+                                <label for="order_notes" class="block text-sm font-medium text-content mb-2">Order Notes (optional)</label>
+                                <textarea id="order_notes" name="order_notes" rows="3"
+                                    placeholder="Notes about your order, e.g., special delivery instructions"
+                                    class="w-full px-4 py-3 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface resize-none transition-colors"
+                                ></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column: Summary, Payment, Place Order -->
+                    <div class="lg:col-span-1 space-y-6">
+                        <div class="bg-surface rounded-2xl border border-outline p-6 sticky top-24">
+                            <h2 class="text-lg font-semibold text-content mb-6">Order Summary</h2>
+                            
+                            <div id="checkout-items" class="space-y-4 mb-6"></div>
+                            
+                            <!-- Coupon Code -->
+                            <div class="mb-4">
+                                <button id="toggle-coupon" type="button" class="text-sm text-primary font-medium hover:underline cursor-pointer">Have a coupon?</button>
+                                <div id="coupon-section" class="hidden mt-3">
+                                    <div class="flex gap-2">
+                                        <input 
+                                            type="text" 
+                                            id="checkout-coupon-input"
+                                            placeholder="Coupon code"
+                                            class="flex-1 px-3 py-2 border border-outline rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface transition-colors"
+                                        />
+                                        <button 
+                                            type="button"
+                                            id="checkout-apply-coupon"
+                                            class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            Apply
+                                        </button>
+                                    </div>
+                                    <p id="checkout-coupon-error" class="hidden mt-2 text-xs text-error"></p>
+                                </div>
+                                <div id="checkout-applied-coupons" class="flex flex-wrap gap-2 mt-2"></div>
+                            </div>
+                            
+                            <hr class="border-outline mb-4" />
+                            
+                            <div class="space-y-3 text-sm">
+                                <div class="flex justify-between text-content">
+                                    <span>Subtotal</span>
+                                    <span id="checkout-subtotal" class="font-medium">$0.00</span>
+                                </div>
+                                <div id="checkout-discount-row" class="hidden flex justify-between text-success">
+                                    <span>Discount</span>
+                                    <span id="checkout-discount" class="font-medium">-$0.00</span>
+                                </div>
+                                <div class="flex justify-between text-content" id="shipping-cost-row">
+                                    <span>Shipping</span>
+                                    <span id="checkout-shipping" class="font-medium">--</span>
+                                </div>
+                                <div class="flex justify-between text-content-light" id="tax-row">
+                                    <span>Tax</span>
+                                    <span id="checkout-tax">Calculated after payment</span>
+                                </div>
+                            </div>
+                            
+                            <hr class="border-outline my-4" />
+                            
+                            <div class="flex justify-between text-xl font-bold text-content mb-6">
+                                <span>Total</span>
+                                <span id="checkout-total">$0.00</span>
+                            </div>
+                            
+                            <!-- Payment Method -->
+                            <div class="mb-6">
+                                <h3 class="text-sm font-semibold text-primary tracking-wide uppercase mb-3">Payment Method</h3>
+                                <div id="payment-methods" class="space-y-3">
+                                    <p class="text-content-lighter text-sm">Loading payment methods...</p>
+                                </div>
+                                <div id="stripe-payment-container" class="hidden mt-4 rounded-lg border border-outline p-4">
+                                    <div id="stripe-payment-element"></div>
+                                    <p id="stripe-payment-message" class="hidden mt-3 text-sm"></p>
+                                </div>
+                                <div id="paypal-buttons-container" class="hidden mt-4"></div>
+                            </div>
+                        
+                            {turnstileSiteKey && (
+                                <div id="turnstile-container" class="mb-4" data-turnstile-site-key={turnstileSiteKey}></div>
+                            )}
+                            
+                            <!-- Place Order -->
+                            <button type="submit" id="place-order-btn"
+                                class="w-full bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-4 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                                <span id="btn-text">Place Order</span>
+                                <span id="btn-loading" class="hidden">
+                                    <svg class="animate-spin h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </span>
+                            </button>
+                            
+                            <div id="checkout-error" class="hidden mt-4 p-4 bg-error/10 text-error rounded-xl text-sm">
+                                <p id="error-message"></p>
+                            </div>
+                            
+                            <p class="text-xs text-content-lighter text-center mt-4">
+                                By placing your order, you agree to our
+                                <a href="/terms" class="text-primary hover:underline cursor-pointer">Terms of Service</a> and
+                                <a href="/privacy" class="text-primary hover:underline cursor-pointer">Privacy Policy</a>.
+                            </p>
+                            
+                            <div class="mt-6 pt-6 border-t border-outline flex items-center justify-center gap-2 text-sm text-content-lighter">
+                                <ShieldCheck class="w-4 h-4 text-success" />
+                                <span>SSL encrypted & secure</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </Section>
+    </main>
+    <Footer />
+</BaseLayout>
+
+<script>
+    import { 
+        $cart, 
+        $cartTotal,
+        $cartSubtotalValue,
+        $cartDiscount,
+        $appliedCoupons,
+        $hasFreeShippingCoupon,
+        $cartIsEmpty,
+        initCart, 
+        getLineItems,
+        getCouponLines,
+        clearCart,
+        applyCoupon,
+        removeCoupon,
+        formatCartPrice,
+    } from '../lib/cart';
+    import { $user, $isLoggedIn, getToken, login, initAuth } from '../lib/auth';
+    
+    initCart();
+    
+    // Turnstile setup
+    let turnstileToken = '';
+    let loginTurnstileToken = '';
+    const turnstileContainer = document.getElementById('turnstile-container');
+    const loginTurnstileContainer = document.getElementById('login-turnstile-container');
+    const turnstileSiteKey = turnstileContainer?.dataset.turnstileSiteKey || loginTurnstileContainer?.dataset.turnstileSiteKey;
+    let turnstileRequired = false;
+    let turnstileScriptLoaded = false;
+
+    function loadTurnstileScript(onReady: () => void) {
+        if (turnstileScriptLoaded) {
+            if ((window as any).turnstile) onReady();
+            return;
+        }
+        turnstileScriptLoaded = true;
+        const script = document.createElement('script');
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad';
+        script.async = true;
+        (window as any).onTurnstileLoad = onReady;
+        document.head.appendChild(script);
+    }
+
+    function initLoginTurnstile() {
+        if (!turnstileSiteKey || !loginTurnstileContainer) return;
+        loadTurnstileScript(() => {
+            (window as any).turnstile.render(loginTurnstileContainer, {
+                sitekey: turnstileSiteKey,
+                callback: (token: string) => { loginTurnstileToken = token; },
+                'expired-callback': () => { loginTurnstileToken = ''; },
+                'error-callback': () => { loginTurnstileToken = ''; },
+                theme: 'auto',
+            });
+        });
+    }
+
+    function initTurnstile() {
+        if (!turnstileSiteKey || !turnstileContainer || $isLoggedIn.get()) {
+            turnstileContainer?.classList.add('hidden');
+            turnstileRequired = false;
+            return;
+        }
+        turnstileRequired = true;
+        turnstileContainer.classList.remove('hidden');
+        loadTurnstileScript(() => {
+            (window as any).turnstile.render(turnstileContainer, {
+                sitekey: turnstileSiteKey,
+                callback: (token: string) => { turnstileToken = token; },
+                'expired-callback': () => { turnstileToken = ''; },
+                'error-callback': () => { turnstileToken = ''; },
+                theme: 'auto',
+            });
+        });
+    }
+    
+    function escapeHtml(value: unknown): string {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function escapeAttr(value: unknown): string {
+        return escapeHtml(value).replace(/`/g, '&#96;');
+    }
+    
+    const loadingEl = document.getElementById('checkout-loading');
+    const emptyNotice = document.getElementById('empty-cart-notice');
+    const loginRequired = document.getElementById('login-required');
+    const checkoutForm = document.getElementById('checkout-form') as HTMLFormElement;
+    const checkoutItems = document.getElementById('checkout-items');
+    const checkoutSubtotal = document.getElementById('checkout-subtotal');
+    const checkoutShipping = document.getElementById('checkout-shipping');
+    const checkoutTotal = document.getElementById('checkout-total');
+    const shippingSection = document.getElementById('shipping-section');
+    const shippingMethods = document.getElementById('shipping-methods');
+    const paymentMethods = document.getElementById('payment-methods');
+    const stripePaymentContainer = document.getElementById('stripe-payment-container');
+    const stripePaymentMessage = document.getElementById('stripe-payment-message');
+    const paypalButtonsContainer = document.getElementById('paypal-buttons-container');
+    const placeOrderBtn = document.getElementById('place-order-btn') as HTMLButtonElement;
+    const btnText = document.getElementById('btn-text');
+    const btnLoading = document.getElementById('btn-loading');
+    const checkoutError = document.getElementById('checkout-error');
+    const errorMessage = document.getElementById('error-message');
+    
+    let selectedGateway = '';
+    let selectedShippingCost = 0;
+    let selectedShippingMethodId = '';
+    let selectedShippingMethodTitle = '';
+    let checkoutConfig: any = null;
+    let estimatedTax = 0;
+    let checkoutCurrency = '';
+    let checkoutCurrencySymbol = '';
+    let checkoutCurrencyPosition = 'left';
+    let checkoutPriceDecimals = 2;
+    let checkoutDecimalSeparator = '.';
+    let checkoutThousandSeparator = ',';
+    let wooTotals: Record<string, any> | null = null;
+    let isRedirecting = false;
+    let initComplete = false;
+    let stripeElements: any = null;
+    let stripePaymentElement: any = null;
+    let stripeClientSecret = '';
+    let createdOrderId: number | null = null;
+    let createdOrderKey = '';
+    let checkoutLockedForPayment = false;
+    let paypalButtonsMounted = false;
+    
+    // ---------------------------------------------------------------
+    // Load checkout config from WooCommerce
+    // ---------------------------------------------------------------
+    async function loadCheckoutConfig() {
+        try {
+            const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+            const token = getToken();
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+            
+            const res = await fetch('/api/checkout/config', { headers });
+            if (!res.ok) throw new Error('Failed to load config');
+            
+            const data = await res.json();
+            if (!data.success) throw new Error(data.error || 'Config error');
+            
+            checkoutConfig = data;
+            applyCurrencyConfig(data);
+            return data;
+        } catch (err) {
+            console.error('Checkout config error:', err);
+            return null;
+        }
+    }
+    
+    // ---------------------------------------------------------------
+    // Auto-fill form with customer data
+    // ---------------------------------------------------------------
+    function prefillCustomer(customer: any) {
+        if (!customer) return;
+        
+        const fill = (id: string, value: string | undefined) => {
+            const el = document.getElementById(id) as HTMLInputElement | HTMLSelectElement | null;
+            if (el && value) el.value = value;
+        };
+        
+        fill('email', customer.email);
+        
+        const b = customer.billing;
+        if (b) {
+            fill('billing_first_name', b.first_name);
+            fill('billing_last_name', b.last_name);
+            fill('billing_company', b.company);
+            fill('billing_address_1', b.address_1);
+            fill('billing_address_2', b.address_2);
+            fill('billing_city', b.city);
+            fill('billing_state', b.state);
+            fill('billing_postcode', b.postcode);
+            fill('billing_country', b.country);
+            fill('billing_phone', b.phone);
+        }
+    }
+
+    function applyCurrencyConfig(config: any) {
+        if (!config) return;
+        checkoutCurrency = config.currency || checkoutCurrency;
+        checkoutCurrencySymbol = config.currency_symbol || checkoutCurrencySymbol;
+        checkoutCurrencyPosition = config.currency_position || checkoutCurrencyPosition;
+        checkoutPriceDecimals = Number.isFinite(Number(config.price_decimals)) ? Number(config.price_decimals) : checkoutPriceDecimals;
+        checkoutDecimalSeparator = config.price_decimal_separator ?? checkoutDecimalSeparator;
+        checkoutThousandSeparator = config.price_thousand_separator ?? checkoutThousandSeparator;
+    }
+
+    function formatAmount(value: number): string {
+        const decimals = Number.isFinite(checkoutPriceDecimals) ? checkoutPriceDecimals : 2;
+        const fixed = (Number(value) || 0).toFixed(decimals);
+        const [whole, fraction] = fixed.split('.');
+        const withThousands = whole.replace(/\B(?=(\d{3})+(?!\d))/g, checkoutThousandSeparator || ',');
+        return fraction !== undefined && decimals > 0
+            ? `${withThousands}${checkoutDecimalSeparator || '.'}${fraction}`
+            : withThousands;
+    }
+
+    function formatMoney(value: number): string {
+        const amount = formatAmount(value);
+        if (!checkoutCurrencySymbol) {
+            return checkoutCurrency ? `${checkoutCurrency} ${amount}` : amount;
+        }
+        switch (checkoutCurrencyPosition) {
+            case 'right':
+                return `${amount}${checkoutCurrencySymbol}`;
+            case 'right_space':
+                return `${amount} ${checkoutCurrencySymbol}`;
+            case 'left_space':
+                return `${checkoutCurrencySymbol} ${amount}`;
+            case 'left':
+            default:
+                return `${checkoutCurrencySymbol}${amount}`;
+        }
+    }
+
+    function parseWooTotal(key: string): number {
+        const value = wooTotals?.[key];
+        const parsed = typeof value === 'number' ? value : parseFloat(String(value ?? '0'));
+        return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function renderCountryOptions(config: any) {
+        const select = document.getElementById('billing_country') as HTMLSelectElement | null;
+        const countries = config?.allowed_countries || config?.shipping_countries || {};
+        if (!select || !countries || Object.keys(countries).length === 0) return;
+        const previous = select.value;
+        select.innerHTML = Object.entries(countries)
+            .map(([code, name]) => `<option value="${escapeAttr(code)}">${escapeHtml(name)}</option>`)
+            .join('');
+        if (previous && countries[previous]) {
+            select.value = previous;
+        }
+    }
+    
+    // ---------------------------------------------------------------
+    // Render shipping methods
+    // ---------------------------------------------------------------
+    function renderShippingMethods(packages: any[]) {
+        if (!shippingMethods) return;
+        
+        if (!packages || packages.length === 0) {
+            shippingMethods.innerHTML = `
+                <div class="p-4 bg-surface-alt rounded-xl text-sm text-content-light">
+                    Enter your address to calculate shipping.
+                </div>
+            `;
+            if (shippingSection) shippingSection.classList.remove('hidden');
+            return;
+        }
+        
+        const allMethods: any[] = [];
+        packages.forEach(pkg => {
+            (pkg.rates || pkg.methods || []).forEach((m: any) => {
+                allMethods.push({
+                    id: m.id,
+                    rate_id: m.rate_id,
+                    method_id: m.method_id,
+                    instance_id: m.instance_id,
+                    title: m.label || m.title,
+                    label: m.label,
+                    description: m.description,
+                    cost: m.cost,
+                    taxes: m.taxes,
+                });
+            });
+        });
+        
+        if (allMethods.length === 0) {
+            shippingMethods.innerHTML = `
+                <div class="p-4 bg-surface-alt rounded-xl text-sm text-content-light">
+                    No shipping methods available for your location. Contact the store for details.
+                </div>
+            `;
+            return;
+        }
+        
+        const previousSelection = selectedShippingMethodId;
+        const selectedIndex = Math.max(0, allMethods.findIndex(method => (method.rate_id || method.id || method.method_id) === previousSelection));
+        
+        shippingMethods.innerHTML = allMethods.map((method, index) => {
+            const hasCost = method.cost !== null && method.cost !== undefined;
+            const cost = hasCost ? parseFloat(method.cost) : 0;
+            const isFree = method.method_id === 'free_shipping' || (hasCost && cost === 0);
+            const costLabel = isFree ? 'Free' : (hasCost ? formatMoney(cost) : 'Calculated at checkout');
+            const checked = index === selectedIndex ? 'checked' : '';
+            const safeId = escapeAttr(method.rate_id || method.id || method.method_id);
+            const safeMethodId = escapeAttr(method.method_id || method.id || method.rate_id);
+            const safeTitle = escapeHtml(method.title || method.label || 'Shipping');
+            const safeTitleAttr = escapeAttr(method.title || method.label || 'Shipping');
+            const safeDescription = escapeHtml(method.description || '');
+            const safeCost = escapeAttr(Number.isFinite(cost) ? cost : 0);
+            const safeCostLabel = escapeHtml(costLabel);
+            
+            return `
+                <label class="flex items-center justify-between p-4 border rounded-xl cursor-pointer hover:border-primary transition-all group
+                    ${index === selectedIndex ? 'border-primary bg-primary/5 ring-1 ring-primary/20' : 'border-outline'}">
+                    <div class="flex items-center gap-3">
+                        <input type="radio" name="shipping_method" value="${safeId}"
+                            data-rate-id="${safeId}" data-cost="${safeCost}" data-title="${safeTitleAttr}" data-method-id="${safeMethodId}"
+                            ${checked}
+                            class="w-4 h-4 text-primary border-outline focus:ring-primary cursor-pointer" />
+                        <div>
+                            <span class="font-medium text-content">${safeTitle}</span>
+                            ${safeDescription ? `<p class="text-xs text-content-lighter mt-0.5">${safeDescription}</p>` : ''}
+                        </div>
+                    </div>
+                    <span class="font-semibold ${isFree ? 'text-success' : 'text-content'}">${safeCostLabel}</span>
+                </label>
+            `;
+        }).join('');
+        
+        // Set initial selection
+        const selectedMethod = allMethods[selectedIndex];
+        if (selectedMethod) {
+            const hasCost = selectedMethod.cost !== null && selectedMethod.cost !== undefined;
+            selectedShippingCost = hasCost ? parseFloat(selectedMethod.cost) : 0;
+            selectedShippingMethodId = selectedMethod.rate_id || selectedMethod.id || selectedMethod.method_id || '';
+            selectedShippingMethodTitle = selectedMethod.title;
+            if (selectedMethod.method_id === 'free_shipping') selectedShippingCost = 0;
+        }
+        
+        // Listen for changes
+        shippingMethods.querySelectorAll('input[name="shipping_method"]').forEach(input => {
+            input.addEventListener('change', (e) => {
+                if (checkoutLockedForPayment) return;
+                resetPreparedPaymentState();
+                const target = e.target as HTMLInputElement;
+                const rawCost = target.dataset.cost;
+                selectedShippingCost = rawCost ? parseFloat(rawCost) : 0;
+                if (isNaN(selectedShippingCost)) selectedShippingCost = 0;
+                selectedShippingMethodId = target.dataset.rateId || target.dataset.methodId || '';
+                selectedShippingMethodTitle = target.dataset.title || '';
+                if (target.dataset.methodId === 'free_shipping') selectedShippingCost = 0;
+                wooTotals = null;
+                
+                shippingMethods.querySelectorAll('label').forEach(label => {
+                    label.classList.remove('border-primary', 'bg-primary/5', 'ring-1', 'ring-primary/20');
+                    label.classList.add('border-outline');
+                });
+                target.closest('label')?.classList.remove('border-outline');
+                target.closest('label')?.classList.add('border-primary', 'bg-primary/5', 'ring-1', 'ring-primary/20');
+                
+                debouncedEstimateTax();
+                updateTotals();
+            });
+        });
+        
+        if (shippingSection) shippingSection.classList.remove('hidden');
+    }
+    
+    // ---------------------------------------------------------------
+    // Render payment gateways
+    // ---------------------------------------------------------------
+    function renderPaymentGateways(gateways: any[]) {
+        if (!paymentMethods) return;
+        
+        if (!gateways || gateways.length === 0) {
+            paymentMethods.innerHTML = `
+                <p class="text-error text-sm">No payment methods available. Please contact the store.</p>
+            `;
+            return;
+        }
+
+        const isSingleStripe = gateways.length === 1 && gateways[0].id === 'stripe';
+
+        if (isSingleStripe) {
+            paymentMethods.innerHTML = '';
+            selectedGateway = 'stripe';
+            return;
+        }
+        
+        paymentMethods.innerHTML = gateways.map((gw, index) => {
+            const safeId = escapeAttr(gw.id);
+            const safeGatewayTitle = escapeHtml(gw.title || gw.name || gw.id);
+            const safeDescription = escapeHtml(gw.description || '');
+            return `
+            <label class="flex items-start gap-3 p-4 border rounded-xl cursor-pointer hover:border-primary transition-all
+                ${index === 0 ? 'border-primary bg-primary/5 ring-1 ring-primary/20' : 'border-outline'}">
+                <input type="radio" name="payment_gateway" value="${safeId}"
+                    ${index === 0 ? 'checked' : ''}
+                    class="w-4 h-4 mt-0.5 text-primary border-outline focus:ring-primary cursor-pointer" />
+                <div>
+                    <span class="font-medium text-content">${safeGatewayTitle}</span>
+                    ${safeDescription ? `<p class="text-xs text-content-lighter mt-0.5">${safeDescription}</p>` : ''}
+                </div>
+            </label>
+        `}).join('');
+        
+        selectedGateway = gateways[0]?.id || '';
+        
+        paymentMethods.querySelectorAll('input[name="payment_gateway"]').forEach(input => {
+            input.addEventListener('change', (e) => {
+                const target = e.target as HTMLInputElement;
+                selectedGateway = target.value;
+                resetStripePaymentStep();
+                resetPayPalPaymentStep();
+                
+                paymentMethods.querySelectorAll('label').forEach(label => {
+                    label.classList.remove('border-primary', 'bg-primary/5', 'ring-1', 'ring-primary/20');
+                    label.classList.add('border-outline');
+                });
+                target.closest('label')?.classList.remove('border-outline');
+                target.closest('label')?.classList.add('border-primary', 'bg-primary/5', 'ring-1', 'ring-primary/20');
+            });
+        });
+    }
+    
+    // ---------------------------------------------------------------
+    // Render order summary items
+    // ---------------------------------------------------------------
+    function renderOrderSummary() {
+        if (isRedirecting || !initComplete) return;
+
+        const items = $cart.get();
+        const isEmpty = items.length === 0;
+
+        if (emptyNotice) emptyNotice.classList.toggle('hidden', !isEmpty);
+        if (checkoutForm) checkoutForm.classList.toggle('hidden', isEmpty);
+        if (loadingEl) loadingEl.classList.add('hidden');
+        
+        if (checkoutItems && !isEmpty) {
+            checkoutItems.innerHTML = items.map(item => {
+                const safeName = escapeHtml(item.name || '');
+                const safeImage = item.image ? escapeAttr(item.image) : '';
+                return `
+                <div class="flex gap-3">
+                    <div class="w-14 h-14 flex-shrink-0 bg-surface-alt rounded-xl overflow-hidden border border-outline">
+                        ${safeImage 
+                            ? `<img src="${safeImage}" alt="${safeName}" class="w-full h-full object-cover" />`
+                            : `<div class="w-full h-full flex items-center justify-center text-content-lighter">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>`
+                        }
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-content truncate">${safeName}</p>
+                        <p class="text-xs text-content-lighter">Qty: ${item.quantity}</p>
+                    </div>
+                    <p class="text-sm font-bold text-content">${formatMoney(item.price * item.quantity)}</p>
+                </div>
+            `}).join('');
+        }
+        
+        updateTotals();
+    }
+    
+    const checkoutDiscountRow = document.getElementById('checkout-discount-row');
+    const checkoutDiscountEl = document.getElementById('checkout-discount');
+
+    function updateTotals() {
+        const hasWooTotals = !!wooTotals;
+        const subtotal = hasWooTotals ? parseWooTotal('subtotal') : $cartSubtotalValue.get();
+        const discount = hasWooTotals ? parseWooTotal('discount_total') : $cartDiscount.get();
+        const afterDiscount = $cartTotal.get();
+        
+        const hasFreeShipping = $hasFreeShippingCoupon.get();
+        const shippingCost = hasWooTotals ? parseWooTotal('shipping_total') : (hasFreeShipping ? 0 : selectedShippingCost);
+        const taxTotal = hasWooTotals ? parseWooTotal('total_tax') : estimatedTax;
+        const total = hasWooTotals ? parseWooTotal('total') : afterDiscount + shippingCost + taxTotal;
+        
+        if (checkoutSubtotal) checkoutSubtotal.textContent = formatMoney(subtotal);
+
+        if (checkoutDiscountRow && checkoutDiscountEl) {
+            if (discount > 0) {
+                checkoutDiscountRow.classList.remove('hidden');
+                checkoutDiscountEl.textContent = `-${formatMoney(discount)}`;
+            } else {
+                checkoutDiscountRow.classList.add('hidden');
+            }
+        }
+
+        if (checkoutShipping) {
+            if (hasFreeShipping) {
+                checkoutShipping.textContent = 'Free (coupon)';
+            } else if (shippingCost > 0) {
+                checkoutShipping.textContent = formatMoney(shippingCost);
+            } else if (selectedShippingMethodId === 'free_shipping') {
+                checkoutShipping.textContent = 'Free';
+            } else if (checkoutConfig?.shipping_zones?.length > 0 && selectedShippingMethodTitle) {
+                checkoutShipping.textContent = 'Included';
+            } else {
+                checkoutShipping.textContent = '--';
+            }
+        }
+
+        const checkoutTaxEl = document.getElementById('checkout-tax');
+        if (checkoutTaxEl) {
+            if (taxTotal > 0) {
+                checkoutTaxEl.textContent = formatMoney(taxTotal);
+            } else if (checkoutConfig?.tax_enabled) {
+                checkoutTaxEl.textContent = 'Calculated after payment';
+            } else {
+                checkoutTaxEl.textContent = '--';
+            }
+        }
+
+        if (checkoutTotal) checkoutTotal.textContent = formatMoney(total);
+
+        renderCheckoutCoupons();
+    }
+
+    function renderCheckoutCoupons() {
+        const container = document.getElementById('checkout-applied-coupons');
+        if (!container) return;
+        const coupons = $appliedCoupons.get();
+        if (coupons.length === 0) {
+            container.innerHTML = '';
+            return;
+        }
+        container.innerHTML = coupons.map(c => {
+            const desc = c.description === 'fixed_amount'
+                ? `${formatMoney(c.discount_amount)} off`
+                : c.description;
+            const safeCode = escapeHtml(String(c.code || '').toUpperCase());
+            const safeDesc = escapeHtml(String(desc || ''));
+            return `
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-success/10 text-success text-xs rounded-md font-medium">
+                ${safeCode} (${safeDesc})
+                <button type="button" data-remove-coupon="${escapeAttr(String(c.code || ''))}" class="ml-0.5 hover:text-error transition-colors cursor-pointer">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </span>
+        `}).join('');
+
+        container.querySelectorAll('[data-remove-coupon]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const code = (btn as HTMLElement).dataset.removeCoupon;
+                if (code) removeCoupon(code);
+            });
+        });
+    }
+    
+    // ---------------------------------------------------------------
+    // Helpers
+    // ---------------------------------------------------------------
+    function showError(message: string) {
+        if (checkoutError && errorMessage) {
+            errorMessage.textContent = message;
+            checkoutError.classList.remove('hidden');
+            checkoutError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+    
+    function hideError() {
+        if (checkoutError) checkoutError.classList.add('hidden');
+    }
+
+    function getAppliedCouponLines() {
+        return getCouponLines();
+    }
+
+    function showStripeMessage(message: string, isError = false) {
+        if (!stripePaymentMessage) return;
+        stripePaymentMessage.textContent = message;
+        stripePaymentMessage.classList.toggle('text-error', isError);
+        stripePaymentMessage.classList.toggle('text-content-lighter', !isError);
+        stripePaymentMessage.classList.remove('hidden');
+    }
+
+    function hideStripeMessage() {
+        if (!stripePaymentMessage) return;
+        stripePaymentMessage.textContent = '';
+        stripePaymentMessage.classList.add('hidden');
+        stripePaymentMessage.classList.remove('text-error', 'text-content-lighter');
+    }
+
+    function setSubmitText(text: string) {
+        if (btnText) btnText.textContent = text;
+    }
+    
+    function setLoading(loading: boolean) {
+        if (placeOrderBtn) placeOrderBtn.disabled = loading;
+        if (btnText) btnText.classList.toggle('hidden', loading);
+        if (btnLoading) btnLoading.classList.toggle('hidden', !loading);
+    }
+
+    function resetStripePaymentStep() {
+        try {
+            stripePaymentElement?.unmount?.();
+        } catch {
+            // Ignore stale Stripe element cleanup failures.
+        }
+        const stripeElementContainer = document.getElementById('stripe-payment-element');
+        if (stripeElementContainer) stripeElementContainer.innerHTML = '';
+        stripePaymentElement = null;
+        stripeElements = null;
+        stripeClientSecret = '';
+        createdOrderId = null;
+        createdOrderKey = '';
+        stripePaymentContainer?.classList.add('hidden');
+        hideStripeMessage();
+        setSubmitText('Place Order');
+    }
+
+    function resetPayPalPaymentStep() {
+        if (paypalButtonsContainer) {
+            paypalButtonsContainer.innerHTML = '';
+            paypalButtonsContainer.classList.add('hidden');
+        }
+        paypalButtonsMounted = false;
+        createdOrderId = null;
+        createdOrderKey = '';
+        setSubmitText('Place Order');
+    }
+
+    function resetPreparedPaymentState() {
+        if (checkoutLockedForPayment) return;
+        resetStripePaymentStep();
+        resetPayPalPaymentStep();
+    }
+
+    function lockCheckoutForPayment() {
+        checkoutLockedForPayment = true;
+        checkoutForm.querySelectorAll('input, select, textarea, button').forEach((control) => {
+            if (control === placeOrderBtn) return;
+            (control as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLButtonElement).disabled = true;
+        });
+    }
+
+    function showStripePaymentStep() {
+        stripePaymentContainer?.classList.remove('hidden');
+        hideStripeMessage();
+        setSubmitText('Pay now');
+        lockCheckoutForPayment();
+    }
+
+    function explainStripeElementError(error: unknown): Error {
+        const message = error instanceof Error ? error.message : String(error || '');
+        const lower = message.toLowerCase();
+        if (
+            lower.includes('paymentintent') ||
+            lower.includes('payment_intent') ||
+            lower.includes('client_secret') ||
+            lower.includes('payment not found')
+        ) {
+            return new Error('Stripe could not find the prepared payment. Check that the Stripe secret key and PUBLIC_STRIPE_PUBLISHABLE_KEY are from the same Stripe account and the same test/live mode.');
+        }
+        return error instanceof Error ? error : new Error(message || 'Could not mount card payment form');
+    }
+
+    async function mountStripePaymentElement(orderId: number, orderKey: string) {
+        if (stripeElements && stripeClientSecret && createdOrderId === orderId) return;
+
+        try {
+            stripePaymentElement?.unmount?.();
+        } catch {
+            // Ignore stale Stripe element cleanup failures.
+        }
+        const stripeElementContainer = document.getElementById('stripe-payment-element');
+        if (stripeElementContainer) stripeElementContainer.innerHTML = '';
+        stripePaymentElement = null;
+        stripeElements = null;
+        stripeClientSecret = '';
+        stripePaymentContainer?.classList.remove('hidden');
+        hideStripeMessage();
+
+        const { initPaymentGateway } = await import('../lib/payments');
+        await initPaymentGateway('stripe');
+        const stripe = (window as any).stripeInstance;
+        if (!stripe) throw new Error('Stripe failed to load');
+
+        const response = await fetch('/api/payments/stripe/create-intent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ order_id: orderId, order_key: orderKey }),
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success || !data.client_secret) {
+            throw new Error(data.error || 'Could not prepare card payment');
+        }
+
+        try {
+            const nextStripeElements = stripe.elements({ clientSecret: data.client_secret });
+            const paymentElement = nextStripeElements.create('payment');
+            paymentElement.mount('#stripe-payment-element');
+            stripePaymentElement = paymentElement;
+            stripeElements = nextStripeElements;
+            stripeClientSecret = data.client_secret;
+        } catch (error) {
+            stripePaymentElement = null;
+            stripeElements = null;
+            stripeClientSecret = '';
+            resetStripePaymentStep();
+            throw explainStripeElementError(error);
+        }
+    }
+
+    async function mountPayPalButtons(orderId: number, orderKey: string) {
+        if (paypalButtonsMounted && createdOrderId === orderId) return;
+
+        const { initPaymentGateway } = await import('../lib/payments');
+        await initPaymentGateway('paypal');
+        const paypal = (window as any).paypal;
+        if (!paypal) throw new Error('PayPal failed to load');
+
+        const container = document.getElementById('paypal-buttons-container');
+        if (!container) return;
+        container.innerHTML = '';
+        container.classList.remove('hidden');
+
+        try {
+            await paypal.Buttons({
+                createOrder: async () => {
+                    const response = await fetch('/api/payments/paypal/create-session', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ order_id: orderId, order_key: orderKey }),
+                    });
+                    const data = await response.json();
+                    if (!response.ok || !data.success || !data.paypal_order_id) {
+                        throw new Error(data.error || 'Could not create PayPal order');
+                    }
+                    return data.paypal_order_id;
+                },
+                onApprove: async (data: any) => {
+                    const response = await fetch('/api/payments/paypal/capture', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            paypal_order_id: data.orderID,
+                            wc_order_id: orderId,
+                            wc_order_key: orderKey,
+                        }),
+                    });
+                    const result = await response.json();
+                    if (!response.ok || !result.success) {
+                        throw new Error(result.error || 'PayPal capture failed');
+                    }
+                    clearCart();
+                    window.location.href = `/order-complete?order_id=${orderId}&order_key=${encodeURIComponent(orderKey)}`;
+                },
+                onError: (error: unknown) => {
+                    console.error('PayPal error:', error);
+                    showError('PayPal payment failed. Please try again.');
+                },
+            }).render('#paypal-buttons-container');
+        } catch (error) {
+            resetPreparedPaymentState();
+            throw error;
+        }
+
+        paypalButtonsMounted = true;
+        lockCheckoutForPayment();
+    }
+    
+    // ---------------------------------------------------------------
+    // Place order
+    // ---------------------------------------------------------------
+    checkoutForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideError();
+        
+        if (!selectedGateway) {
+            showError('Please select a payment method');
+            return;
+        }
+        
+        setLoading(true);
+        
+        try {
+            if (selectedGateway === 'stripe' && stripeElements && stripeClientSecret && createdOrderId) {
+                const { initPaymentGateway } = await import('../lib/payments');
+                await initPaymentGateway('stripe');
+                const stripe = (window as any).stripeInstance;
+                if (!stripe) throw new Error('Stripe failed to load');
+
+                const { error } = await stripe.confirmPayment({
+                    elements: stripeElements,
+                    confirmParams: {
+                        return_url: `${window.location.origin}/order-complete?order_id=${createdOrderId}&order_key=${encodeURIComponent(createdOrderKey)}`,
+                    },
+                });
+
+                if (error) {
+                    showStripeMessage(error.message || 'Card payment could not be confirmed.', true);
+                    throw new Error(error.message || 'Card payment could not be confirmed.');
+                }
+
+                return;
+            }
+
+            if (selectedGateway === 'stripe' && createdOrderId && createdOrderKey && !stripeElements) {
+                await mountStripePaymentElement(createdOrderId, createdOrderKey);
+                showStripePaymentStep();
+                setLoading(false);
+                return;
+            }
+
+            if (selectedGateway === 'paypal' && createdOrderId && createdOrderKey) {
+                await mountPayPalButtons(createdOrderId, createdOrderKey);
+                setLoading(false);
+                setSubmitText('Pay with PayPal');
+                return;
+            }
+
+            // Validate stock availability before placing the order
+            const stockItems = getLineItems().map((li: any) => ({
+                product_id: li.product_id,
+                variation_id: li.variation_id || undefined,
+                quantity: li.quantity,
+            }));
+            
+            try {
+                const stockRes = await fetch('/api/stock/check', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ items: stockItems }),
+                });
+                
+                if (stockRes.ok) {
+                    const stockData = await stockRes.json();
+                    if (stockData.success && !stockData.all_available) {
+                        const issues = stockData.unavailable_items
+                            .map((item: any) => `${item.name}: ${item.message}`)
+                            .join('. ');
+                        throw new Error(`Some items are no longer available. ${issues}`);
+                    }
+                }
+            } catch (stockError) {
+                if (stockError instanceof Error && stockError.message.includes('no longer available')) {
+                    throw stockError;
+                }
+                // If stock check endpoint fails, proceed anyway (non-blocking)
+            }
+            
+            const formData = new FormData(checkoutForm);
+            
+            const orderData: Record<string, any> = {
+                billing: {
+                    first_name: formData.get('billing_first_name'),
+                    last_name: formData.get('billing_last_name'),
+                    company: formData.get('billing_company') || '',
+                    address_1: formData.get('billing_address_1'),
+                    address_2: formData.get('billing_address_2') || '',
+                    city: formData.get('billing_city'),
+                    state: formData.get('billing_state'),
+                    postcode: formData.get('billing_postcode'),
+                    country: formData.get('billing_country'),
+                    email: formData.get('email'),
+                    phone: formData.get('billing_phone') || '',
+                },
+                line_items: getLineItems(),
+                coupon_lines: getAppliedCouponLines(),
+                shipping_rate_id: selectedShippingMethodId,
+                customer_note: formData.get('order_notes') || '',
+                payment_gateway: selectedGateway,
+                payment_gateway_title: (document.querySelector('input[name="payment_gateway"]:checked') as HTMLInputElement)
+                    ?.closest('label')?.querySelector('.font-medium')?.textContent || selectedGateway,
+            };
+            
+            // Include selected shipping method if available
+            if (selectedShippingMethodTitle) {
+                orderData.shipping_lines = [{
+                    method_title: selectedShippingMethodTitle,
+                    method_id: (document.querySelector('input[name="shipping_method"]:checked') as HTMLInputElement)?.dataset.methodId || 'flat_rate',
+                    total: selectedShippingCost.toFixed(2),
+                }];
+                orderData.shipping_rate_id = (document.querySelector('input[name="shipping_method"]:checked') as HTMLInputElement)?.dataset.rateId || selectedShippingMethodId;
+            }
+            
+            if (turnstileRequired && !turnstileToken) {
+                throw new Error('Please complete the security verification.');
+            }
+            if (turnstileToken) {
+                orderData.turnstile_token = turnstileToken;
+            }
+            
+            const token = getToken();
+            const response = await fetch('/api/orders/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+                },
+                body: JSON.stringify(orderData),
+            });
+            
+            const result = await response.json();
+            
+            if (!response.ok || !result.success) {
+                throw new Error(result.error || 'Failed to create order');
+            }
+            
+            if (selectedGateway === 'stripe') {
+                createdOrderId = Number(result.order_id);
+                createdOrderKey = String(result.order_key || '');
+                await mountStripePaymentElement(createdOrderId, createdOrderKey);
+                showStripePaymentStep();
+                setLoading(false);
+                return;
+            } else if (selectedGateway === 'paypal') {
+                createdOrderId = Number(result.order_id);
+                createdOrderKey = String(result.order_key || '');
+                await mountPayPalButtons(createdOrderId, createdOrderKey);
+                setLoading(false);
+                setSubmitText('Pay with PayPal');
+                return;
+            } else {
+                isRedirecting = true;
+                clearCart();
+                    window.location.href = `/order-complete?order_id=${result.order_id}&order_key=${encodeURIComponent(result.order_key)}`;
+            }
+        } catch (error) {
+            console.error('Checkout error:', error);
+            showError(error instanceof Error ? error.message : 'An error occurred during checkout');
+            setLoading(false);
+            if (turnstileRequired && (window as any).turnstile) {
+                turnstileToken = '';
+                (window as any).turnstile.reset(turnstileContainer);
+            }
+        }
+    });
+    
+    // ---------------------------------------------------------------
+    // Tax estimation
+    // ---------------------------------------------------------------
+    let taxDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+    async function estimateTax() {
+        if (checkoutLockedForPayment) return;
+        if (!checkoutConfig?.tax_enabled) return;
+
+        const country = (document.getElementById('billing_country') as HTMLSelectElement)?.value;
+        const state = (document.getElementById('billing_state') as HTMLInputElement)?.value;
+        const postcode = (document.getElementById('billing_postcode') as HTMLInputElement)?.value;
+
+        if (!country) return;
+
+        const items = $cart.get();
+        if (items.length === 0) return;
+
+        const line_items = getLineItems().map((item: any) => ({
+            product_id: item.product_id,
+            variation_id: item.variation_id,
+            quantity: item.quantity,
+        }));
+
+        try {
+            const res = await fetch('/api/tax/estimate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    country,
+                    state,
+                    postcode,
+                    line_items,
+                    coupon_lines: getAppliedCouponLines(),
+                    shipping_rate_id: selectedShippingMethodId,
+                }),
+            });
+            if (res.ok) {
+                if (checkoutLockedForPayment) return;
+                const data = await res.json();
+                if (data.success) {
+                    estimatedTax = data.tax_total || 0;
+                    wooTotals = data.totals || null;
+                    if (data.currency) applyCurrencyConfig(data);
+                    if (data.shipping_packages) renderShippingMethods(data.shipping_packages);
+                    updateTotals();
+                }
+            }
+        } catch {
+            // Tax estimation is non-blocking
+        }
+    }
+
+    function debouncedEstimateTax() {
+        if (taxDebounceTimer) clearTimeout(taxDebounceTimer);
+        taxDebounceTimer = setTimeout(() => estimateTax(), 500);
+    }
+
+    function handleTotalsInputChange() {
+        resetPreparedPaymentState();
+        debouncedEstimateTax();
+    }
+
+    document.getElementById('billing_country')?.addEventListener('change', handleTotalsInputChange);
+    document.getElementById('billing_state')?.addEventListener('input', handleTotalsInputChange);
+    document.getElementById('billing_postcode')?.addEventListener('input', handleTotalsInputChange);
+
+    // ---------------------------------------------------------------
+    // Inline login form for non-guest checkout
+    // ---------------------------------------------------------------
+    const checkoutLoginForm = document.getElementById('checkout-login-form') as HTMLFormElement;
+    const loginError = document.getElementById('login-error');
+    const loginBtnText = document.getElementById('login-btn-text');
+    const loginBtnLoading = document.getElementById('login-btn-loading');
+
+    checkoutLoginForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = (document.getElementById('login-email') as HTMLInputElement).value.trim();
+        const password = (document.getElementById('login-password') as HTMLInputElement).value;
+
+        if (!email || !password) return;
+
+        if (turnstileSiteKey && !loginTurnstileToken) {
+            if (loginError) {
+                loginError.textContent = 'Please complete the security verification.';
+                loginError.classList.remove('hidden');
+            }
+            return;
+        }
+
+        if (loginError) { loginError.classList.add('hidden'); loginError.textContent = ''; }
+        if (loginBtnText) loginBtnText.classList.add('hidden');
+        if (loginBtnLoading) loginBtnLoading.classList.remove('hidden');
+
+        try {
+            const result = await login(email, password, loginTurnstileToken || undefined);
+
+            if (!result.success) {
+                if (loginError) {
+                    loginError.textContent = result.error || 'Invalid email or password.';
+                    loginError.classList.remove('hidden');
+                }
+                if (turnstileSiteKey && (window as any).turnstile && loginTurnstileContainer) {
+                    loginTurnstileToken = '';
+                    (window as any).turnstile.reset(loginTurnstileContainer);
+                }
+                return;
+            }
+
+            if (loginRequired) loginRequired.classList.add('hidden');
+
+            initTurnstile();
+
+            initComplete = true;
+            const config = await loadCheckoutConfig();
+            renderOrderSummary();
+
+            if (config) {
+                renderCountryOptions(config);
+                renderPaymentGateways(config.payment_gateways);
+                renderShippingMethods(config.shipping_zones);
+                prefillCustomer(config.customer);
+                debouncedEstimateTax();
+                updateTotals();
+            }
+        } catch (err) {
+            if (loginError) {
+                loginError.textContent = 'Login failed. Please try again.';
+                loginError.classList.remove('hidden');
+            }
+            if (turnstileSiteKey && (window as any).turnstile && loginTurnstileContainer) {
+                loginTurnstileToken = '';
+                (window as any).turnstile.reset(loginTurnstileContainer);
+            }
+        } finally {
+            if (loginBtnText) loginBtnText.classList.remove('hidden');
+            if (loginBtnLoading) loginBtnLoading.classList.add('hidden');
+        }
+    });
+
+    function showLoginRequired() {
+        if (loadingEl) loadingEl.classList.add('hidden');
+        if (loginRequired) loginRequired.classList.remove('hidden');
+        if (checkoutForm) checkoutForm.classList.add('hidden');
+        if (emptyNotice) emptyNotice.classList.add('hidden');
+        initLoginTurnstile();
+    }
+
+    // ---------------------------------------------------------------
+    // Initialize
+    // ---------------------------------------------------------------
+    async function init() {
+        initAuth();
+        const config = await loadCheckoutConfig();
+
+        if (config && !config.guest_checkout_enabled && !getToken()) {
+            showLoginRequired();
+            return;
+        }
+
+        initTurnstile();
+
+        initComplete = true;
+        // Show the form (or empty state)
+        renderOrderSummary();
+        
+        if (config) {
+            renderCountryOptions(config);
+            renderPaymentGateways(config.payment_gateways);
+            renderShippingMethods(config.shipping_zones);
+            prefillCustomer(config.customer);
+            debouncedEstimateTax();
+            updateTotals();
+        } else {
+            // Fallback: use env-based gateways if config endpoint failed
+            try {
+                const { getEnabledGateways } = await import('../lib/payments');
+                const fallbackGateways = getEnabledGateways().map(g => ({
+                    id: g.id,
+                    title: g.name,
+                    description: '',
+                }));
+                renderPaymentGateways(fallbackGateways);
+            } catch {
+                renderPaymentGateways([]);
+            }
+            
+            if (shippingMethods) {
+                shippingMethods.innerHTML = `
+                    <div class="p-4 bg-surface-alt rounded-xl text-sm text-content-light">
+                        Shipping will be calculated by the store after your order is placed.
+                    </div>
+                `;
+            }
+        }
+        
+        // Also try to pre-fill email from auth state if config didn't have customer
+        if (!config?.customer) {
+            const user = $user.get();
+            if (user?.email) {
+                const emailInput = document.getElementById('email') as HTMLInputElement;
+                if (emailInput && !emailInput.value) emailInput.value = user.email;
+            }
+        }
+    }
+    
+    // Coupon toggle and apply
+    const toggleCouponBtn = document.getElementById('toggle-coupon');
+    const couponSection = document.getElementById('coupon-section');
+    const checkoutCouponInput = document.getElementById('checkout-coupon-input') as HTMLInputElement;
+    const checkoutApplyCoupon = document.getElementById('checkout-apply-coupon');
+    const checkoutCouponError = document.getElementById('checkout-coupon-error');
+
+    toggleCouponBtn?.addEventListener('click', () => {
+        couponSection?.classList.toggle('hidden');
+        if (!couponSection?.classList.contains('hidden')) {
+            checkoutCouponInput?.focus();
+        }
+    });
+
+    checkoutApplyCoupon?.addEventListener('click', async () => {
+        if (!checkoutCouponInput) return;
+        const code = checkoutCouponInput.value.trim();
+        if (!code) return;
+
+        if (checkoutCouponError) { checkoutCouponError.classList.add('hidden'); checkoutCouponError.textContent = ''; }
+        checkoutApplyCoupon.setAttribute('disabled', '');
+        const result = await applyCoupon(code);
+        checkoutApplyCoupon.removeAttribute('disabled');
+
+        if (result.success) {
+            checkoutCouponInput.value = '';
+            couponSection?.classList.add('hidden');
+        } else {
+            if (checkoutCouponError) {
+                checkoutCouponError.textContent = result.error || 'Invalid coupon';
+                checkoutCouponError.classList.remove('hidden');
+            }
+        }
+    });
+
+    checkoutCouponInput?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            checkoutApplyCoupon?.click();
+        }
+    });
+
+    $cart.subscribe(() => {
+        if (checkoutLockedForPayment) return;
+        wooTotals = null;
+        resetPreparedPaymentState();
+        renderOrderSummary();
+        debouncedEstimateTax();
+    });
+    $appliedCoupons.subscribe(() => {
+        if (checkoutLockedForPayment) return;
+        wooTotals = null;
+        resetPreparedPaymentState();
+        debouncedEstimateTax();
+        updateTotals();
+    });
+    
+    init();
+</script>

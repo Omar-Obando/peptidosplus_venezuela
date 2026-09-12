@@ -1,0 +1,313 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import Section from '@/components/Section.astro';
+import ArrowLeft from '@lucide/astro/icons/arrow-left';
+
+export const prerender = true;
+---
+
+<BaseLayout title="My Addresses">
+    <Header />
+    <main id="main-content">
+        <div class="bg-surface border-b border-outline">
+            <Section padding="none" class="py-8">
+                <div class="flex items-center gap-4">
+                    <a href="/account" class="text-content-lighter hover:text-primary transition-colors cursor-pointer">
+                        <ArrowLeft class="w-5 h-5" />
+                    </a>
+                    <div>
+                        <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-content">My Addresses</h1>
+                        <p class="text-content-lighter mt-1">Manage your billing and shipping addresses</p>
+                    </div>
+                </div>
+            </Section>
+        </div>
+
+        <Section padding="lg" bg="surface-alt" size="lg">
+            <div class="max-w-4xl mx-auto">
+                <div id="not-logged-in" class="hidden text-center py-20 bg-surface rounded-2xl border border-outline">
+                    <p class="text-content-lighter mb-4">You need to be logged in to manage your addresses.</p>
+                    <a href="/login?redirect=/account/addresses" class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
+                        Sign In
+                    </a>
+                </div>
+
+                <div id="addresses-content" class="hidden">
+                    <div id="loading-state" class="text-center py-16">
+                        <svg class="animate-spin h-8 w-8 mx-auto text-primary mb-4" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <p class="text-content-lighter">Loading addresses...</p>
+                    </div>
+
+                    <div id="forms-container" class="hidden">
+                        <div id="save-success" class="hidden mb-6 p-4 bg-success/10 text-success rounded-xl text-sm font-medium">
+                            Addresses updated successfully.
+                        </div>
+                        <div id="save-error" class="hidden mb-6 p-4 bg-error/10 text-error rounded-xl text-sm font-medium">
+                            <span id="error-message">Failed to update addresses.</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <!-- Billing Address -->
+                            <div class="bg-surface rounded-2xl border border-outline p-6 lg:p-8">
+                                <h2 class="text-lg font-bold text-content mb-6">Billing Address</h2>
+                                <form id="billing-form" class="space-y-4">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-content mb-1.5">First Name</label>
+                                            <input type="text" name="first_name" class="w-full px-3 py-2.5 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface text-sm" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-content mb-1.5">Last Name</label>
+                                            <input type="text" name="last_name" class="w-full px-3 py-2.5 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface text-sm" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-content mb-1.5">Company (optional)</label>
+                                        <input type="text" name="company" class="w-full px-3 py-2.5 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface text-sm" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-content mb-1.5">Address Line 1</label>
+                                        <input type="text" name="address_1" class="w-full px-3 py-2.5 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface text-sm" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-content mb-1.5">Address Line 2 (optional)</label>
+                                        <input type="text" name="address_2" class="w-full px-3 py-2.5 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface text-sm" />
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-content mb-1.5">City</label>
+                                            <input type="text" name="city" class="w-full px-3 py-2.5 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface text-sm" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-content mb-1.5">State / Province</label>
+                                            <input type="text" name="state" class="w-full px-3 py-2.5 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface text-sm" />
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-content mb-1.5">Postcode</label>
+                                            <input type="text" name="postcode" class="w-full px-3 py-2.5 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface text-sm" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-content mb-1.5">Country</label>
+                                            <input type="text" name="country" class="w-full px-3 py-2.5 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface text-sm" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-content mb-1.5">Phone</label>
+                                        <input type="tel" name="phone" class="w-full px-3 py-2.5 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface text-sm" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-content mb-1.5">Email</label>
+                                        <input type="email" name="email" class="w-full px-3 py-2.5 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface text-sm" />
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Shipping Address -->
+                            <div class="bg-surface rounded-2xl border border-outline p-6 lg:p-8">
+                                <div class="flex items-center justify-between mb-6">
+                                    <h2 class="text-lg font-bold text-content">Shipping Address</h2>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" id="same-as-billing" class="w-4 h-4 text-primary border-outline rounded focus:ring-primary cursor-pointer" />
+                                        <span class="text-sm text-content-lighter">Same as billing</span>
+                                    </label>
+                                </div>
+                                <form id="shipping-form" class="space-y-4">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-content mb-1.5">First Name</label>
+                                            <input type="text" name="first_name" class="w-full px-3 py-2.5 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface text-sm" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-content mb-1.5">Last Name</label>
+                                            <input type="text" name="last_name" class="w-full px-3 py-2.5 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface text-sm" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-content mb-1.5">Company (optional)</label>
+                                        <input type="text" name="company" class="w-full px-3 py-2.5 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface text-sm" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-content mb-1.5">Address Line 1</label>
+                                        <input type="text" name="address_1" class="w-full px-3 py-2.5 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface text-sm" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-content mb-1.5">Address Line 2 (optional)</label>
+                                        <input type="text" name="address_2" class="w-full px-3 py-2.5 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface text-sm" />
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-content mb-1.5">City</label>
+                                            <input type="text" name="city" class="w-full px-3 py-2.5 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface text-sm" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-content mb-1.5">State / Province</label>
+                                            <input type="text" name="state" class="w-full px-3 py-2.5 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface text-sm" />
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-content mb-1.5">Postcode</label>
+                                            <input type="text" name="postcode" class="w-full px-3 py-2.5 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface text-sm" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-content mb-1.5">Country</label>
+                                            <input type="text" name="country" class="w-full px-3 py-2.5 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface text-sm" />
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="mt-8 flex justify-end">
+                            <button
+                                id="save-btn"
+                                class="bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <span id="btn-text">Save Addresses</span>
+                                <span id="btn-loading" class="hidden">
+                                    <svg class="animate-spin h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Section>
+    </main>
+    <Footer />
+</BaseLayout>
+
+<script>
+    import { $isLoggedIn, getToken, initAuth } from '../../lib/auth';
+
+    initAuth();
+
+    const notLoggedIn = document.getElementById('not-logged-in');
+    const addressesContent = document.getElementById('addresses-content');
+    const loadingState = document.getElementById('loading-state');
+    const formsContainer = document.getElementById('forms-container');
+    const billingForm = document.getElementById('billing-form') as HTMLFormElement;
+    const shippingForm = document.getElementById('shipping-form') as HTMLFormElement;
+    const sameAsBilling = document.getElementById('same-as-billing') as HTMLInputElement;
+    const saveBtn = document.getElementById('save-btn') as HTMLButtonElement;
+    const btnText = document.getElementById('btn-text');
+    const btnLoading = document.getElementById('btn-loading');
+    const saveSuccess = document.getElementById('save-success');
+    const saveError = document.getElementById('save-error');
+    const errorMessage = document.getElementById('error-message');
+
+    const addressFields = ['first_name', 'last_name', 'company', 'address_1', 'address_2', 'city', 'state', 'postcode', 'country', 'phone', 'email'];
+
+    function populateForm(form: HTMLFormElement, data: Record<string, string>) {
+        addressFields.forEach(field => {
+            const input = form.querySelector(`[name="${field}"]`) as HTMLInputElement;
+            if (input && data[field]) input.value = data[field];
+        });
+    }
+
+    function getFormData(form: HTMLFormElement): Record<string, string> {
+        const data: Record<string, string> = {};
+        addressFields.forEach(field => {
+            const input = form.querySelector(`[name="${field}"]`) as HTMLInputElement;
+            if (input) data[field] = input.value;
+        });
+        return data;
+    }
+
+    sameAsBilling?.addEventListener('change', () => {
+        if (sameAsBilling.checked) {
+            const billing = getFormData(billingForm);
+            populateForm(shippingForm, billing);
+        }
+    });
+
+    async function loadAddresses() {
+        const token = getToken();
+        if (!token) return;
+
+        try {
+            const res = await fetch('/api/customer/addresses', {
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+            const data = await res.json();
+
+            loadingState?.classList.add('hidden');
+            formsContainer?.classList.remove('hidden');
+
+            if (data.success) {
+                if (data.billing) populateForm(billingForm, data.billing);
+                if (data.shipping) populateForm(shippingForm, data.shipping);
+            }
+        } catch {
+            loadingState?.classList.add('hidden');
+            formsContainer?.classList.remove('hidden');
+        }
+    }
+
+    function setLoading(loading: boolean) {
+        if (saveBtn) saveBtn.disabled = loading;
+        btnText?.classList.toggle('hidden', loading);
+        btnLoading?.classList.toggle('hidden', !loading);
+    }
+
+    saveBtn?.addEventListener('click', async () => {
+        saveSuccess?.classList.add('hidden');
+        saveError?.classList.add('hidden');
+        setLoading(true);
+
+        const token = getToken();
+        if (!token) {
+            setLoading(false);
+            return;
+        }
+
+        const billing = getFormData(billingForm);
+        const shipping = sameAsBilling?.checked ? { ...billing } : getFormData(shippingForm);
+
+        try {
+            const res = await fetch('/api/customer/addresses', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ billing, shipping }),
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                saveSuccess?.classList.remove('hidden');
+                setTimeout(() => saveSuccess?.classList.add('hidden'), 3000);
+            } else {
+                if (errorMessage) errorMessage.textContent = data.error || 'Failed to update addresses.';
+                saveError?.classList.remove('hidden');
+            }
+        } catch {
+            if (errorMessage) errorMessage.textContent = 'Network error. Please try again.';
+            saveError?.classList.remove('hidden');
+        }
+
+        setLoading(false);
+    });
+
+    function updateUI() {
+        const isLoggedIn = $isLoggedIn.get();
+        if (notLoggedIn) notLoggedIn.classList.toggle('hidden', isLoggedIn);
+        if (addressesContent) addressesContent.classList.toggle('hidden', !isLoggedIn);
+        if (isLoggedIn) loadAddresses();
+    }
+
+    $isLoggedIn.subscribe(() => updateUI());
+    updateUI();
+</script>

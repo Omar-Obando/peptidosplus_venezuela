@@ -1,0 +1,842 @@
+---
+import { Image } from 'astro:assets';
+import { getLocalProducts, getLocalProduct, getLocalRelatedProducts, getLocalProductVariations } from '../../../lib/local-product-data';
+import { formatPrice, isInStock, getDiscountPercentage, stripHtml } from '../../../lib/woocommerce';
+import { getLocalProductImageUrl } from '../../../lib/product-media';
+import { storeConfig } from '../../../config/store';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import Section from '@/components/Section.astro';
+import ProductCard from '@/components/shop/ProductCard.astro';
+import AddToCartButton from '@/components/shop/AddToCartButton.astro';
+import ArrowRight from '@lucide/astro/icons/arrow-right';
+
+export const prerender = true;
+
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
+// Review submission requires Turnstile (the API route rejects it otherwise),
+// so only render the form when both keys are configured.
+const reviewSubmissionEnabled = !!turnstileSiteKey && !!import.meta.env.TURNSTILE_SECRET_KEY;
+
+export async function getStaticPaths() {
+    const products = await getLocalProducts();
+    return products.map(product => ({
+        params: { slug: product.slug },
+    }));
+}
+
+const { slug } = Astro.params;
+const product = await getLocalProduct(slug);
+
+if (!product) {
+    return Astro.redirect('/404');
+}
+
+const relatedProducts = await getLocalRelatedProducts(product, 4);
+const isVariable = product.type === 'variable';
+const variations = isVariable ? await getLocalProductVariations(product.id) : [];
+const mainImage = product.images?.[0];
+const originalMainUrl = mainImage?.src || mainImage?.thumbnail || '';
+const mainImageUrl = getLocalProductImageUrl(originalMainUrl);
+const isLocalImage = mainImageUrl && mainImageUrl.startsWith('/src/media/');
+const hasValidMainImage = mainImageUrl && (mainImageUrl.startsWith('/src/media/') || mainImageUrl.startsWith('http://') || mainImageUrl.startsWith('https://'));
+const inStock = isInStock(product);
+const discount = getDiscountPercentage(product);
+
+const productImages = import.meta.glob('/src/media/products/*', { eager: true });
+
+function getImageSrc(url: string) {
+    const localUrl = getLocalProductImageUrl(url);
+    if (localUrl && localUrl.startsWith('/src/media/')) {
+        const imageModule = productImages[localUrl];
+        return imageModule?.default;
+    }
+    return null;
+}
+
+const mainImageSrc = getImageSrc(originalMainUrl);
+
+const stockUrlMap: Record<string, string> = {
+    instock: 'https://schema.org/InStock',
+    outofstock: 'https://schema.org/OutOfStock',
+    onbackorder: 'https://schema.org/BackOrder',
+};
+const jsonLd: Record<string, any> = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: stripHtml(product.short_description || product.description).slice(0, 500),
+    image: product.images?.map((img: any) => img.src).filter(Boolean) || [],
+    sku: product.sku || undefined,
+    offers: {
+        '@type': 'Offer',
+        url: Astro.url.href,
+        priceCurrency: storeConfig.currency,
+        price: product.on_sale && product.sale_price ? product.sale_price : product.price,
+        availability: stockUrlMap[product.stock_status] || 'https://schema.org/InStock',
+        itemCondition: 'https://schema.org/NewCondition',
+    },
+};
+if (product.rating_count && parseInt(String(product.rating_count)) > 0) {
+    jsonLd.aggregateRating = {
+        '@type': 'AggregateRating',
+        ratingValue: product.average_rating,
+        reviewCount: product.rating_count,
+    };
+}
+if (product.categories?.[0]) {
+    jsonLd.category = product.categories[0].name;
+}
+const jsonLdString = JSON.stringify(jsonLd);
+const variationsString = JSON.stringify(variations);
+const pageDescription = stripHtml(product.short_description || product.description).slice(0, 160);
+const pageImage = product.images?.[0]?.src || '';
+---
+
+<BaseLayout title={product.name} description={pageDescription} image={pageImage}>
+    <Header />
+    <script type="application/ld+json" set:html={jsonLdString} />
+    <main id="main-content">
+        <!-- Breadcrumb -->
+        <div class="bg-surface border-b border-outline">
+            <Section padding="none" class="py-4">
+                <nav>
+                    <ol class="flex items-center gap-2 text-sm">
+                        <li><a href="/" class="text-content-lighter hover:text-primary transition-colors cursor-pointer">Home</a></li>
+                        <li class="text-content-lighter">/</li>
+                        <li><a href="/shop" class="text-content-lighter hover:text-primary transition-colors cursor-pointer">Shop</a></li>
+                        {product.categories?.[0] && (
+                            <>
+                                <li class="text-content-lighter">/</li>
+                                <li>
+                                    <a href={`/shop/category/${product.categories[0].slug}`} class="text-content-lighter hover:text-primary transition-colors cursor-pointer">
+                                        {product.categories[0].name}
+                                    </a>
+                                </li>
+                            </>
+                        )}
+                        <li class="text-content-lighter">/</li>
+                        <li class="text-content font-medium">{product.name}</li>
+                    </ol>
+                </nav>
+            </Section>
+        </div>
+
+        <!-- Product Section -->
+        <Section padding="lg">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+                <!-- Product Images -->
+                <div class="space-y-4">
+                    <div class="relative bg-surface-alt rounded-2xl overflow-hidden border border-outline">
+                        {discount && (
+                            <span class="absolute top-4 left-4 z-10 px-3 py-1.5 bg-error text-white text-sm font-bold rounded-xl shadow-lg">
+                                -{discount}%
+                            </span>
+                        )}
+                        
+                        {mainImageSrc ? (
+                            <div class="aspect-square">
+                                <Image 
+                                    id="main-product-image"
+                                    src={mainImageSrc}
+                                    alt={mainImage?.alt || product.name}
+                                    width={800}
+                                    height={800}
+                                    format="webp"
+                                    quality={85}
+                                    class="w-full h-full object-cover"
+                                    loading="eager"
+                                    data-original-src={originalMainUrl}
+                                />
+                            </div>
+                        ) : hasValidMainImage ? (
+                            <div class="aspect-square">
+                                <img 
+                                    id="main-product-image"
+                                    src={mainImageUrl} 
+                                    alt={mainImage?.alt || product.name}
+                                    width="800"
+                                    height="800"
+                                    class="w-full h-full object-cover"
+                                    loading="eager"
+                                    decoding="async"
+                                />
+                            </div>
+                        ) : (
+                            <div class="aspect-square flex items-center justify-center">
+                                <svg class="w-32 h-32 text-content-lighter" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                        )}
+                    </div>
+                    
+                    <!-- Image Thumbnails -->
+                    {product.images && product.images.length > 1 && (
+                        <div class="flex gap-3 overflow-x-auto pb-2">
+                            {product.images.map((image, index) => {
+                                const thumbUrl = image.thumbnail || image.src || '';
+                                const fullUrl = image.src || '';
+                                const localThumbUrl = getLocalProductImageUrl(thumbUrl);
+                                const thumbImageSrc = getImageSrc(thumbUrl);
+                                const hasValidThumb = localThumbUrl && (localThumbUrl.startsWith('/src/media/') || localThumbUrl.startsWith('http://') || localThumbUrl.startsWith('https://'));
+                                return hasValidThumb ? (
+                                    <button 
+                                        class={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 cursor-pointer transition-all hover:scale-105 ${index === 0 ? 'border-primary ring-2 ring-primary/20' : 'border-outline hover:border-primary-light'}`}
+                                        data-image-thumbnail={fullUrl}
+                                        data-local-src={localThumbUrl}
+                                    >
+                                        {thumbImageSrc ? (
+                                            <Image 
+                                                src={thumbImageSrc}
+                                                alt={image.alt || `${product.name} - Image ${index + 1}`}
+                                                width={80}
+                                                height={80}
+                                                format="webp"
+                                                quality={70}
+                                                class="w-full h-full object-cover"
+                                                loading="lazy"
+                                            />
+                                        ) : (
+                                            <img 
+                                                src={localThumbUrl} 
+                                                alt={image.alt || `${product.name} - Image ${index + 1}`}
+                                                width="80"
+                                                height="80"
+                                                class="w-full h-full object-cover"
+                                                loading="lazy"
+                                                decoding="async"
+                                            />
+                                        )}
+                                    </button>
+                                ) : null;
+                            })}
+                        </div>
+                    )}
+                </div>
+                
+                <!-- Product Info -->
+                <div class="flex flex-col">
+                    <!-- Categories -->
+                    {product.categories && product.categories.length > 0 && (
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            {product.categories.map(cat => (
+                                <a 
+                                    href={`/shop/category/${cat.slug}`}
+                                    class="text-xs font-semibold px-3 py-1.5 bg-primary/10 text-primary rounded-full hover:bg-primary/20 transition-colors cursor-pointer tracking-wide uppercase"
+                                >
+                                    {cat.name}
+                                </a>
+                            ))}
+                        </div>
+                    )}
+                    
+                    <h1 class="text-3xl lg:text-4xl font-black tracking-tight text-content mb-4">{product.name}</h1>
+                    
+                    <!-- Rating -->
+                    {product.average_rating && parseFloat(product.average_rating) > 0 && (
+                        <div class="flex items-center gap-2 mb-6">
+                            <div class="flex">
+                                {[1, 2, 3, 4, 5].map(star => (
+                                    <svg 
+                                        class={`w-5 h-5 ${star <= Math.round(parseFloat(product.average_rating)) ? 'text-warning' : 'text-outline'}`}
+                                        fill="currentColor" 
+                                        viewBox="0 0 20 20"
+                                    >
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                ))}
+                            </div>
+                            <span class="text-content-light text-sm">
+                                {product.average_rating} ({product.rating_count} reviews)
+                            </span>
+                        </div>
+                    )}
+                    
+                    <!-- Price -->
+                    <div class="flex items-baseline gap-3 mb-6">
+                        <span class="text-4xl font-black text-content">
+                            {formatPrice(product)}
+                        </span>
+                        {product.on_sale && product.regular_price && (
+                            <span class="text-lg text-content-lighter line-through">
+                                {formatPrice(product.regular_price, product)}
+                            </span>
+                        )}
+                    </div>
+                    
+                    <!-- Stock Status -->
+                    <div class="mb-6 flex flex-col gap-2">
+                        {inStock ? (
+                            <>
+                                {product.is_on_backorder ? (
+                                    <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-warning/10 text-warning rounded-full text-sm font-medium w-fit">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        Available on backorder
+                                    </span>
+                                ) : (
+                                    <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-success/10 text-success rounded-full text-sm font-medium w-fit">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                        In Stock
+                                    </span>
+                                )}
+                                {product.low_stock_remaining !== null && product.low_stock_remaining !== undefined && (
+                                    <span class="inline-flex items-center gap-1.5 text-warning text-sm font-medium">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                        </svg>
+                                        Only {product.low_stock_remaining} left in stock
+                                    </span>
+                                )}
+                            </>
+                        ) : (
+                            <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-error/10 text-error rounded-full text-sm font-medium w-fit">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Out of Stock
+                            </span>
+                        )}
+                    </div>
+                    
+                    <!-- Short Description -->
+                    {product.short_description && (
+                        <div class="prose prose-sm text-content-light mb-8 leading-relaxed" set:html={product.short_description} />
+                    )}
+                    
+                    <!-- Add to Cart -->
+                    <div class="bg-surface-alt rounded-2xl p-6 border border-outline mb-8">
+                        {isVariable && variations.length > 0 && (
+                            <>
+                                <script type="application/json" id="product-variations" set:html={variationsString} />
+                                <div id="variation-picker" class="space-y-4 mb-6">
+                                    {product.attributes?.filter(attr => attr.has_variations).map(attr => (
+                                        <div>
+                                            <label class="block text-sm font-semibold text-content mb-1.5">{attr.name}</label>
+                                            <select 
+                                                class="w-full px-4 py-2.5 bg-surface border border-outline rounded-lg text-content focus:ring-2 focus:ring-primary focus:border-primary cursor-pointer"
+                                                data-variation-attr={attr.name}
+                                            >
+                                                <option value="">Choose {attr.name}...</option>
+                                                {attr.terms.map(term => (
+                                                    <option value={term.name}>{term.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div id="variation-price" class="hidden mb-4">
+                                    <span class="text-2xl font-black text-content" id="variation-price-value"></span>
+                                    <span class="text-sm text-content-lighter line-through ml-2 hidden" id="variation-regular-price"></span>
+                                </div>
+                                <div id="variation-stock" class="hidden mb-4"></div>
+                            </>
+                        )}
+                        <AddToCartButton 
+                            product={product}
+                            showQuantity={true}
+                            size="large"
+                            maxQuantity={product.low_stock_remaining ?? undefined}
+                            soldIndividually={product.sold_individually ?? false}
+                        />
+                    </div>
+                    
+                    <!-- SKU & Meta -->
+                    <div class="pt-6 border-t border-outline space-y-2 text-sm text-content-lighter">
+                        {product.sku && (
+                            <p><span class="font-medium text-content">SKU:</span> {product.sku}</p>
+                        )}
+                        {product.tags && product.tags.length > 0 && (
+                            <p>
+                                <span class="font-medium text-content">Tags:</span>{' '}
+                                {product.tags.map((tag, i) => (
+                                    <span>
+                                        <a href={`/shop/tag/${tag.slug}`} class="hover:text-primary transition-colors cursor-pointer">{tag.name}</a>
+                                        {i < product.tags.length - 1 ? ', ' : ''}
+                                    </span>
+                                ))}
+                            </p>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </Section>
+        
+        <!-- Product Description Tabs -->
+        <Section bg="surface-alt" padding="lg">
+            <div class="bg-surface rounded-2xl border border-outline overflow-hidden">
+                <div class="border-b border-outline">
+                    <nav class="flex gap-0">
+                        <button 
+                            class="px-8 py-4 font-semibold text-primary border-b-2 border-primary cursor-pointer transition-colors"
+                            data-tab="description"
+                        >
+                            Description
+                        </button>
+                        <button 
+                            class="px-8 py-4 font-semibold text-content-lighter hover:text-content border-b-2 border-transparent cursor-pointer transition-colors"
+                            data-tab="additional"
+                        >
+                            Additional Information
+                        </button>
+                        <button 
+                            class="px-8 py-4 font-semibold text-content-lighter hover:text-content border-b-2 border-transparent cursor-pointer transition-colors"
+                            data-tab="reviews"
+                        >
+                            Reviews ({product.rating_count || 0})
+                        </button>
+                    </nav>
+                </div>
+                
+                <div class="p-8 lg:p-10">
+                    <div id="tab-description" class="prose max-w-none" set:html={product.description} />
+                    <div id="tab-additional" class="hidden">
+                        {product.attributes && product.attributes.length > 0 ? (
+                            <table class="w-full">
+                                <tbody>
+                                    {product.attributes.map(attr => (
+                                        <tr class="border-b border-outline last:border-0">
+                                            <th class="py-4 pr-4 text-left font-semibold text-content w-1/3">{attr.name}</th>
+                                            <td class="py-4 text-content-light">{attr.terms.map(t => t.name).join(', ')}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        ) : (
+                            <p class="text-content-lighter">No additional information available.</p>
+                        )}
+                    </div>
+                    <div id="tab-reviews" class="hidden" data-product-id={product.id}>
+                        <div class="mb-8">
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="flex items-center gap-1">
+                                    {[1, 2, 3, 4, 5].map(star => (
+                                        <svg 
+                                            class={`w-6 h-6 ${star <= Math.round(parseFloat(product.average_rating || '0')) ? 'text-warning' : 'text-outline'}`}
+                                            fill="currentColor" 
+                                            viewBox="0 0 20 20"
+                                        >
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                        </svg>
+                                    ))}
+                                </div>
+                                <span class="text-lg font-semibold text-content">{product.average_rating || '0'} out of 5</span>
+                                <span class="text-content-lighter">({product.rating_count || 0} reviews)</span>
+                            </div>
+                        </div>
+                        
+                        <div id="reviews-list" class="space-y-6 mb-10">
+                            <div class="flex items-center justify-center py-8">
+                                <svg class="animate-spin h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        
+                        {reviewSubmissionEnabled && (
+                        <div class="border-t border-outline pt-8">
+                            <h3 class="text-xl font-bold text-content mb-6">Write a Review</h3>
+                            <form id="review-form" class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-content mb-2">Your Rating</label>
+                                    <div class="flex gap-1" id="star-rating-input">
+                                        {[1, 2, 3, 4, 5].map(star => (
+                                            <button 
+                                                type="button" 
+                                                class="text-outline hover:text-warning transition-colors cursor-pointer" 
+                                                data-star-value={star}
+                                            >
+                                                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                                </svg>
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <input type="hidden" id="review-rating" value="0" />
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="review-name" class="block text-sm font-medium text-content mb-1">Name</label>
+                                        <input type="text" id="review-name" required class="w-full px-4 py-2.5 bg-surface-alt border border-outline rounded-lg text-content focus:ring-2 focus:ring-primary focus:border-primary" />
+                                    </div>
+                                    <div>
+                                        <label for="review-email" class="block text-sm font-medium text-content mb-1">Email</label>
+                                        <input type="email" id="review-email" required class="w-full px-4 py-2.5 bg-surface-alt border border-outline rounded-lg text-content focus:ring-2 focus:ring-primary focus:border-primary" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="review-text" class="block text-sm font-medium text-content mb-1">Your Review</label>
+                                    <textarea id="review-text" rows="4" required class="w-full px-4 py-2.5 bg-surface-alt border border-outline rounded-lg text-content focus:ring-2 focus:ring-primary focus:border-primary resize-y"></textarea>
+                                </div>
+                                {turnstileSiteKey && (
+                                    <div id="review-turnstile" data-turnstile-site-key={turnstileSiteKey}></div>
+                                )}
+                                <div id="review-message" class="hidden text-sm"></div>
+                                <button 
+                                    type="submit" 
+                                    class="px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Submit Review
+                                </button>
+                            </form>
+                        </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </Section>
+        
+        <!-- Related Products -->
+        {relatedProducts.length > 0 && (
+            <Section padding="lg">
+                <div class="flex items-end justify-between mb-12">
+                    <div>
+                        <span class="text-sm font-semibold text-primary tracking-wide uppercase">You may also like</span>
+                        <h2 class="text-3xl sm:text-4xl font-black tracking-tight text-content mt-2">Related Products</h2>
+                    </div>
+                    <a href="/shop" class="group hidden sm:inline-flex items-center gap-2 text-primary font-medium hover:gap-3 transition-all cursor-pointer">
+                        View all
+                        <ArrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </a>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+                    {relatedProducts.map(related => (
+                        <ProductCard product={related} />
+                    ))}
+                </div>
+            </Section>
+        )}
+    </main>
+    <Footer />
+</BaseLayout>
+
+<script>
+    import { formatStorePrice } from '../../../config/store';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Turnstile for review form
+        let reviewTurnstileToken = '';
+        const reviewTurnstileContainer = document.getElementById('review-turnstile');
+        const reviewTurnstileSiteKey = reviewTurnstileContainer?.dataset.turnstileSiteKey;
+        if (reviewTurnstileSiteKey && reviewTurnstileContainer) {
+            const script = document.createElement('script');
+            script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onReviewTurnstileLoad';
+            script.async = true;
+            (window as any).onReviewTurnstileLoad = () => {
+                (window as any).turnstile.render(reviewTurnstileContainer, {
+                    sitekey: reviewTurnstileSiteKey,
+                    callback: (token: string) => { reviewTurnstileToken = token; },
+                    'expired-callback': () => { reviewTurnstileToken = ''; },
+                    'error-callback': () => { reviewTurnstileToken = ''; },
+                    theme: 'auto',
+                    size: 'flexible',
+                });
+            };
+            document.head.appendChild(script);
+        }
+        
+        const mainImage = document.getElementById('main-product-image') as HTMLImageElement;
+        const thumbnails = document.querySelectorAll('[data-image-thumbnail]');
+        
+        thumbnails.forEach(thumb => {
+            thumb.addEventListener('click', () => {
+                const src = (thumb as HTMLElement).dataset.imageThumbnail;
+                if (mainImage && src) {
+                    mainImage.src = src;
+                    thumbnails.forEach(t => {
+                        t.classList.remove('border-primary', 'ring-2', 'ring-primary/20');
+                        t.classList.add('border-outline');
+                    });
+                    thumb.classList.remove('border-outline');
+                    thumb.classList.add('border-primary', 'ring-2', 'ring-primary/20');
+                }
+            });
+        });
+        
+        const tabButtons = document.querySelectorAll('[data-tab]');
+        const tabDescription = document.getElementById('tab-description');
+        const tabAdditional = document.getElementById('tab-additional');
+        const tabReviews = document.getElementById('tab-reviews');
+        const allTabs = [tabDescription, tabAdditional, tabReviews];
+        let reviewsLoaded = false;
+        
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tab = (button as HTMLElement).dataset.tab;
+                
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('text-primary', 'border-primary');
+                    btn.classList.add('text-content-lighter', 'border-transparent');
+                });
+                button.classList.remove('text-content-lighter', 'border-transparent');
+                button.classList.add('text-primary', 'border-primary');
+                
+                allTabs.forEach(t => t?.classList.add('hidden'));
+                if (tab === 'description') tabDescription?.classList.remove('hidden');
+                else if (tab === 'additional') tabAdditional?.classList.remove('hidden');
+                else if (tab === 'reviews') {
+                    tabReviews?.classList.remove('hidden');
+                    if (!reviewsLoaded) loadReviews();
+                }
+            });
+        });
+        
+        function renderStars(rating: number, size = 'w-4 h-4') {
+            return [1, 2, 3, 4, 5].map(s =>
+                `<svg class="${size} ${s <= rating ? 'text-warning' : 'text-outline'}" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>`
+            ).join('');
+        }
+
+        function escapeHtml(value: unknown): string {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+        
+        async function loadReviews() {
+            const productId = tabReviews?.dataset.productId;
+            if (!productId) return;
+            const reviewsList = document.getElementById('reviews-list');
+            if (!reviewsList) return;
+            
+            try {
+                const res = await fetch(`/api/reviews?product_id=${productId}`);
+                const data = await res.json();
+                
+                if (data.success && data.reviews.length > 0) {
+                    reviewsList.innerHTML = data.reviews.map((r: any) => {
+                        const date = new Date(r.date_created).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                        const reviewer = escapeHtml(r.reviewer);
+                        const reviewerInitial = escapeHtml(String(r.reviewer || '?').charAt(0).toUpperCase() || '?');
+                        const review = escapeHtml(r.review);
+                        return `<div class="border-b border-outline pb-6 last:border-0">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">${reviewerInitial}</div>
+                                    <div>
+                                        <span class="font-semibold text-content">${reviewer}</span>
+                                        ${r.verified ? '<span class="ml-2 text-xs bg-success/10 text-success px-2 py-0.5 rounded-full font-medium">Verified Purchase</span>' : ''}
+                                    </div>
+                                </div>
+                                <span class="text-xs text-content-lighter">${date}</span>
+                            </div>
+                            <div class="flex mb-2">${renderStars(r.rating)}</div>
+                            <div class="text-content-light text-sm leading-relaxed">${review}</div>
+                        </div>`;
+                    }).join('');
+                } else {
+                    reviewsList.innerHTML = '<p class="text-content-lighter text-center py-8">No reviews yet. Be the first to review this product!</p>';
+                }
+                reviewsLoaded = true;
+            } catch {
+                reviewsList.innerHTML = '<p class="text-content-lighter text-center py-8">Failed to load reviews.</p>';
+            }
+        }
+        
+        // Star rating input
+        let selectedRating = 0;
+        const starButtons = document.querySelectorAll('#star-rating-input button');
+        const ratingInput = document.getElementById('review-rating') as HTMLInputElement;
+        
+        starButtons.forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                const val = parseInt((btn as HTMLElement).dataset.starValue || '0');
+                starButtons.forEach((b, i) => {
+                    b.classList.toggle('text-warning', i < val);
+                    b.classList.toggle('text-outline', i >= val);
+                });
+            });
+            btn.addEventListener('click', () => {
+                selectedRating = parseInt((btn as HTMLElement).dataset.starValue || '0');
+                if (ratingInput) ratingInput.value = String(selectedRating);
+                starButtons.forEach((b, i) => {
+                    b.classList.toggle('text-warning', i < selectedRating);
+                    b.classList.toggle('text-outline', i >= selectedRating);
+                });
+            });
+        });
+        
+        document.getElementById('star-rating-input')?.addEventListener('mouseleave', () => {
+            starButtons.forEach((b, i) => {
+                b.classList.toggle('text-warning', i < selectedRating);
+                b.classList.toggle('text-outline', i >= selectedRating);
+            });
+        });
+        
+        // Review form submission
+        const reviewForm = document.getElementById('review-form') as HTMLFormElement;
+        reviewForm?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const msgEl = document.getElementById('review-message');
+            const submitBtn = reviewForm.querySelector('button[type="submit"]') as HTMLButtonElement;
+            
+            const rating = parseInt(ratingInput?.value || '0');
+            if (rating < 1) {
+                if (msgEl) { msgEl.textContent = 'Please select a rating.'; msgEl.className = 'text-sm text-error'; msgEl.classList.remove('hidden'); }
+                return;
+            }
+            
+            const name = (document.getElementById('review-name') as HTMLInputElement)?.value;
+            const email = (document.getElementById('review-email') as HTMLInputElement)?.value;
+            const text = (document.getElementById('review-text') as HTMLTextAreaElement)?.value;
+            
+            if (!name || !email || !text) return;
+            
+            if (reviewTurnstileSiteKey && !reviewTurnstileToken) {
+                if (msgEl) { msgEl.textContent = 'Please complete the security verification.'; msgEl.className = 'text-sm text-error'; msgEl.classList.remove('hidden'); }
+                return;
+            }
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            
+            try {
+                const productId = tabReviews?.dataset.productId;
+                const res = await fetch('/api/reviews/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_id: Number(productId), rating, review: text, reviewer: name, reviewer_email: email, turnstile_token: reviewTurnstileToken }),
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    if (msgEl) { msgEl.textContent = 'Review submitted successfully! It may take a moment to appear.'; msgEl.className = 'text-sm text-success'; msgEl.classList.remove('hidden'); }
+                    reviewForm.reset();
+                    selectedRating = 0;
+                    starButtons.forEach(b => { b.classList.remove('text-warning'); b.classList.add('text-outline'); });
+                    if (ratingInput) ratingInput.value = '0';
+                    reviewsLoaded = false;
+                    loadReviews();
+                } else {
+                    if (msgEl) { msgEl.textContent = data.error || 'Failed to submit review.'; msgEl.className = 'text-sm text-error'; msgEl.classList.remove('hidden'); }
+                }
+            } catch {
+                if (msgEl) { msgEl.textContent = 'Failed to submit review.'; msgEl.className = 'text-sm text-error'; msgEl.classList.remove('hidden'); }
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Review';
+                if (reviewTurnstileSiteKey && (window as any).turnstile) {
+                    reviewTurnstileToken = '';
+                    (window as any).turnstile.reset(reviewTurnstileContainer);
+                }
+            }
+        });
+        
+        // Variable product picker
+        const variationsEl = document.getElementById('product-variations');
+        if (variationsEl) {
+            const variations: any[] = JSON.parse(variationsEl.textContent || '[]');
+            const attrSelects = document.querySelectorAll('[data-variation-attr]') as NodeListOf<HTMLSelectElement>;
+            const variationPriceContainer = document.getElementById('variation-price');
+            const variationPriceValue = document.getElementById('variation-price-value');
+            const variationRegularPrice = document.getElementById('variation-regular-price');
+            const variationStock = document.getElementById('variation-stock');
+            const addToCartWrapper = document.querySelector('[data-add-to-cart-wrapper]');
+            const addToCartBtn = addToCartWrapper?.querySelector('button[data-product-id]') as HTMLButtonElement | null;
+            
+            if (addToCartBtn) {
+                addToCartBtn.disabled = true;
+                const btnText = addToCartBtn.querySelector('[data-btn-text]');
+                if (btnText) btnText.textContent = 'Select options';
+            }
+            
+            function findMatchingVariation(): any | null {
+                const selected: Record<string, string> = {};
+                attrSelects.forEach(sel => {
+                    const name = sel.dataset.variationAttr || '';
+                    if (sel.value) selected[name] = sel.value;
+                });
+                
+                if (Object.keys(selected).length !== attrSelects.length) return null;
+                
+                return variations.find(v => {
+                    return v.attributes.every((attr: any) => {
+                        if (!attr.option || attr.option === '') return true;
+                        return selected[attr.name] === attr.option;
+                    });
+                }) || null;
+            }
+            
+            function formatPriceSimple(price: string): string {
+                const num = parseFloat(price);
+                return isNaN(num) ? price : formatStorePrice(num);
+            }
+            
+            function updateVariationDisplay() {
+                const variation = findMatchingVariation();
+                
+                if (variation) {
+                    if (variationPriceContainer && variationPriceValue) {
+                        variationPriceValue.textContent = formatPriceSimple(variation.price);
+                        variationPriceContainer.classList.remove('hidden');
+                        
+                        if (variationRegularPrice && variation.on_sale && variation.regular_price) {
+                            variationRegularPrice.textContent = formatPriceSimple(variation.regular_price);
+                            variationRegularPrice.classList.remove('hidden');
+                        } else if (variationRegularPrice) {
+                            variationRegularPrice.classList.add('hidden');
+                        }
+                    }
+                    
+                    if (variationStock) {
+                        const status = variation.stock_status;
+                        if (status === 'outofstock') {
+                            variationStock.innerHTML = '<span class="inline-flex items-center gap-2 px-3 py-1.5 bg-error/10 text-error rounded-full text-sm font-medium">Out of Stock</span>';
+                            variationStock.classList.remove('hidden');
+                        } else if (status === 'onbackorder') {
+                            variationStock.innerHTML = '<span class="inline-flex items-center gap-2 px-3 py-1.5 bg-warning/10 text-warning rounded-full text-sm font-medium">Available on backorder</span>';
+                            variationStock.classList.remove('hidden');
+                        } else if (variation.stock_quantity !== null && variation.stock_quantity <= 5) {
+                            variationStock.innerHTML = `<span class="inline-flex items-center gap-2 px-3 py-1.5 bg-warning/10 text-warning rounded-full text-sm font-medium">Only ${variation.stock_quantity} left</span>`;
+                            variationStock.classList.remove('hidden');
+                        } else {
+                            variationStock.classList.add('hidden');
+                        }
+                    }
+                    
+                    if (variation.image?.src && mainImage) {
+                        mainImage.src = variation.image.src;
+                    }
+                    
+                    if (addToCartBtn) {
+                        const inStock = variation.stock_status !== 'outofstock' && variation.purchasable;
+                        addToCartBtn.disabled = !inStock;
+                        addToCartBtn.dataset.productPrice = variation.price;
+                        if (variation.image?.src) {
+                            addToCartBtn.dataset.productImage = variation.image.src;
+                        }
+                        addToCartBtn.dataset.variationId = String(variation.id);
+                        const attrs: Record<string, string> = {};
+                        attrSelects.forEach(sel => {
+                            if (sel.value) attrs[sel.dataset.variationAttr || ''] = sel.value;
+                        });
+                        addToCartBtn.dataset.variationAttributes = JSON.stringify(attrs);
+                        const btnText = addToCartBtn.querySelector('[data-btn-text]');
+                        if (btnText) btnText.textContent = inStock ? 'Add to Cart' : 'Out of Stock';
+                    }
+                } else {
+                    variationPriceContainer?.classList.add('hidden');
+                    variationStock?.classList.add('hidden');
+                    if (addToCartBtn) {
+                        addToCartBtn.disabled = true;
+                        const btnText = addToCartBtn.querySelector('[data-btn-text]');
+                        if (btnText) btnText.textContent = 'Select options';
+                        delete addToCartBtn.dataset.variationId;
+                        delete addToCartBtn.dataset.variationAttributes;
+                    }
+                }
+            }
+            
+            attrSelects.forEach(sel => sel.addEventListener('change', updateVariationDisplay));
+        }
+    });
+</script>

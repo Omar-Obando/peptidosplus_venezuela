@@ -1,0 +1,99 @@
+---
+/**
+ * Optimized Product Image Component
+ * 
+ * Renders product images with:
+ * - Astro Image optimization for local images
+ * - Lazy loading
+ * - WebP conversion
+ * - Fallback for remote images
+ */
+
+import { Image } from 'astro:assets';
+import { getLocalProductImageUrl } from '../../lib/product-media';
+
+interface Props {
+    src: string;
+    alt: string;
+    width?: number;
+    height?: number;
+    class?: string;
+    loading?: 'lazy' | 'eager';
+    sizes?: string;
+    aspectRatio?: 'square' | '4:3' | '16:9' | 'auto';
+    format?: 'webp' | 'avif' | 'auto';
+    quality?: number;
+}
+
+const { 
+    src: originalSrc, 
+    alt, 
+    width = 400,
+    height,
+    class: className = '',
+    loading = 'lazy',
+    sizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw',
+    aspectRatio = 'square',
+    format = 'webp',
+    quality = 80
+} = Astro.props;
+
+// Calculate height based on aspect ratio if not provided
+const aspectRatios: Record<string, number> = {
+    'square': 1,
+    '4:3': 0.75,
+    '16:9': 0.5625,
+    'auto': 1,
+};
+const calculatedHeight = height || Math.round(width * aspectRatios[aspectRatio]);
+
+// Get local image URL if available
+const localUrl = getLocalProductImageUrl(originalSrc);
+const isLocalImage = localUrl && localUrl.startsWith('/src/media/');
+const isRemoteUrl = localUrl && (localUrl.startsWith('http://') || localUrl.startsWith('https://'));
+const hasValidSrc = isLocalImage || isRemoteUrl;
+
+// Import all product images for Astro Image component
+const productImages = import.meta.glob('/src/media/products/*', { eager: true });
+const localImageModule = isLocalImage && productImages[localUrl];
+const localImageSrc = localImageModule?.default;
+
+// SVG placeholder as data URI
+const placeholderSvg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'%3E%3Cpath stroke='%23999' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'/%3E%3C/svg%3E";
+---
+
+{localImageSrc ? (
+    <!-- Local image: use Astro Image for optimization -->
+    <Image 
+        src={localImageSrc}
+        alt={alt}
+        width={width}
+        height={calculatedHeight}
+        format={format}
+        quality={quality}
+        class={className}
+        loading={loading}
+    />
+) : isRemoteUrl ? (
+    <!-- Remote image: use standard img with lazy loading -->
+    <img 
+        src={localUrl}
+        alt={alt}
+        width={width}
+        height={calculatedHeight}
+        class={className}
+        loading={loading}
+        decoding="async"
+        onerror={`this.onerror=null; this.src='${placeholderSvg}'; this.classList.add('p-8');`}
+    />
+) : (
+    <!-- No valid image: show placeholder -->
+    <div 
+        class={`flex items-center justify-center bg-surface-alt ${className}`}
+        style={`aspect-ratio: ${width}/${calculatedHeight}`}
+    >
+        <svg class="w-16 h-16 text-content-lighter" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+    </div>
+)}

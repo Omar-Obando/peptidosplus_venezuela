@@ -1,0 +1,127 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import Section from '@/components/Section.astro';
+import RecentOrders from '../../components/react/RecentOrders.tsx';
+import ClipboardList from '@lucide/astro/icons/clipboard-list';
+import MapPin from '@lucide/astro/icons/map-pin';
+import Settings from '@lucide/astro/icons/settings';
+
+export const prerender = true;
+---
+
+<BaseLayout title="My Account">
+    <Header />
+    <main id="main-content">
+        <!-- Header -->
+        <div class="bg-surface border-b border-outline">
+            <Section padding="none" class="py-8">
+                <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-content">My Account</h1>
+            </Section>
+        </div>
+
+        <Section padding="lg" bg="surface-alt" size="lg">
+            <div class="max-w-4xl mx-auto">
+                <!-- Not Logged In State -->
+                <div id="not-logged-in" class="hidden text-center py-20 bg-surface rounded-2xl border border-outline">
+                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-primary/10 mb-6">
+                        <svg class="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-content mb-2">Please sign in</h2>
+                    <p class="text-content-lighter mb-8">You need to be logged in to view your account.</p>
+                    <a href="/login?redirect=/account" class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
+                        Sign In
+                    </a>
+                </div>
+                
+                <!-- Account Content -->
+                <div id="account-content" class="hidden space-y-8">
+                    <!-- User Info -->
+                    <div class="bg-surface rounded-2xl border border-outline p-6 lg:p-8">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-xl font-bold text-content">Welcome back!</h2>
+                            <button 
+                                id="logout-btn"
+                                class="text-sm text-error hover:text-error-dark transition-colors cursor-pointer font-medium"
+                            >
+                                Sign Out
+                            </button>
+                        </div>
+                        <p id="user-email" class="text-content-light"></p>
+                    </div>
+                    
+                    <!-- Quick Links -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <a href="/account/orders" class="bg-surface rounded-2xl border border-outline p-6 hover:border-primary hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group">
+                            <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <ClipboardList class="w-6 h-6 text-primary" />
+                            </div>
+                            <h3 class="font-semibold text-content group-hover:text-primary transition-colors">Orders</h3>
+                            <p class="text-sm text-content-lighter mt-1">View your order history</p>
+                        </a>
+                        
+                        <a href="/account/addresses" class="bg-surface rounded-2xl border border-outline p-6 hover:border-primary hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group">
+                            <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <MapPin class="w-6 h-6 text-primary" />
+                            </div>
+                            <h3 class="font-semibold text-content group-hover:text-primary transition-colors">Addresses</h3>
+                            <p class="text-sm text-content-lighter mt-1">Manage your addresses</p>
+                        </a>
+                        
+                        <a href="/account/settings" class="bg-surface rounded-2xl border border-outline p-6 hover:border-primary hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group">
+                            <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <Settings class="w-6 h-6 text-primary" />
+                            </div>
+                            <h3 class="font-semibold text-content group-hover:text-primary transition-colors">Settings</h3>
+                            <p class="text-sm text-content-lighter mt-1">Account settings</p>
+                        </a>
+                    </div>
+                    
+                    <!-- Recent Orders -->
+                    <div class="bg-surface rounded-2xl border border-outline p-6 lg:p-8">
+                        <h2 class="text-lg font-semibold text-content mb-6">Recent Orders</h2>
+                        <div id="recent-orders-container">
+                            <RecentOrders client:load token={null} />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Section>
+    </main>
+    <Footer />
+</BaseLayout>
+
+<script>
+    import { $user, $isLoggedIn, logout, initAuth } from '../../lib/auth';
+    
+    initAuth();
+    
+    const notLoggedIn = document.getElementById('not-logged-in');
+    const accountContent = document.getElementById('account-content');
+    const userEmail = document.getElementById('user-email');
+    const logoutBtn = document.getElementById('logout-btn');
+    
+    function updateUI() {
+        const isLoggedIn = $isLoggedIn.get();
+        const user = $user.get();
+        
+        if (notLoggedIn) notLoggedIn.classList.toggle('hidden', isLoggedIn);
+        if (accountContent) accountContent.classList.toggle('hidden', !isLoggedIn);
+        
+        if (isLoggedIn && user && userEmail) {
+            userEmail.textContent = user.email;
+        }
+    }
+    
+    logoutBtn?.addEventListener('click', () => {
+        logout();
+        window.location.href = '/';
+    });
+    
+    $isLoggedIn.subscribe(() => updateUI());
+    
+    updateUI();
+</script>

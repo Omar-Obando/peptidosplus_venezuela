@@ -1,14 +1,11 @@
 ---
 /**
  * Blog post detail — /blog/[slug] (SSR on-demand)
- *
- * Fetches the article from the headless CMS at request time, so every slug
- * resolves (no static page limit / pre-render cap). Same approach as the
- * reference sites (sesioniniciar.com, registrounicotributario.com).
+ * Diseño de marca: <article class="pg-art"> + pg-cejilla/pg-h1/pg-sub/pg-lista
+ * (CSS compilado del sitio original ya servido por BrandLayout).
  */
-import PostLayout from '@/layouts/PostLayout.astro';
+import BrandLayout from '@/layouts/BrandLayout.astro';
 import TableOfContents from '@/components/blog/TableOfContents.astro';
-import SocialShare from '@/components/blog/SocialShare.astro';
 import {
   safePost,
   resolveAuthor,
@@ -19,6 +16,7 @@ import {
   firstCategory,
   catName,
   esDate,
+  readTime,
 } from '@/lib/blog';
 import {
   addHeadingIds,
@@ -54,97 +52,95 @@ const bodyHtml = applyExternalLinkPolicy(
 const headings = extractHeadings(bodyHtml);
 const readingTime = calculateReadingTime(post?.content?.rendered || '');
 const related = await relatedPosts(post, 3);
+
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Inicio', item: SITE.url },
+    { '@type': 'ListItem', position: 2, name: 'Blog', item: `${SITE.url}/blog` },
+    ...(cat ? [{ '@type': 'ListItem', position: 3, name: catName(post), item: `${SITE.url}/categoria/${cat.slug}` }] : []),
+    { '@type': 'ListItem', position: cat ? 4 : 3, name: title, item: canonicalUrl },
+  ],
+};
+const articleLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: title,
+  description,
+  ...(featuredImage ? { image: featuredImage } : {}),
+  author: { '@type': 'Person', name: author?.name || SITE.name },
+  publisher: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+  datePublished: post.date,
+  dateModified: post.modified || post.date,
+  mainEntityOfPage: canonicalUrl,
+};
 ---
 
-<PostLayout
+<BrandLayout
   title={title}
   description={description}
   image={featuredImage || undefined}
   canonicalUrl={canonicalUrl}
-  authorName={author?.name || SITE.name}
-  datePublished={post.date}
-  dateModified={post.modified || post.date}
-  breadcrumbs={[
-    { name: 'Inicio', path: '/' },
-    { name: 'Blog', path: '/blog' },
-    ...(cat ? [{ name: catName(post), path: `/categoria/${cat.slug}` }] : []),
-    { name: title, path: canonicalUrl },
-  ]}
 >
-  <Fragment slot="sidebar">
-    {cat && (
-      <div class="rounded-2xl border border-outline bg-surface-alt/60 p-6">
-        <h2 class="text-sm font-bold uppercase tracking-wider text-content mb-3">Categoría</h2>
-        <a href={`/categoria/${cat.slug}`} class="font-semibold text-primary hover:underline">{catName(post)}</a>
-      </div>
-    )}
-    {related.length > 0 && (
-      <div class="rounded-2xl border border-outline bg-surface p-6">
-        <h2 class="text-sm font-bold uppercase tracking-wider text-content mb-4">Artículos relacionados</h2>
-        <div class="space-y-5">
-          {related.map((r) => (
-            <a key={r.slug} href={`/blog/${r.slug}`} class="group flex gap-3">
-              <div class="w-20 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-surface-alt">
-                {postImage(r) && <img src={postImage(r)!} alt={postTitle(r)} class="w-full h-full object-cover" loading="lazy" />}
-              </div>
-              <div>
-                <p class="text-sm font-medium text-content group-hover:text-primary transition-colors leading-snug line-clamp-2">{postTitle(r)}</p>
-                <p class="text-xs text-content-lighter mt-1">{esDate(r.date)}</p>
-              </div>
-            </a>
-          ))}
-        </div>
-      </div>
-    )}
-  </Fragment>
+  <slot name="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(articleLd)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbLd)} />
+  </slot>
 
-  <div class="prose prose-lg prose-slate max-w-none">
-    {/* Article meta */}
-    <div class="flex flex-wrap items-center gap-3 text-sm text-content-light mb-8 not-prose">
-      {cat && (
-        <a href={`/categoria/${cat.slug}`} class="inline-flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/10 px-3 py-1.5 rounded-full hover:bg-primary/20 transition-colors">{catName(post)}</a>
-      )}
-      <time datetime={post.date}>{esDate(post.date)}</time>
-      <span aria-hidden="true">•</span>
-      <span>{readingTime} min de lectura</span>
-    </div>
+  <div class="content-container pp-art-wrap">
+    <article class="pg-art">
+      <header class="pg-art-cab">
+        <p class="pg-cejilla font-poppins">
+          {cat ? catName(post) : 'Blog'} · {esDate(post.date)} · {readingTime} min
+        </p>
+        <h1 class="pg-h1">{title}</h1>
+        <p class="pg-sub">{description}</p>
+        <p class="pg-gris">{author?.name || 'Equipo Peptidos Plus'} · Solo para investigación</p>
+      </header>
 
-    {headings.length > 0 && <TableOfContents headings={headings} readingTime={readingTime} />}
+      {headings.length > 0 && <TableOfContents headings={headings} readingTime={readingTime} />}
 
-    <div set:html={bodyHtml} />
+      <div set:html={bodyHtml} />
 
-    {tags.length > 0 && (
-      <div class="mt-10 pt-6 border-t border-outline not-prose">
-        <div class="flex flex-wrap items-center gap-2">
-          <span class="text-sm font-medium text-content">Etiquetas:</span>
+      {tags.length > 0 && (
+        <div class="pg-tags">
           {tags.map((t: any) => (
-            <a key={t.id} href={`/tag/${t.slug}`} class="text-xs font-medium text-content-light bg-surface-alt px-3 py-1.5 rounded-full hover:text-primary hover:bg-primary/10 transition-colors">{t.name}</a>
+            <a key={t.id} href={`/tag/${t.slug}`} class="pg-tag">{t.name}</a>
           ))}
         </div>
-      </div>
-    )}
+      )}
 
-    {author?.name && (
-      <div class="mt-8 p-6 bg-surface-alt rounded-2xl border border-outline not-prose">
-        <div class="flex items-center gap-4">
-          {author.avatar_urls?.['96'] ? (
-            <img src={author.avatar_urls['96']} alt={author.name} class="w-14 h-14 rounded-full object-cover" />
-          ) : (
-            <div class="w-14 h-14 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center text-white font-bold text-xl">{author.name.charAt(0)}</div>
-          )}
-          <div>
-            <p class="text-sm text-content-light">Escrito por</p>
-            {author.slug ? (
-              <a href={`/autor/${author.slug}`} class="font-semibold text-content hover:text-primary transition-colors">{author.name}</a>
-            ) : (
-              <p class="font-semibold text-content">{author.name}</p>
-            )}
-            {author.description && <p class="text-sm text-content-light mt-0.5">{author.description}</p>}
-          </div>
+      <div class="pg-autor">
+        {author?.avatar_urls?.['96'] ? (
+          <img src={author.avatar_urls['96']} alt={author.name} class="pg-autor-avatar" />
+        ) : (
+          <span class="pg-autor-inicial">{author?.name?.charAt(0) || 'P'}</span>
+        )}
+        <div>
+          <small>Escrito por</small>
+          <b>{author?.name || SITE.name}</b>
         </div>
       </div>
-    )}
 
-    <SocialShare url={canonicalUrl} title={title} />
+      <p class="pg-aviso">Contenido educativo basado en literatura publicada. Los productos de Peptidos Plus se destinan exclusivamente a investigación; nada de lo anterior es consejo médico.</p>
+
+      {related.length > 0 && (
+        <section class="pg-rel">
+          <p class="pg-cejilla font-poppins">Relacionados · {cat ? catName(post) : 'Blog'}</p>
+          <div class="pg-lista">
+            {related.map((r) => (
+              <a class="pg-entrada" href={`/blog/${r.slug}`} data-cat={catName(r)}>
+                <span class="pg-entrada-meta"><b class="font-poppins">{catName(r)}</b><span>{esDate(r.date)} · {readTime(r)} min</span></span>
+                <h3>{postTitle(r)}</h3>
+                <p>{postExcerpt(r, 140)}</p>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <p class="pg-volver"><a href="/blog">← Todos los artículos</a></p>
+    </article>
   </div>
-</PostLayout>
+</BrandLayout>

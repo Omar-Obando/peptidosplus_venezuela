@@ -1,7 +1,5 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import Header from '@/components/Header.astro';
-import Footer from '@/components/Footer.astro';
 import Section from '@/components/Section.astro';
 import ArrowLeft from '@lucide/astro/icons/arrow-left';
 import Package from '@lucide/astro/icons/package';
@@ -12,7 +10,7 @@ const orderId = Astro.params.id;
 ---
 
 <BaseLayout title={`Order #${orderId}`}>
-    <Header />
+
     <main id="main-content">
         <div class="bg-surface border-b border-outline">
             <Section padding="none" class="py-8">
@@ -123,7 +121,7 @@ const orderId = Astro.params.id;
             </div>
         </Section>
     </main>
-    <Footer />
+
 </BaseLayout>
 
 <script define:vars={{ orderId }}>

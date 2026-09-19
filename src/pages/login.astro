@@ -1,7 +1,5 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import Header from '@/components/Header.astro';
-import Footer from '@/components/Footer.astro';
 import Section from '@/components/Section.astro';
 
 export const prerender = true;
@@ -10,7 +8,7 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
 ---
 
 <BaseLayout title="Sign In">
-    <Header />
+
     <main id="main-content">
         <div class="relative overflow-hidden bg-gradient-to-br from-primary/5 via-surface to-primary-light/10 min-h-[calc(100vh-5rem)]">
             <div class="absolute inset-0 bg-[linear-gradient(to_right,var(--color-outline)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-outline)_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-30"></div>
@@ -102,7 +100,7 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
             </Section>
         </div>
     </main>
-    <Footer />
+
 </BaseLayout>
 
 <script>

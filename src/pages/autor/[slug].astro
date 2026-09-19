@@ -1,11 +1,10 @@
 ---
 /**
- * Author archive — /autor/[slug] (SSR on-demand)
+ * Author archive — /autor/[slug] (SSR on-demand, diseño de marca).
  */
-import BlogLayout from '@/layouts/BlogLayout.astro';
-import PostCard from '@/components/blog/PostCard.astro';
+import BrandLayout from '@/layouts/BrandLayout.astro';
+import { postTitle, postExcerpt, catName, esDate, readTime } from '@/lib/blog';
 import { getUserBySlug, getPosts } from '@/lib/wordpress';
-import { postTitle, postExcerpt, safePosts } from '@/lib/blog';
 import { SITE } from '@/lib/site';
 
 const { slug } = Astro.params;
@@ -22,37 +21,40 @@ try { userPosts = await getPosts({ author: user.id, perPage: 100 }); } catch { u
 const title = user.name;
 const description = user.description || `Artículos escritos por ${user.name} en el blog de ${SITE.name}.`;
 const canonicalUrl = `${SITE.url}/autor/${slug}`;
+
+const pageLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfilePage',
+  name: title,
+  url: canonicalUrl,
+  mainEntity: { '@type': 'Person', name: user.name, url: canonicalUrl },
+};
 ---
 
-<BlogLayout
-  title={title}
-  description={description}
-  canonicalUrl={canonicalUrl}
-  breadcrumbs={[
-    { name: 'Inicio', path: '/' },
-    { name: 'Blog', path: '/blog' },
-    { name: 'Autores', path: '/blog' },
-    { name: title, path: canonicalUrl },
-  ]}
-  heroTitle={title}
-  heroDescription={description}
-  jsonLd={[
-    {
-      '@context': 'https://schema.org',
-      '@type': 'ProfilePage',
-      name: title,
-      url: canonicalUrl,
-      mainEntity: { '@type': 'Person', name: user.name, url: canonicalUrl },
-    },
-  ]}
->
-  {userPosts.length === 0 ? (
-    <p class="text-content-light py-12 text-center">Este autor aún no tiene artículos publicados.</p>
-  ) : (
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-      {userPosts.map((p) => (
-        <PostCard post={p} />
-      ))}
-    </div>
-  )}
-</BlogLayout>
+<BrandLayout title={title} description={description} canonicalUrl={canonicalUrl}>
+  <slot name="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(pageLd)} />
+  </slot>
+
+  <div class="content-container pp-art-wrap py-12 md:py-16">
+    <header class="pg-art-cab mb-10">
+      <p class="pg-cejilla font-poppins">Autor</p>
+      <h1 class="pg-h1">{title}</h1>
+      <p class="pg-sub">{description}</p>
+    </header>
+
+    {userPosts.length === 0 ? (
+      <p class="pg-gris">Este autor aún no tiene artículos publicados.</p>
+    ) : (
+      <div class="pg-lista">
+        {userPosts.map((p) => (
+          <a class="pg-entrada" href={`/blog/${p.slug}`} data-cat={catName(p)}>
+            <span class="pg-entrada-meta"><b class="font-poppins">{catName(p)}</b><span>{esDate(p.date)} · {readTime(p)} min</span></span>
+            <h3>{postTitle(p)}</h3>
+            <p>{postExcerpt(p, 150)}</p>
+          </a>
+        ))}
+      </div>
+    )}
+  </div>
+</BrandLayout>

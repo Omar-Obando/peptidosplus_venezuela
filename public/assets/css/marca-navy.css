@@ -1,0 +1,1442 @@
+/* ============================================================
+   Peptidos Plus — capa de marca navy
+   ------------------------------------------------------------
+   El clon llegó con la paleta de aminoclub: negro para la acción,
+   verde saturado en la cinta superior y granate en el cupón. Desde
+   el rebranding, el logo y la etiqueta de todos los viales son azul
+   marino, así que el color de acción del sitio pasa a ser ese mismo
+   navy y el negro desaparece de la interfaz.
+
+   Lo que NO se toca:
+   · los pastel de las escenas de producto — son la fotografía, y el
+     vial navy está compuesto contra ellos;
+   · el verde cuando significa algo ("Incluido", "Ahorra $x") y el
+     oro de los avisos: son semántica, no marca.
+
+   Esta hoja va la última a propósito. Solo re-tinta: ni una regla
+   cambia caja, tamaño ni posición.
+   ============================================================ */
+
+:root {
+  --pp-navy: #0a192f;          /* el del logo y las etiquetas */
+  --pp-navy-700: #112240;      /* hover */
+  --pp-navy-500: #1b3a63;      /* activo y degradados */
+  --pp-navy-300: #5d8ac2;
+  --pp-navy-050: #e4ecf7;
+  --pp-tinta-2: #4d5a70;       /* texto secundario, tintado del navy — 7.4:1 */
+  --pp-tinta-3: #616d80;       /* terciario — 5.3:1, medido sobre la tarjeta */
+  --pp-oro: #e9c46a;
+
+  /* El "negro de marca" del clon: un cambio aquí alcanza chips,
+     globos, pastillas y botones sin tocar una sola clase del HTML. */
+  --rx-color-2: #0a192f;
+  --rx-color-5: #4d5a70;
+  --rx-color-14: #0a192f;
+}
+
+/* ---- 1. Acción: lo que era negro, ahora es navy ---- */
+.bg-black { background-color: var(--pp-navy); }
+.hover\:bg-black\/90:hover,
+.hover\:bg-\[\#1a1a1a\]:hover,
+.hover\:bg-gray-800:hover { background-color: var(--pp-navy-700); }
+.active\:bg-black\/80:active { background-color: var(--pp-navy-500); }
+.text-black { color: var(--pp-navy); }
+.border-black { border-color: var(--pp-navy); }
+.ring-black { --tw-ring-color: var(--pp-navy); }
+.focus-visible\:ring-black:focus-visible { --tw-ring-color: var(--pp-navy); }
+.decoration-gray-400 { text-decoration-color: rgba(10, 25, 47, .35); }
+
+/* El "negro de marca" está compilado como valor literal (#131315) en las
+   utilidades de Tailwind, no como variable, así que la familia entera hay
+   que re-tintarla aquí. Son 2.600 usos en el sitio: títulos, precios,
+   pastillas, globos y bordes. */
+.text-brand-black { color: rgb(10 25 47 / var(--tw-text-opacity, 1)); }
+.bg-brand-black { background-color: rgb(10 25 47 / var(--tw-bg-opacity, 1)); }
+.border-brand-black,
+.focus\:border-brand-black:focus,
+.hover\:border-brand-black:hover { border-color: rgb(10 25 47 / var(--tw-border-opacity, 1)); }
+.border-t-brand-black { border-top-color: rgb(10 25 47 / var(--tw-border-opacity, 1)); }
+.text-brand-black\/30 { color: rgba(10, 25, 47, .3); }
+.text-brand-black\/40 { color: rgba(10, 25, 47, .4); }
+.text-brand-black\/45 { color: rgba(10, 25, 47, .45); }
+.text-brand-black\/50 { color: rgba(10, 25, 47, .5); }
+.text-brand-black\/55 { color: rgba(10, 25, 47, .55); }
+.text-brand-black\/60 { color: rgba(10, 25, 47, .6); }
+.text-brand-black\/70 { color: rgba(10, 25, 47, .7); }
+.bg-brand-black\/0 { background-color: rgba(10, 25, 47, 0); }
+.bg-brand-black\/10 { background-color: rgba(10, 25, 47, .1); }
+.bg-brand-black\/30 { background-color: rgba(10, 25, 47, .3); }
+.bg-brand-black\/40 { background-color: rgba(10, 25, 47, .4); }
+.hover\:bg-brand-black\/90:hover { background-color: rgba(10, 25, 47, .9); }
+.border-brand-black\/10 { border-color: rgba(10, 25, 47, .1); }
+.border-brand-black\/15 { border-color: rgba(10, 25, 47, .15); }
+.border-brand-black\/30 { border-color: rgba(10, 25, 47, .3); }
+.border-brand-black\/60 { border-color: rgba(10, 25, 47, .6); }
+.focus\:ring-brand-black\/20:focus { --tw-ring-color: rgba(10, 25, 47, .2); }
+.focus-visible\:ring-brand-black:focus-visible { --tw-ring-color: var(--pp-navy); }
+.group:hover .group-hover\:decoration-brand-black { text-decoration-color: var(--pp-navy); }
+.from-brand-black\/15 { --tw-gradient-from: rgba(10, 25, 47, .15) var(--tw-gradient-from-position); }
+/* Globos de ayuda y superficies oscuras sueltas */
+.bg-gray-900 { background-color: var(--pp-navy); }
+.border-t-gray-900 { border-top-color: var(--pp-navy); }
+
+/* Texto secundario: gris neutro → gris con el azul de la marca dentro.
+   Contraste sobre blanco 7.4:1 y 5.2:1, por encima del mínimo. */
+.text-\[\#555555\], .text-\[\#555\] { color: var(--pp-tinta-2); }
+.text-\[\#797979\], .text-\[\#666\], .text-\[\#666666\] { color: var(--pp-tinta-3); }
+
+/* El héroe propio y su barra comparten la misma tinta */
+.pp-hero-v3 { --pp-ink: #0a192f; --pp-muted: #4d5a70; }
+.pp-hero-v3-tagline { color: var(--pp-tinta-2); }
+.pp-player-nota { color: var(--pp-tinta-2); }
+
+/* ---- 2. Cinta superior: de verde bandera a navy ---- */
+[aria-label*="productos nuevos"] {
+  background-image: linear-gradient(90deg, var(--pp-navy) 0%, var(--pp-navy-500) 50%, var(--pp-navy) 100%);
+}
+[aria-label*="productos nuevos"] svg.animate-pulse { color: rgba(233, 196, 106, .8); }
+/* El estallido decorativo de la esquina era verde; se lleva al azul de la
+   cinta y se baja, para que sea un halo y no una mancha. */
+[aria-label*="productos nuevos"] .absolute.-right-7 { opacity: .3; filter: hue-rotate(165deg) saturate(.55) brightness(.9); }
+.text-\[\#0B5B45\] { color: var(--pp-navy); }
+/* El círculo de la flecha del botón de la cinta seguía en verde bandera */
+[aria-label*="productos nuevos"] .from-\[\#17A971\] {
+  background-image: linear-gradient(to bottom, var(--pp-navy-500), var(--pp-navy));
+}
+
+/* ---- 3b. Franja de cierre: del amarillo ácido al pastel de las escenas ----
+   No es fotografía de producto, es superficie de interfaz: en lavanda y
+   cielo enlaza con la sección anterior y deja respirar al botón navy. */
+section[aria-label="Llamado a la acción"] {
+  background-image: linear-gradient(to bottom, #f1efff 0%, #e3ecfa 100%);
+}
+
+/* ---- 3. La cinta del cupón: de granate a navy ----
+   RETIRADA. Enganchaba por aria-label ("Aplicar el código…") y desde que el
+   cupón funciona ese texto lo llevan también la chapa de la banda ancha y la
+   X de quitar: a las dos les pintaba el degradado encima y quedaban como un
+   borrón navy. No hace falta: el bloque A2 ya retinta las clases del propio
+   degradado (.from-[#4a0e1e], .via-[#5c1120], .to-[#3c0a18]), así que la
+   cinta sale navy por su propio marcado. */
+
+/* ---- 4. Lo que dibuja el navegador y no el diseño ----
+   Selección, cursor, foco y barra de desplazamiento venían del
+   sistema operativo, sin relación con la marca. */
+::selection { background: var(--pp-navy); color: #fff; }
+input, textarea, [contenteditable] { caret-color: var(--pp-navy); }
+a { text-underline-offset: .18em; }
+
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--pp-navy);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+html { scrollbar-color: #b9c8de #eef2f8; scrollbar-width: thin; }
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-track { background: #eef2f8; }
+::-webkit-scrollbar-thumb { background: #b9c8de; border-radius: 999px; border: 3px solid #eef2f8; }
+::-webkit-scrollbar-thumb:hover { background: var(--pp-navy-300); }
+
+/* Cifras de una columna: los precios y los totales dejan de bailar */
+[data-testid$="price"],
+[data-testid^="cart-"],
+.pp-precio, .tabular-nums { font-variant-numeric: tabular-nums; }
+
+/* ---- 5. Estados que faltaban ---- */
+.pp-nav-links a { transition: color .18s; }
+.pp-nav-links a:hover { color: var(--pp-navy); }
+.pp-marquee-item { color: inherit; }
+
+/* ---- Sin existencias ---- */
+.pp-agotado{position:absolute;left:10px;top:10px;z-index:20;background:rgba(10,25,47,.92);color:#fff;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:5px 10px;border-radius:999px}
+[data-pp-agotado] img{filter:grayscale(.55) opacity(.75)}
+[data-pp-agotado] button[disabled]{pointer-events:none}
+
+/* Al elegir una tarjeta de cantidad, un latido corto para que se note */
+.pp-tarjeta-elegida{animation:pp-tarjeta-elegida .3s cubic-bezier(.16,1,.3,1)}
+@keyframes pp-tarjeta-elegida{from{transform:scale(.965)}to{transform:none}}
+@media (prefers-reduced-motion:reduce){.pp-tarjeta-elegida{animation:none}}
+
+/* ---- Viales que flotan en el héroe de contacto ----
+   Los de aminoclub llevan la sombra pintada dentro de la imagen y aire
+   alrededor; los nuestros son recortes a sangre y sin sombra, así que salían
+   planos, grandes y encima del titular.
+   Ojo: un drop-shadow sobre el vial se ve como neblina, porque el vidrio es
+   semitransparente y la sombra se cuela por dentro. Se dibuja por debajo,
+   con un óvalo difuminado en el contenedor. */
+section[aria-label="Contacto de Peptidos Plus"] img[src*="viales-ficha"] {
+  transform: scale(.66);
+}
+section[aria-label="Contacto de Peptidos Plus"] [aria-hidden="true"] > div:has(img[src*="viales-ficha"])::after {
+  content: "";
+  position: absolute;
+  left: 26%; right: 26%; bottom: 12%;
+  height: 7%;
+  background: radial-gradient(ellipse at center, rgba(31, 41, 68, .30), rgba(31, 41, 68, 0) 70%);
+  filter: blur(3px);
+  z-index: -1;
+}
+/* El vial del agua caía sobre el párrafo: se corre a la izquierda */
+section[aria-label="Contacto de Peptidos Plus"] [aria-hidden="true"] > div:has(img[src*="Agua-Bac"]) {
+  left: 8%;
+}
+@media (min-width: 1024px) {
+  section[aria-label="Contacto de Peptidos Plus"] [aria-hidden="true"] > div:has(img[src*="Agua-Bac"]) { left: 12%; }
+}
+/* En móvil no caben cuatro: se quedan los dos de arriba, y los de abajo
+   —que caían sobre el botón— se retiran. */
+@media (max-width: 767px) {
+  section[aria-label="Contacto de Peptidos Plus"] img[src*="viales-ficha"] { transform: scale(.58); }
+  section[aria-label="Contacto de Peptidos Plus"] [aria-hidden="true"] > div:has(img[src*="Agua-Bac"]),
+  section[aria-label="Contacto de Peptidos Plus"] [aria-hidden="true"] > div:has(img[src*="Nad+"]) { display: none; }
+}
+/* En tableta el titular ocupa dos líneas y el vial de la izquierda lo rozaba */
+@media (min-width: 768px) and (max-width: 1023px) {
+  section[aria-label="Contacto de Peptidos Plus"] img[src*="viales-ficha"] { transform: scale(.55); }
+  section[aria-label="Contacto de Peptidos Plus"] [aria-hidden="true"] > div:has(img[src*="Klow"]) { left: 1%; top: 8%; }
+  section[aria-label="Contacto de Peptidos Plus"] [aria-hidden="true"] > div:has(img[src*="Glow"]) { right: 1%; }
+}
+
+/* El vial de Glow rozaba la píldora del horario en portátil y en móvil:
+   se sube y se corre al borde en esos dos anchos. */
+@media (max-width: 1279px) {
+  section[aria-label="Contacto de Peptidos Plus"] [aria-hidden="true"] > div:has(img[src*="Glow"]) { right: 0; top: 4%; }
+}
+@media (max-width: 767px) {
+  section[aria-label="Contacto de Peptidos Plus"] [aria-hidden="true"] > div:has(img[src*="Glow"]) { right: -2%; top: 2%; }
+  section[aria-label="Contacto de Peptidos Plus"] [aria-hidden="true"] > div:has(img[src*="Klow"]) { left: -2%; top: 6%; }
+}
+
+/* ============================================================
+   ESTÉTICA PROPIA (2026-09-09)
+   Cinco piezas, cada una en su bloque para poder quitarla sola:
+     A. paleta sacada de las escenas de producto
+     B. un solo acento: oro sobre navy; verde solo para "verificado"
+     C. esquinas precisas (botones 10 px, tarjetas 12 px, chips redondos)
+     D. bordes y sombras tintados de navy
+     E. cuadrícula de laboratorio en héroe, "Por qué" y cierre
+   La tipografía NO se toca (decisión del dueño).
+   ============================================================ */
+
+:root {
+  /* Medidos en el fondo de los 37 renders: grises apagados, no pasteles */
+  --pp-lavanda: #d8d6e2;  --pp-lavanda-050: #eeedf3;   /* Retatrutida, Mots-c */
+  --pp-cielo:   #d5dde1;  --pp-cielo-050:   #edf1f3;   /* Tirzepatida, GHK-Cu */
+  --pp-salvia:  #c9d6cf;  --pp-salvia-050:  #eaf0ec;   /* CJC, Epitalón, KPV */
+  --pp-arena:   #d9cdc6;  --pp-arena-050:   #f3eeeb;   /* NAD+, Sermorelin */
+  --pp-rosa:    #e3dad8;  --pp-rosa-050:    #f4f0ef;   /* Semaglutida, Agua Bac */
+  /* Verde de verificación: profundo, no caramelo. Solo para "certificado" */
+  --pp-verde: #1e6f55;    --pp-verde-050: #e3efe9;
+}
+
+/* ---- A. Paleta: los cuatro pasteles de aminoclub pasan a nuestros tonos ----
+   menta = salvia, cielo = cielo, mantequilla = arena, lavanda = lavanda.
+   Lleno = tono (chips, círculos numerados); tarjetas = lavado claro. */
+.bg-brand-mint     { background-color: var(--pp-salvia); }
+.bg-brand-sky      { background-color: var(--pp-cielo); }
+.bg-brand-butter   { background-color: var(--pp-arena); }
+.bg-brand-lavender { background-color: var(--pp-lavanda); }
+.rounded-\[20px\].bg-brand-mint, .rounded-\[16px\].bg-brand-mint, .rounded-2xl.bg-brand-mint         { background-color: var(--pp-salvia-050); }
+.rounded-\[20px\].bg-brand-sky, .rounded-\[16px\].bg-brand-sky, .rounded-2xl.bg-brand-sky             { background-color: var(--pp-cielo-050); }
+.rounded-\[20px\].bg-brand-butter, .rounded-\[16px\].bg-brand-butter, .rounded-2xl.bg-brand-butter    { background-color: var(--pp-arena-050); }
+.rounded-\[20px\].bg-brand-lavender, .rounded-\[16px\].bg-brand-lavender, .rounded-2xl.bg-brand-lavender { background-color: var(--pp-lavanda-050); }
+.bg-brand-mint\/40 { background-color: rgba(201, 214, 207, .45); }
+.from-brand-mint\/60   { --tw-gradient-from: rgba(201,214,207,.6) var(--tw-gradient-from-position); --tw-gradient-to: rgba(201,214,207,0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+.from-brand-mint\/70   { --tw-gradient-from: rgba(201,214,207,.7) var(--tw-gradient-from-position); --tw-gradient-to: rgba(201,214,207,0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+.from-brand-butter\/70 { --tw-gradient-from: rgba(217,205,198,.7) var(--tw-gradient-from-position); --tw-gradient-to: rgba(217,205,198,0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+.from-brand-lavender\/60 { --tw-gradient-from: rgba(216,214,226,.6) var(--tw-gradient-from-position); --tw-gradient-to: rgba(216,214,226,0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+.to-brand-sky\/40      { --tw-gradient-to: rgba(213,221,225,.4) var(--tw-gradient-to-position); }
+.to-brand-sky\/30      { --tw-gradient-to: rgba(213,221,225,.3) var(--tw-gradient-to-position); }
+.to-brand-lavender\/40 { --tw-gradient-to: rgba(216,214,226,.4) var(--tw-gradient-to-position); }
+.border-\[\#dff0da\]   { border-color: rgba(10, 25, 47, .10); }
+/* fondos grises neutros: el mismo aire, con una gota de navy */
+.bg-\[\#f9f9f9\], .bg-gray-50 { background-color: #f4f6fa; }
+.bg-neutral-100               { background-color: #eef1f6; }
+.bg-\[\#fbfbfc\]              { background-color: #f6f8fb; }
+/* el resplandor verde detrás de los iconos de "La garantía" */
+.bg-\[\#5FD69E\]\/50 { background-color: rgba(201, 214, 207, .75); }
+
+/* ---- B. Un solo acento ----
+   Verde SOLO donde significa "verificado": el punto y el check de la insignia
+   del certificado, la chapa Janoshik, el candado, "Resultados verificados".
+   Todo lo demás que era verde o teal pasa a navy. El oro vive sobre navy. */
+.bg-emerald-500                              { background-color: var(--pp-verde); }
+.text-emerald-700, .text-green-700, .text-green-800, .text-\[\#22c55e\] { color: var(--pp-verde); }
+.bg-emerald-50, .bg-\[\#f0fdf4\]             { background-color: var(--pp-verde-050); }
+.border-\[\#dcfce7\]                         { border-color: rgba(30, 111, 85, .18); }
+.bg-green-500                                { background-color: var(--pp-verde); }
+svg.text-green-600                           { color: var(--pp-verde); }        /* el check de la insignia */
+span.text-green-600, p.text-green-600, div.text-green-600 { color: var(--pp-navy-500); } /* "Incluido" y afines */
+.bg-\[\#16a34a\]                             { background-color: var(--pp-verde); }   /* el punto que late */
+.text-\[\#16a34a\]                           { color: var(--pp-verde); }             /* candado, checks, "Resultados verificados" */
+.text-\[\#15803d\]                           { color: var(--pp-navy-500); }          /* "Completa tu pedido", pastillas */
+.bg-\[\#16a34a\]\/10                         { background-color: var(--pp-navy-050); }
+.text-teal-600                               { color: var(--pp-navy-500); }          /* "3 % DTO." */
+.border-teal-600                             { border-color: var(--pp-navy); }       /* tarjeta de volumen elegida */
+.bg-teal-50                                  { background-color: var(--pp-navy-050); }
+/* las tres chapas de las tarjetas de volumen: navy con letra dorada */
+.bg-teal-600, .bg-amber-500, span.text-\[8px\].-top-2.bg-brand-black { background-color: var(--pp-navy); color: var(--pp-oro); }
+/* la cinta de "productos nuevos" del catálogo y las fichas era verde botella */
+.from-\[\#0B5B45\] { --tw-gradient-from: var(--pp-navy-700) var(--tw-gradient-from-position); --tw-gradient-to: rgba(17,34,64,0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+.to-\[\#0B5B45\]   { --tw-gradient-to: var(--pp-navy) var(--tw-gradient-to-position); }
+.text-\[\#0B5B45\] { color: var(--pp-navy); }
+/* oro: un solo valor para todos los dorados que andaban sueltos */
+.text-\[\#f2d9a4\], .text-\[\#FFE9A8\]\/70, .text-amber-300, .text-amber-400 { color: var(--pp-oro); }
+.text-\[\#f2d9a4\]\/80 { color: rgba(233, 196, 106, .85); }
+.text-\[\#f2d9a4\]\/70 { color: rgba(233, 196, 106, .75); }
+.border-amber-400, .border-\[\#f2d9a4\]\/40 { border-color: var(--pp-oro); }
+.bg-amber-400\/10, .bg-\[\#f2d9a4\]\/15      { background-color: rgba(233, 196, 106, .12); }
+.bg-\[\#f2d9a4\]                             { background-color: var(--pp-oro); }
+
+/* ---- C. Esquinas precisas ----
+   Acciones a 10 px, tarjetas y paneles a 12 px. Los chips pequeños (h-7,
+   h-8), los círculos de icono y los de categoría siguen redondos. */
+a.rounded-full.h-9:not(.w-9), a.rounded-full.h-10:not(.w-10), a.rounded-full.h-11:not(.w-11), a.rounded-full.h-12:not(.w-12), a.rounded-full.h-14,
+button.rounded-full.h-9:not(.w-9):not([data-pp-cat]), button.rounded-full.h-10:not(.w-10), button.rounded-full.h-11:not(.w-11), button.rounded-full.h-12:not(.w-12),
+a.rounded-full.py-2, a.rounded-full.py-2\.5, a.rounded-full.py-3, a.rounded-full.py-3\.5,
+button.rounded-full.py-2, button.rounded-full.py-2\.5, button.rounded-full.py-3, button.rounded-full.py-3\.5,
+input.rounded-full,
+div.rounded-full.h-9:not(.w-9), div.rounded-full.h-11:not(.w-11),
+[data-pp-pres] { border-radius: 10px; }
+.rounded-\[20px\], .rounded-\[24px\], .rounded-\[28px\], .rounded-\[32px\], .rounded-\[16px\], .rounded-2xl, .rounded-3xl,
+.sm\:rounded-\[20px\], .lg\:rounded-\[20px\], .lg\:rounded-\[24px\], .lg\:rounded-\[32px\], .lg\:rounded-3xl { border-radius: 12px; }
+.rounded-b-\[16px\], .rounded-b-\[20px\], .lg\:rounded-b-\[20px\], .lg\:rounded-b-\[24px\], .rounded-b-2xl, .rounded-b-3xl { border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
+.rounded-t-2xl, .rounded-t-3xl { border-top-left-radius: 12px; border-top-right-radius: 12px; }
+
+/* ---- D. Bordes y sombras tintados de navy (antes gris neutro / negro) ---- */
+.border-\[\#d5d5d5\]  { border-color: rgba(10, 25, 47, .16); }
+.border-\[\#e0e0e0\]  { border-color: rgba(10, 25, 47, .13); }
+.border-\[\#e8e8e8\]  { border-color: rgba(10, 25, 47, .10); }
+.border-\[\#eee\], .border-\[\#ececec\], .border-\[\#e5e5e5\] { border-color: rgba(10, 25, 47, .09); }
+.border-\[\#eef0f3\]  { border-color: rgba(10, 25, 47, .07); }
+.border-\[\#f4f4f4\]  { border-color: rgba(10, 25, 47, .05); }
+.border-gray-100      { border-color: rgba(10, 25, 47, .06); }
+.border-gray-200      { border-color: rgba(10, 25, 47, .11); }
+.border-gray-300      { border-color: rgba(10, 25, 47, .18); }
+.hover\:border-\[\#999\]:hover  { border-color: rgba(10, 25, 47, .45); }
+.hover\:border-gray-300:hover   { border-color: rgba(10, 25, 47, .22); }
+.hover\:border-gray-200:hover   { border-color: rgba(10, 25, 47, .14); }
+.shadow-sm  { --tw-shadow: 0 1px 2px 0 rgba(10, 25, 47, .06); }
+.shadow-md  { --tw-shadow: 0 4px 6px -1px rgba(10, 25, 47, .08), 0 2px 4px -2px rgba(10, 25, 47, .06); }
+.shadow-lg, .hover\:shadow-lg:hover { --tw-shadow: 0 10px 15px -3px rgba(10, 25, 47, .10), 0 4px 6px -4px rgba(10, 25, 47, .06); }
+.shadow-xl, .hover\:shadow-xl:hover { --tw-shadow: 0 20px 25px -5px rgba(10, 25, 47, .12), 0 8px 10px -6px rgba(10, 25, 47, .06); }
+.shadow-2xl { --tw-shadow: 0 25px 50px -12px rgba(10, 25, 47, .22); }
+.shadow-\[0px_8px_24px_0px_rgba\(0\,0\,0\,0\.10\)\]   { --tw-shadow: 0 8px 24px 0 rgba(10, 25, 47, .10); }
+.shadow-\[0px_4px_40px_0px_rgba\(0\,0\,0\,0\.06\)\]   { --tw-shadow: 0 4px 40px 0 rgba(10, 25, 47, .07); }
+.shadow-\[0px_12px_50px_0px_rgba\(0\,0\,0\,0\.10\)\]  { --tw-shadow: 0 12px 50px 0 rgba(10, 25, 47, .10); }
+.shadow-\[0px_12px_40px_0px_rgba\(0\,0\,0\,0\.10\)\]  { --tw-shadow: 0 12px 40px 0 rgba(10, 25, 47, .10); }
+.shadow-\[0_-4px_20px_rgba\(0\,0\,0\,0\.08\)\]        { --tw-shadow: 0 -4px 20px rgba(10, 25, 47, .09); }
+.shadow-\[0_1px_3px_rgba\(0\,0\,0\,0\.05\)\]          { --tw-shadow: 0 1px 3px rgba(10, 25, 47, .06); }
+.shadow-\[0_1px_3px_rgba\(0\,0\,0\,0\.04\)\]          { --tw-shadow: 0 1px 3px rgba(10, 25, 47, .05); }
+.shadow-\[0_18px_28px_rgba\(19\,19\,21\,0\.10\)\]     { --tw-shadow: 0 18px 28px rgba(10, 25, 47, .11); }
+.shadow-\[0_18px_22px_rgba\(31\,41\,68\,0\.22\)\]     { --tw-shadow: 0 18px 22px rgba(10, 25, 47, .22); }
+.hover\:shadow-\[0_12px_28px_-12px_rgba\(19\,19\,21\,0\.18\)\]:hover { --tw-shadow: 0 12px 28px -12px rgba(10, 25, 47, .20); }
+.hover\:shadow-\[0_14px_32px_-14px_rgba\(19\,19\,21\,0\.22\)\]:hover { --tw-shadow: 0 14px 32px -14px rgba(10, 25, 47, .24); }
+.hover\:shadow-\[0_10px_28px_rgba\(0\,0\,0\,0\.10\)\]:hover          { --tw-shadow: 0 10px 28px rgba(10, 25, 47, .11); }
+.group:hover .group-hover\:shadow-\[0px_6px_24px_0px_rgba\(0\,0\,0\,0\.08\)\] { --tw-shadow: 0 6px 24px 0 rgba(10, 25, 47, .09); }
+.shadow-\[0_1px_2px_rgba\(16\,24\,40\,0\.04\)\,0_10px_28px_-14px_rgba\(21\,163\,74\,0\.18\)\] { --tw-shadow: 0 1px 2px rgba(10, 25, 47, .04), 0 10px 28px -14px rgba(10, 25, 47, .18); }
+.shadow-\[0_4px_14px_rgba\(55\,185\,138\,0\.5\)\]     { --tw-shadow: 0 4px 14px rgba(10, 25, 47, .22); }
+.shadow-\[0_1px_4px_rgba\(6\,40\,30\,0\.35\)\]        { --tw-shadow: 0 1px 4px rgba(10, 25, 47, .30); }
+.shadow-\[0_4px_16px_rgba\(6\,40\,30\,0\.28\)\,inset_0_1px_0_rgba\(255\,255\,255\,0\.9\)\] { --tw-shadow: 0 4px 16px rgba(10, 25, 47, .26), inset 0 1px 0 rgba(255, 255, 255, .9); }
+.group:hover .group-hover\:shadow-\[0_7px_22px_rgba\(6\,40\,30\,0\.35\)\] { --tw-shadow: 0 7px 22px rgba(10, 25, 47, .30); }
+
+/* ---- E. La luz del héroe ----
+   Antes había aquí una cuadrícula de papel milimetrado. El dueño la vio y
+   dijo que no combinaba, y tenía razón: sobre el mismo fondo suben unas
+   partículas a la deriva, y una retícula rígida peleaba con ellas. Dos
+   lenguajes distintos discutiendo detrás del titular.
+
+   Lo que se pinta ahora no es un adorno: es LA LUZ QUE LA FOTO YA IMPLICA.
+   Los tres viales están iluminados desde arriba a la derecha y apoyados en
+   una superficie clara. Se reconstruye esa luz con tres lavados —los mismos
+   tonos que los fondos de las escenas de producto— y una superficie donde
+   apoyarse. Así las partículas dejan de ser puntitos sueltos y pasan a ser
+   motas suspendidas en esa luz: el mismo fenómeno, no dos.
+   Sin blur ni filtros: son degradados, que el navegador compone gratis. */
+.pp-hero-v3, .pp-porque-lluvia, section[aria-label="Llamado a la acción"] { position: relative; isolation: isolate; }
+.pp-hero-v3::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    /* 1. la luz principal, cayendo sobre los viales */
+    radial-gradient(115% 85% at 74% 2%, rgba(213, 221, 225, .78) 0%, rgba(213, 221, 225, .30) 36%, rgba(213, 221, 225, 0) 70%),
+    /* 2. un rebote templado bajo el titular, para que el texto no flote en gris */
+    radial-gradient(78% 66% at 4% 88%, rgba(227, 218, 216, .50) 0%, rgba(227, 218, 216, 0) 64%),
+    /* 3. el velo lavanda que une las dos temperaturas por abajo */
+    radial-gradient(120% 130% at 52% 128%, rgba(216, 214, 226, .46) 0%, rgba(216, 214, 226, 0) 58%);
+}
+/* La superficie donde apoyan los viales: una banda apenas más densa en el
+   tercio bajo, con el canto superior difuso. Es lo que los deja de pie en vez
+   de flotando, y de paso da un horizonte a la composición. */
+.pp-hero-v3::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 34%;
+  z-index: -1; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(224, 229, 238, 0) 0%, rgba(224, 229, 238, .55) 55%, rgba(219, 225, 236, .75) 100%);
+}
+/* Las otras dos secciones se quedan sin retícula: era el mismo motivo y el
+   mismo problema. Su degradado propio ya las sostiene. */
+
+
+/* REVERTIDO a petición del dueño (2026-09-09): la banda pastel con los viales
+   cayendo —"Por qué Peptidos Plus" en el home y el héroe de certificados, que
+   comparten el mismo gradiente— vuelve a su color original, con sus seis
+   azulejos de icono y sus glifos de color. Le gustaba como estaba. No se
+   contra-escribe: las reglas se quitaron. NO volver a añadirlas.
+   ============================================================ */
+
+/* ---- A2. Los pasteles que estaban escritos a mano ----
+   El clon no siempre usa las clases de marca: hay colores literales en
+   clases (bg-[#f2f0ff]) y degradados en atributos style. Estos se cazan por
+   valor. Los de style necesitan !important porque el atributo gana. */
+.bg-\[\#cbe5fc\]  { background-color: var(--pp-cielo); }
+.bg-\[\#4ade80\]  { background-color: var(--pp-verde); }        /* punto de disponible */
+.bg-\[\#131315\]  { background-color: var(--pp-navy); }         /* negro viejo de marca */
+.bg-\[\#f1f2f4\]  { background-color: #eef1f6; }
+.bg-\[\#f8f8f8\], .bg-\[\#fafafa\], .bg-\[\#f6f7f9\], .bg-\[\#f5f5f5\] { background-color: #f6f8fb; }
+/* degradados por clase con colores literales */
+.from-\[\#cbe5fc\] { --tw-gradient-from: var(--pp-cielo) var(--tw-gradient-from-position); --tw-gradient-to: rgba(213,221,225,0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+.via-\[\#e8e5ff\]  { --tw-gradient-to: rgba(216,214,226,0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--pp-lavanda) var(--tw-gradient-via-position), var(--tw-gradient-to); }
+.to-\[\#e9fce6\]   { --tw-gradient-to: var(--pp-salvia) var(--tw-gradient-to-position); }
+.from-\[\#fefeca\] { --tw-gradient-from: var(--pp-arena-050) var(--tw-gradient-from-position); --tw-gradient-to: rgba(243,238,235,0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+.to-\[\#e9fae7\]   { --tw-gradient-to: var(--pp-salvia-050) var(--tw-gradient-to-position); }
+.from-\[\#e8e5ff\] { --tw-gradient-from: var(--pp-lavanda-050) var(--tw-gradient-from-position); --tw-gradient-to: rgba(238,237,243,0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+.to-\[\#f8eaed\]   { --tw-gradient-to: var(--pp-rosa-050) var(--tw-gradient-to-position); }
+/* el "NUEVO" verde de la cinta y la cinta vino del carrito (bloque señalado, solo se retinta) */
+.via-\[\#16A672\]  { --tw-gradient-to: rgba(27,58,99,0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--pp-navy-500) var(--tw-gradient-via-position), var(--tw-gradient-to); }
+.to-\[\#0C7A54\]   { --tw-gradient-to: var(--pp-navy) var(--tw-gradient-to-position); }
+.from-\[\#4a0e1e\] { --tw-gradient-from: var(--pp-navy-700) var(--tw-gradient-from-position); --tw-gradient-to: rgba(17,34,64,0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+.via-\[\#5c1120\]  { --tw-gradient-to: rgba(10,25,47,0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--pp-navy) var(--tw-gradient-via-position), var(--tw-gradient-to); }
+.to-\[\#3c0a18\]   { --tw-gradient-to: var(--pp-navy-700) var(--tw-gradient-to-position); }
+/* degradados en atributo style: se reconocen por su primer color */
+/* [halo tras el vial de la ficha] La regla que lo pasaba a gris azulado (cielo) se retiró el 2026-09-10: el dueño pidió de vuelta el halo verde original del vial, que va en el atributo style del propio marcado. */
+[style*="rgba(232, 229, 255, 0.6) 0%"]  { background: linear-gradient(rgba(216, 214, 226, .6) 0%, rgba(213, 221, 225, .6) 100%) !important; }
+[style*="rgba(233, 252, 230, 0.7) 0%"]  { background: linear-gradient(rgba(201, 214, 207, .7) 0%, rgba(213, 221, 225, .55) 100%) !important; }
+[style*="rgba(232, 229, 255, 0.75) 0%"] { background: linear-gradient(rgba(216, 214, 226, .75) 0%, rgba(227, 218, 216, .75) 100%) !important; }
+/* el cierre "Elige tu compuesto" es claro, no navy: la cuadrícula va en navy también */
+
+
+
+/* ---- La tira del héroe, como la cinta de la referencia ----
+   Era una fila gorda: icono de 26 px, título de 14 y subtítulo de 12, con
+   separadores de caja. Ahora es un teletipo fino de VERSALES espaciadas,
+   separadas por un punto medio. Ocupa un tercio del alto y deja de competir
+   con el titular. */
+.pp-marquee { padding: 9px 0; background: #fbfcfe; border-color: rgba(10, 25, 47, .07); }
+.pp-marquee-item { gap: 0; padding: 0 20px; border-right: 0; position: relative; }
+.pp-marquee-item::after {
+  content: "·";
+  position: absolute; right: -3px; top: 50%; transform: translateY(-52%);
+  color: rgba(10, 25, 47, .3); font-size: 13px; line-height: 1;
+}
+.pp-marquee-ic { display: none; }
+/* 2026-09-09: el dueño quitó los textos secundarios (<small>) del deslizador,
+   así que cada rótulo es una sola palabra en negrita y las reglas de small
+   sobran.
+   Al acortarse, el grupo pasó de 1415 a 867 px y la animación —que recorre
+   siempre el 50 % de la pista— se quedó a 18 px/s cuando antes iba a 29,5.
+   La duración se recorta para que la velocidad sea la misma de siempre. */
+.pp-marquee-track { animation-duration: 59s; }
+.pp-marquee-txt { flex-direction: row; align-items: baseline; }
+.pp-marquee-txt b {
+  font-family: Poppins, ui-sans-serif, system-ui, sans-serif;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .17em;
+  line-height: 1;
+  font-weight: 600;
+  color: rgba(10, 25, 47, .66);
+}
+@media (max-width: 820px) {
+  .pp-marquee { padding: 8px 0; }
+  .pp-marquee-item { padding: 0 14px; }
+  .pp-marquee-txt b { font-size: 9px; letter-spacing: .14em; }
+  .pp-marquee-track { animation-duration: 40s; }   /* mismo cálculo: 1212 → 721 px */
+}
+
+/* ---- La banda ancha del carrito: RETIRADA (2026-09-09) ----
+   Anunciaba el código del mes. El dueño quitó los códigos promocionales para
+   dejar un solo descuento —el de cantidad de viales—, así que la banda salió
+   entera de carrito.html (marcado y su <style> propio) y estas variables, que
+   solo servían para re-teñirla de navy, ya no tienen a quién pintar. */
+
+/* ---- La etiqueta de la caja de compra se salía de su hueco ----
+   "PRESENTACIÓN" mide 101 px en versales espaciadas y el hueco era de 80
+   (w-20): le pisaba 21 px al primer botón. Venía del clon, donde ponía "Size".
+   Se ensanchan las dos etiquetas a la vez —Presentación y Cantidad— para que
+   sigan alineadas. */
+.font-poppins.text-\[11px\].uppercase.tracking-\[0\.14em\].w-20 { width: 7.75rem; }
+
+/* ---- Foco visible en todo lo enfocable ----
+   El clon solo pinta anillo donde trae la clase focus-visible:ring-*: el campo
+   del código, el selector de mg y varios enlaces se quedaban sin nada. Esto
+   pone un contorno a lo que NO declara su propio anillo, así que no se duplica.
+   Va con :where() para no ganarle a nadie en especificidad. */
+:where(a, button, input, select, textarea, summary, [tabindex]):not([class*="ring-"]):focus-visible {
+  outline: 2px solid var(--pp-navy);
+  outline-offset: 2px;
+}
+/* Sobre fondo navy el contorno navy se pierde: ahí va en oro. */
+:where(.bg-black, .bg-brand-black, [class*="bg-\[\#0a192f\]"]):not([class*="ring-"]):focus-visible {
+  outline-color: var(--pp-oro);
+}
+
+/* ================================================================
+   F. Las páginas de lectura, dentro del mundo de la marca (2026-09-09/10)
+   Artículos (índice + 29 fichas) y las tres páginas legales.
+   ----------------------------------------------------------------
+   Venía en negro sobre blanco, con las entradas una debajo de otra
+   separadas por una raya y el texto pegado a la izquierda dejando un
+   hueco muerto a la derecha: no se parecía en nada al resto del sitio.
+
+   La página se llama a sí misma "publicación científica", así que se le
+   da la anatomía de un índice de revista —carril de datos a la izquierda,
+   columna de lectura a la derecha— en vez de una tira de párrafos.
+
+   TODO va dentro de :is([id^="pg-articulo"],[id^="pg-legal"]): las clases pg-* las comparten
+   certificados, preguntas frecuentes y contacto, y esas no se tocan.
+   ================================================================ */
+
+/* ---- la luz de la cabecera, la misma del héroe: lavados, no cajas ---- */
+:is([id^="pg-articulo"],[id^="pg-legal"]) { position: relative; isolation: isolate; }
+:is([id^="pg-articulo"],[id^="pg-legal"])::before {
+  content: "";
+  position: absolute; inset: 0 0 auto 0; height: 460px;
+  /* El lavado se corta en el ancho del contenedor y se le veía el canto a los
+     lados —justo el borde de caja que el dueño no quiere—. La máscara lo
+     desvanece antes de llegar al filo, como en el teletipo del héroe. */
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 15%, #000 85%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 15%, #000 85%, transparent 100%);
+  z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(72% 78% at 50% 0%, var(--pp-cielo-050) 0%, rgba(237, 241, 243, 0) 66%),
+    radial-gradient(46% 58% at 84% 4%, rgba(216, 214, 226, .55) 0%, rgba(216, 214, 226, 0) 60%),
+    radial-gradient(40% 52% at 12% 10%, rgba(243, 238, 235, .55) 0%, rgba(243, 238, 235, 0) 62%);
+}
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-cejilla { color: rgba(10, 25, 47, .55); }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-h1 { color: var(--pp-navy); }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-sub { color: var(--pp-tinta-2); }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-nota { color: var(--pp-tinta-3); }
+
+/* ---- una sola columna de lectura, centrada, para todo el cuerpo ---- */
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-lead,
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-controles,
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-cuenta,
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-lista { max-width: 940px; margin-left: auto; margin-right: auto; }
+
+/* ---- el destacado: tarjeta de la marca, no un recuadro gris ---- */
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-lead {
+  border-radius: 12px;
+  border-color: rgba(10, 25, 47, .10);
+  background: linear-gradient(178deg, #fff 0%, var(--pp-cielo-050) 100%);
+  color: var(--pp-navy);
+  padding: 26px 28px 24px;
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-lead:hover {
+  border-color: rgba(10, 25, 47, .22);
+  box-shadow: 0 12px 32px -18px rgba(10, 25, 47, .38);
+}
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-lead h2 { color: var(--pp-navy); }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-lead p { color: var(--pp-tinta-2); }
+/* "Leer la revisión" deja de ser texto suelto y pasa a ser la acción */
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-leer {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 38px; padding: 0 18px; border-radius: 10px;
+  background: var(--pp-navy); color: #fff;
+  font-family: Poppins, ui-sans-serif, system-ui, sans-serif;
+  font-size: 12.5px; font-weight: 600; letter-spacing: .01em;
+  transition: background-color .18s ease;
+}
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-lead:hover .pg-leer { background: var(--pp-navy-700); }
+
+/* ---- buscador y filtros ---- */
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-controles { border-color: rgba(10, 25, 47, .10); }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-busca-caja input {
+  border-radius: 10px; border-color: rgba(10, 25, 47, .16); color: var(--pp-navy);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-busca-caja input::placeholder { color: rgba(10, 25, 47, .38); }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-busca-caja input:focus {
+  border-color: var(--pp-navy);
+  box-shadow: 0 0 0 3px var(--pp-navy-050);
+}
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-filtro {
+  border-color: rgba(10, 25, 47, .14); color: var(--pp-muted);
+  transition: border-color .15s ease, color .15s ease, background-color .15s ease;
+}
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-filtro:hover { border-color: rgba(10, 25, 47, .40); color: var(--pp-navy); }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-filtro.on { background: var(--pp-navy); border-color: var(--pp-navy); color: #fff; }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-cuenta { color: var(--pp-tinta-3); }
+
+/* ---- el buscador y los filtros, que NO filtraban ----
+   El script de la página esconde con `elemento.hidden = true`, y tanto
+   .pg-entrada como .pg-lead traían `display:block` del autor, que le gana al
+   [hidden] del navegador: se escribía en el buscador, el contador bajaba y no
+   desaparecía ni una entrada. Venía así de antes; con el display:grid de aquí
+   abajo seguiría igual. La misma trampa de Tailwind con .flex, otra vez. */
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-entrada[hidden],
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-lead[hidden] { display: none; }
+
+/* ---- las entradas ---- */
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-entrada {
+  color: var(--pp-navy);
+  border-bottom-color: rgba(10, 25, 47, .09);
+  border-radius: 10px;
+  transition: background-color .16s ease;
+}
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-entrada:hover { background: rgba(237, 241, 243, .72); }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-entrada h3 { color: var(--pp-navy); }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-entrada:hover h3 { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-entrada p { color: var(--pp-tinta-2); max-width: 68ch; }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-entrada-meta { color: var(--pp-tinta-3); }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-entrada-meta b { color: rgba(10, 25, 47, .62); }
+
+/* ---- de tira de párrafos a índice de revista (de 900 px en adelante) ----
+   El carril de la izquierda lleva la categoría y la fecha; la columna de la
+   derecha, el titular y el resumen. Debajo de 900 px se queda como estaba,
+   apilado, que es lo que funciona en un teléfono. */
+@media (min-width: 900px) {
+  :is([id^="pg-articulo"],[id^="pg-legal"]) .pg-entrada {
+    display: grid;
+    grid-template-columns: 158px minmax(0, 1fr);
+    column-gap: 30px;
+    align-items: start;
+    /* El relleno se compensa con margen negativo para que el carril arranque
+       en el mismo eje que el contador y el buscador, y el color del hover
+       sobresalga un poco por los lados en vez de cortar el texto. */
+    padding: 22px 14px 22px 12px;
+    margin-inline: -12px;
+  }
+  /* OJO: solo la meta de una ENTRADA. El destacado (.pg-lead) tiene la suya y
+     ahí los dos datos van en línea, como estaban. */
+  :is([id^="pg-articulo"],[id^="pg-legal"]) .pg-entrada > .pg-entrada-meta {
+    grid-column: 1; grid-row: 1 / span 2;
+    flex-direction: column; align-items: flex-start; gap: 5px;
+    padding-top: 4px; line-height: 1.45;
+  }
+  :is([id^="pg-articulo"],[id^="pg-legal"]) .pg-entrada h3 { grid-column: 2; grid-row: 1; margin: 0 0 6px; }
+  :is([id^="pg-articulo"],[id^="pg-legal"]) .pg-entrada p { grid-column: 2; grid-row: 2; }
+  /* el destacado gana aire, que es el que manda en la página */
+  :is([id^="pg-articulo"],[id^="pg-legal"]) .pg-lead { padding: 32px 34px 30px; }
+}
+
+/* ---- la página del artículo en sí ---- */
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-art h2 { color: var(--pp-navy); }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-art p { color: var(--pp-navy); }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-art-cab .pg-sub { color: var(--pp-tinta-2); }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-gris { color: var(--pp-tinta-3); }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-refs li { color: var(--pp-tinta-2); }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-aviso { color: var(--pp-tinta-3); border-top-color: rgba(10, 25, 47, .10); }
+/* anterior / siguiente: las mismas esquinas y la misma tinta que las tarjetas */
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-art-nav a {
+  border-radius: 12px; border-color: rgba(10, 25, 47, .10); color: var(--pp-navy);
+  transition: border-color .16s ease, background-color .16s ease;
+}
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-art-nav a:hover { border-color: rgba(10, 25, 47, .28); background: rgba(237, 241, 243, .6); }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-art-nav small { color: var(--pp-tinta-3); }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-volver a { color: var(--pp-navy); }
+
+/* ---- las páginas legales: índice, listas y lo que falta por completar ---- */
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-art section { scroll-margin-top: 92px; }
+
+/* índice de la página, arriba del todo */
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-indice {
+  margin: 0 0 30px;
+  padding: 18px 22px;
+  border: 1px solid rgba(10, 25, 47, .10);
+  border-radius: 12px;
+  background: linear-gradient(178deg, #fff 0%, var(--pp-cielo-050) 100%);
+}
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-indice ol {
+  margin: 0; padding: 0; list-style: none;
+  display: grid; grid-template-columns: 1fr; gap: 7px 26px;
+  counter-reset: pgidx;
+}
+@media (min-width: 620px) {
+  :is([id^="pg-articulo"],[id^="pg-legal"]) .pg-indice ol { grid-template-columns: 1fr 1fr; }
+}
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-indice li { counter-increment: pgidx; }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-indice a {
+  display: flex; gap: 9px; align-items: baseline;
+  font-size: 13.5px; line-height: 1.4;
+  color: var(--pp-tinta-2); text-decoration: none;
+}
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-indice a::before {
+  content: counter(pgidx);
+  font-family: Poppins, ui-sans-serif, system-ui, sans-serif;
+  font-size: 10px; font-weight: 700; letter-spacing: .06em;
+  color: rgba(10, 25, 47, .40);
+  min-width: 15px; text-align: right; flex-shrink: 0;
+}
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-indice a:hover { color: var(--pp-navy); text-decoration: underline; text-underline-offset: 3px; }
+
+/* listas y enlaces dentro del cuerpo */
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-art ul {
+  margin: 0 0 14px; padding-left: 0; list-style: none;
+}
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-art ul li {
+  position: relative; padding-left: 20px; margin: 0 0 8px;
+  font-size: 16px; line-height: 1.7; color: var(--pp-navy);
+}
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-art ul li::before {
+  content: ""; position: absolute; left: 4px; top: .72em;
+  width: 5px; height: 5px; border-radius: 999px;
+  background: rgba(10, 25, 47, .34);
+}
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-art a {
+  color: var(--pp-navy); text-decoration: underline;
+  text-decoration-color: rgba(10, 25, 47, .32); text-underline-offset: 3px;
+}
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-art a:hover { text-decoration-color: var(--pp-navy); }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-art code {
+  font-size: 13px; padding: 1px 6px; border-radius: 5px;
+  background: rgba(10, 25, 47, .06); color: var(--pp-navy);
+}
+
+/* Marcador para datos pendientes de rellenar. Va en el ámbar de los avisos
+   para que no se cuele nada a producción sin verlo.
+   SIN USO desde el 2026-09-10: el dueño todavía no tiene razón social ni RIF,
+   así que esos datos salieron de las páginas en vez de quedarse como hueco.
+   Se conserva la regla para cuando lleguen. */
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-falta {
+  background: rgba(233, 196, 106, .26);
+  color: var(--pp-navy);
+  border-bottom: 1px dashed rgba(150, 110, 20, .6);
+  padding: 1px 4px; margin: 0 -2px; border-radius: 3px;   /* el margen negativo evita el hueco antes de la puntuación */
+  font-style: normal;
+}
+
+/* ---- Utilidades que el clon no traía compiladas (2026-09-10) ----
+   Tailwind aquí no compila nada: las clases de valor arbitrario solo existen
+   si el sitio ORIGINAL las usaba. Al rehacer la tarjeta de ejemplo del
+   descuento se escribieron cuatro que no existían y no hacían nada, en
+   silencio: la tarjeta se quedaba en 301 px de ancho a fuerza de encoger a su
+   contenido. Estas tres se declaran aquí; la cuarta se cambió por
+   .text-green-700, que ya existe y esta hoja tiñe del verde de la marca. */
+.max-w-\[480px\] { max-width: 480px; }
+.pr-16          { padding-right: 4rem; }
+@media (min-width: 640px) {
+  .sm\:-right-6 { right: -1.5rem; }
+}
+
+/* ---- Las pestañas de "Calidad garantizada" (2026-09-10) ----
+   El clon trae el estado horneado en clases, porque lo pintó React una vez:
+   el botón activo con .bg-black y el panel activo con "opacity-100 visible
+   relative", los demás con "opacity-0 invisible absolute". Al pulsar otra
+   pestaña, la clase `visible` del panel viejo le ganaba a la `invisible` que
+   le añadía el JS —misma especificidad, decide el orden del CSS— así que el
+   navy se quedaba clavado en la primera y el panel no cambiaba nunca.
+
+   Aquí el estado se pinta desde los atributos, que es lo que el JS mueve.
+   Estas reglas son más específicas que las utilidades horneadas, así que las
+   apagan sin tener que tocar el marcado de los cinco botones y los cinco
+   paneles. */
+[role="tablist"] button[aria-controls][aria-selected="true"] {
+  background-color: var(--pp-navy);
+  color: #fff;
+  box-shadow: 0 4px 10px -3px rgba(10, 25, 47, .35);
+}
+[role="tablist"] button[aria-controls][aria-selected="false"] {
+  background-color: #f1f4f9;
+  color: var(--pp-tinta-2);
+  box-shadow: none;
+}
+[role="tablist"] button[aria-controls][aria-selected="false"]:hover {
+  background-color: #e5ebf4;
+  color: var(--pp-navy);
+}
+/* El panel: se neutraliza el estado horneado y manda [hidden]. */
+[role="tabpanel"] {
+  position: relative;
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  pointer-events: auto;
+}
+[role="tabpanel"][hidden] { display: none; }
+
+/* ---- Enlaces dentro de texto corrido (2026-09-10) ----
+   El clon trae una regla global: `a,[role=button]{font-family:var(--font-poppins)}`.
+   Para la navegación y los botones está bien —son Poppins por diseño—, pero un
+   enlace DENTRO de un párrafo salía en Poppins mientras el párrafo iba en Anek
+   Telugu: al mismo tamaño, Poppins tiene mucha más altura de x y el enlace se
+   leía notablemente más grande que la frase que lo rodea.
+   En texto corrido, un enlace tiene que leerse como el texto. */
+section[aria-label^="Calidad verificada"] h2 + p a,
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-art p a,
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-art li a {
+  font-family: inherit;
+}
+
+/* ---- El fondo de "Calidad garantizada" (2026-09-10) ----
+   PRUEBA EN CURSO. Tercer fondo que se prueba en esta sección.
+
+   AHORA: el oscuro de la sección "Club Tab" del clon — rgb(22,19,15), un
+   negro cálido, con un halo dorado arriba a la derecha. El halo del original
+   era rgba(214,178,110,…); aquí va el oro de la marca, que es casi el mismo.
+
+   OJO: un fondo oscuro obliga a invertir la sección entera. Todo lo que sigue
+   —titular, cuerpo, sellos, pestañas, botón— existe solo por eso. Si se vuelve
+   a un fondo claro, hay que borrar este bloque completo, no solo el color.
+
+   Probados y a la espera de su decisión:
+   · Crema:      background-color: #f6f4ed; con dos filetes de 1 px
+                 rgba(10,25,47,.12) arriba y abajo (::before / ::after).
+   · Degradado:  linear-gradient(to bottom,#f7faf9 0%,#f4f7f6 55%,#ecf1f0 100%)
+                 con dos halos difuminados (navy .09 y salvia .5, blur 64px).
+   ------------------------------------------------------------------------ */
+section[aria-label^="Calidad verificada"] {
+  position: relative;
+  isolation: isolate;
+  background-color: #16130f;
+}
+/* el halo cálido, en el oro de la marca */
+section[aria-label^="Calidad verificada"]::before {
+  content: "";
+  position: absolute; inset: 0;
+  z-index: -1; pointer-events: none;
+  background: radial-gradient(60% 75% at 72% 42%,
+    rgba(233, 196, 106, .16) 0%,
+    rgba(233, 196, 106, .05) 45%,
+    rgba(233, 196, 106, 0) 72%);
+}
+section[aria-label^="Calidad verificada"]::after { content: none; }
+
+/* ---- la inversión: lo que estaba escrito para leerse sobre claro ---- */
+section[aria-label^="Calidad verificada"] h2 { color: #f7f4ee; }
+section[aria-label^="Calidad verificada"] h2 + p { color: rgba(247, 244, 238, .78); }
+section[aria-label^="Calidad verificada"] h2 + p a { color: #f7f4ee; text-decoration-color: rgba(247, 244, 238, .5); }
+section[aria-label^="Calidad verificada"] h2 + p a:hover { text-decoration-color: #f7f4ee; }
+
+/* los tres sellos (HPLC · LAL · Cada lote) y su línea divisoria */
+section[aria-label^="Calidad verificada"] h2 ~ div .text-black,
+section[aria-label^="Calidad verificada"] h2 ~ div .text-brand-black { color: #f7f4ee; }
+section[aria-label^="Calidad verificada"] h2 ~ div .text-\[\#555555\],
+section[aria-label^="Calidad verificada"] h2 ~ div .text-\[\#555\],
+section[aria-label^="Calidad verificada"] h2 ~ div .text-gray-500,
+section[aria-label^="Calidad verificada"] h2 ~ div .text-gray-400 { color: rgba(247, 244, 238, .62); }
+section[aria-label^="Calidad verificada"] .border-t,
+section[aria-label^="Calidad verificada"] .border-b,
+section[aria-label^="Calidad verificada"] .divide-x > * { border-color: rgba(247, 244, 238, .16); }
+
+/* las pestañas: la activa en crema, las demás en un velo claro */
+section[aria-label^="Calidad verificada"] [role="tablist"] button[aria-selected="true"] {
+  background-color: #f3efe4;
+  color: #16130f;
+  box-shadow: 0 6px 16px -6px rgba(0, 0, 0, .6);
+}
+section[aria-label^="Calidad verificada"] [role="tablist"] button[aria-selected="false"] {
+  background-color: rgba(247, 244, 238, .08);
+  color: rgba(247, 244, 238, .72);
+}
+section[aria-label^="Calidad verificada"] [role="tablist"] button[aria-selected="false"]:hover {
+  background-color: rgba(247, 244, 238, .16);
+  color: #f7f4ee;
+}
+
+/* el botón de acción: navy sobre negro no se ve; pasa a crema */
+section[aria-label^="Calidad verificada"] .bg-black,
+section[aria-label^="Calidad verificada"] .bg-brand-black {
+  background-color: #f3efe4;
+  color: #16130f;
+}
+section[aria-label^="Calidad verificada"] .bg-black:hover,
+section[aria-label^="Calidad verificada"] .bg-brand-black:hover { background-color: #fff; }
+section[aria-label^="Calidad verificada"] .bg-black svg,
+section[aria-label^="Calidad verificada"] .bg-black span { color: #16130f; }
+
+/* el pie de la columna ("Certificado incluido en cada pedido") */
+section[aria-label^="Calidad verificada"] .bg-black ~ *,
+section[aria-label^="Calidad verificada"] .bg-black + div,
+section[aria-label^="Calidad verificada"] .bg-black + span { color: rgba(247, 244, 238, .72); }
+
+/* el foco visible tiene que verse sobre el oscuro */
+section[aria-label^="Calidad verificada"] :where(a, button):focus-visible { outline-color: var(--pp-oro); }
+
+/* Las superficies CLARAS de dentro de la sección oscura —los paneles de las
+   pestañas y la tarjeta de la derecha— no se invierten: siguen siendo tarjetas
+   claras con tinta oscura. La regla de arriba (h2 ~ div) las alcanzaba y les
+   ponía texto casi blanco sobre fondo casi blanco: 1,04:1, ilegible. */
+section[aria-label^="Calidad verificada"] [role="tabpanel"] .text-black,
+section[aria-label^="Calidad verificada"] [role="tabpanel"] .text-brand-black,
+section[aria-label^="Calidad verificada"] [role="tabpanel"] h3,
+section[aria-label^="Calidad verificada"] .bg-white .text-black,
+section[aria-label^="Calidad verificada"] .bg-white .text-brand-black {
+  color: var(--pp-navy);
+}
+section[aria-label^="Calidad verificada"] [role="tabpanel"] p,
+section[aria-label^="Calidad verificada"] [role="tabpanel"] .text-\[\#555555\],
+section[aria-label^="Calidad verificada"] [role="tabpanel"] .text-\[\#555\],
+section[aria-label^="Calidad verificada"] .bg-white p,
+section[aria-label^="Calidad verificada"] .bg-white .text-gray-500 {
+  color: var(--pp-tinta-2);
+}
+section[aria-label^="Calidad verificada"] [role="tabpanel"] .border-t,
+section[aria-label^="Calidad verificada"] [role="tabpanel"] .border-b {
+  border-color: rgba(10, 25, 47, .10);
+}
+
+/* ---- La tarjeta derecha de "Calidad garantizada", en oscuro (2026-09-10) ----
+   Va junto al bloque del fondo oscuro y se retira con él. */
+/* el panel: de azul claro a un oscuro cálido un punto por encima del fondo */
+section[aria-label^="Calidad verificada"] .lg\:order-2 > div {
+  background-image: linear-gradient(to bottom, #262019 0%, #1c1713 100%);
+  border: 1px solid rgba(255, 255, 255, .07);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05);
+  padding-bottom: 7.5rem;   /* reserva el sitio del botón de abajo */
+}
+@media (max-width: 1023px) {
+  /* en móvil el botón es más alto y el panel más bajo: hace falta más reserva */
+  section[aria-label^="Calidad verificada"] .lg\:order-2 > div { padding-bottom: 7.75rem; }
+}
+/* el anillo decorativo, en el oro del halo */
+section[aria-label^="Calidad verificada"] .lg\:order-2 > div > [aria-hidden="true"].rounded-full {
+  border-color: rgba(233, 196, 106, .14);
+}
+
+/* los tres viales */
+section[aria-label^="Calidad verificada"] .pp-calidad-viales {
+  display: flex; align-items: flex-end; justify-content: center;
+  gap: 4px;
+}
+section[aria-label^="Calidad verificada"] .pp-calidad-viales img {
+  width: auto; object-fit: contain;
+  filter: drop-shadow(0 22px 26px rgba(0, 0, 0, .55));
+  transition: transform .5s ease;
+}
+section[aria-label^="Calidad verificada"] .pp-cv-centro { height: 190px; }
+section[aria-label^="Calidad verificada"] .pp-cv-lado   { height: 164px; }
+section[aria-label^="Calidad verificada"] .pp-cv-izq    { transform: rotate(-7deg) translateY(4px); }
+section[aria-label^="Calidad verificada"] .pp-cv-der    { transform: rotate(7deg) translateY(4px); }
+@media (min-width: 1024px) {
+  section[aria-label^="Calidad verificada"] .pp-calidad-viales { gap: 8px; }
+  section[aria-label^="Calidad verificada"] .pp-cv-centro { height: 270px; }
+  section[aria-label^="Calidad verificada"] .pp-cv-lado   { height: 232px; }
+}
+section[aria-label^="Calidad verificada"] .pp-calidad-viales:hover .pp-cv-centro { transform: translateY(-4px); }
+
+/* los dos recuadros: el sello y el enlace, en el crema de la sección */
+section[aria-label^="Calidad verificada"] .lg\:order-2 .bg-white\/95 {
+  background-color: rgba(243, 239, 228, .96);
+  border-color: rgba(255, 255, 255, .55);
+  box-shadow: 0 14px 30px -14px rgba(0, 0, 0, .7);
+}
+section[aria-label^="Calidad verificada"] .lg\:order-2 .bg-white\/95:hover { background-color: #fbf8f0; }
+section[aria-label^="Calidad verificada"] .lg\:order-2 .bg-white\/95 .text-black { color: #16130f; }
+section[aria-label^="Calidad verificada"] .lg\:order-2 .bg-white\/95 .text-\[\#666\] { color: rgba(22, 19, 15, .62); }
+/* el icono del documento y el disco de la flecha, sobre crema */
+section[aria-label^="Calidad verificada"] .lg\:order-2 .from-\[\#f8f8f8\] {
+  background-image: none; background-color: #fff;
+  border-color: rgba(22, 19, 15, .10);
+}
+section[aria-label^="Calidad verificada"] .lg\:order-2 .bg-\[\#f5f5f5\] { background-color: rgba(22, 19, 15, .08); }
+section[aria-label^="Calidad verificada"] .lg\:order-2 .group:hover .bg-\[\#f5f5f5\] { background-color: #16130f; color: #f3efe4; }
+
+/* ---- Rematar el bloque oscuro (2026-09-10) ----
+   1. Dos filetes dorados de 1 px, arriba y abajo, en el oro del halo: enmarcan
+      el bloque y dicen que el corte contra las secciones claras es a propósito.
+   2. La columna gris de la sección del descuento (la capa absoluta de su mitad
+      derecha) llegaba hasta el borde y moría contra el negro, dejando el borde
+      superior a dos tonos. Se desvanece en su último tramo, así el negro
+      arranca sobre blanco en todo el ancho. */
+section[aria-label^="Calidad verificada"] {
+  border-top: 1px solid rgba(233, 196, 106, .28);
+  border-bottom: 1px solid rgba(233, 196, 106, .28);
+}
+@media (min-width: 1024px) {
+  section[aria-label^="Descuento por cantidad"] > div:first-child {
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
+  }
+}
+
+/* ---- El buscador de certificados no filtraba (2026-09-10) ----
+   Tercera vez la misma trampa en este clon: el script esconde las tarjetas con
+   `elemento.hidden = true`, pero las tarjetas llevan la clase .flex de
+   Tailwind, y una regla de display del autor le gana al [hidden] del navegador.
+   Se escribía "retatrutida", el script marcaba 44 tarjetas como ocultas, y las
+   61 seguían en pantalla a 218 px de alto cada una. */
+[data-coa][hidden] { display: none; }
+
+/* ---- El Agua Bac del héroe de contacto pisaba el texto (2026-09-10) ----
+   Fallo latente desde el principio: el vial lleva left 20 % + ancho 16 % en
+   escritorio, así que su borde derecho llega al 36 % del ancho, donde ya
+   empieza la columna de texto centrada. No se veía porque la animación de
+   flotar borraba el giro y el vial salía recto (caja más estrecha). Al
+   recuperar el giro, la caja creció y la colisión salió: 49 px a 1366,
+   121 px a 1024. A 1440 no pisa. Se corrige solo en ese rango. */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  section:has(> div > img[src*="Agua-Bac"]) div:has(> img[src*="Agua-Bac"]),
+  main div:has(> img[src*="Agua-Bac"][class*="object-contain"]) {
+    left: 7% !important;
+    width: 12% !important;
+  }
+}
+/* …y en el tramo más estrecho (1024–1279) aún rozaba el párrafo 29 px:
+   un poco más a la izquierda y un poco más pequeño solo ahí. */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  section:has(> div > img[src*="Agua-Bac"]) div:has(> img[src*="Agua-Bac"]),
+  main div:has(> img[src*="Agua-Bac"][class*="object-contain"]) {
+    left: 4% !important;
+    width: 11% !important;
+  }
+}
+
+
+/* ==== Ficha + certificados (2026-09-10) ====================================
+   Pedido del dueño: (1) fuera las tres pastillas del héroe, vuelve el halo
+   verde tras el vial y queda una sola pastilla "● Certificado" (solo si hay
+   COA); (2) fuera "Verificamos cada pago", la fila de pagos a la izquierda;
+   (3) el bloque "Resultados verificados" deja de ser el de ILS Labs heredado
+   (99.85 %, KLW0002, panel QC inventado) y muestra los certificados reales
+   del producto, como ya hacía "Cada lote con su registro"; (4) los enlaces al
+   certificado abren una vista previa encima de la página (captura real del
+   informe Janoshik) en vez de mandar fuera; (5) el boletín del cierre pasa a
+   ser el buscador de certificados por CÓD., nombre o test.
+   Todo con clases propias (pp-coa-*) para no depender de utilidades de
+   Tailwind que el original no compiló. */
+
+/* -- 1. pastilla del héroe ------------------------------------------------ */
+.pp-coa-pill {
+  position: absolute; bottom: .875rem; left: .875rem; z-index: 2;
+  display: inline-flex; align-items: center; gap: .45rem;
+  border-radius: 999px; border: 1px solid rgba(10, 25, 47, .12);
+  background: rgba(255, 255, 255, .88); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  padding: .4rem .8rem .4rem .7rem; cursor: pointer;
+  font-family: Poppins, ui-sans-serif, system-ui, sans-serif; font-size: 10px; font-weight: 600; line-height: 1;
+  letter-spacing: .1em; text-transform: uppercase; color: rgba(10, 25, 47, .72);
+  transition: transform .15s ease, border-color .15s ease, background-color .15s ease;
+}
+.pp-coa-pill i { width: 6px; height: 6px; border-radius: 999px; background: #16a34a; }
+.pp-coa-pill:hover { background: #fff; border-color: rgba(10, 25, 47, .35); color: var(--pp-navy); transform: translateY(-1px); }
+.pp-coa-pill:focus-visible { outline: 2px solid var(--pp-navy); outline-offset: 2px; }
+.pp-coa-pill[hidden] { display: none; }
+
+/* -- 2. "Resultados verificados" con datos reales ------------------------- */
+.pp-coa-ficha { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+@media (min-width: 1024px) {
+  .pp-coa-ficha { grid-template-columns: minmax(0, .9fr) minmax(0, 1.35fr); gap: 1.5rem; align-items: stretch; }
+}
+.pp-coa-ficha-lab {
+  position: relative; overflow: hidden; display: flex; flex-direction: column;
+  border-radius: 20px; padding: 1.5rem 1.75rem 1.75rem;
+  background-image: linear-gradient(160deg, #132a4d 0%, var(--pp-navy) 58%, #081324 100%);
+  color: #fff;
+}
+.pp-coa-ficha-lab::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px;
+  background: linear-gradient(90deg, var(--pp-oro) 0%, rgba(233, 196, 106, .35) 55%, transparent 100%);
+}
+.pp-coa-ficha-labcab { display: flex; align-items: center; gap: .75rem; }
+.pp-coa-ficha-sello {
+  flex: none; width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center;
+  background: rgba(233, 196, 106, .12); border: 1px solid rgba(233, 196, 106, .35); color: var(--pp-oro);
+}
+.pp-coa-ficha-sello svg { width: 20px; height: 20px; }
+.pp-coa-ficha-labcab b { display: block; font-family: Poppins, ui-sans-serif, system-ui, sans-serif; font-size: 14px; font-weight: 600; line-height: 1.2; }
+.pp-coa-ficha-labcab span { display: block; margin-top: .15rem; font-size: 11px; line-height: 1.3; color: rgba(255, 255, 255, .5); }
+.pp-coa-ficha-eti, .pp-coa-ficha-eti2 {
+  font-family: Poppins, ui-sans-serif, system-ui, sans-serif; font-size: 11px; font-weight: 600;
+  letter-spacing: .18em; text-transform: uppercase; color: rgba(255, 255, 255, .5);
+}
+.pp-coa-ficha-eti { margin-top: 1.5rem; }
+.pp-coa-ficha-eti2 { margin-top: .5rem; }
+.pp-coa-ficha-num { display: flex; align-items: baseline; gap: .2rem; margin-top: .35rem; }
+.pp-coa-ficha-num span {
+  font-family: Poppins, ui-sans-serif, system-ui, sans-serif; font-size: 56px; font-weight: 700; line-height: 1;
+  letter-spacing: -.02em; font-variant-numeric: tabular-nums;
+}
+.pp-coa-ficha-num i { font-style: normal; font-family: Poppins, ui-sans-serif, system-ui, sans-serif; font-size: 28px; font-weight: 700; line-height: 1; color: #8fdcb5; }
+.pp-coa-ficha-num.sin span { display: inline-flex; align-items: center; gap: .5rem; font-size: 28px; font-weight: 600; letter-spacing: 0; padding: .35rem 0; }
+.pp-coa-ficha-num.sin svg { width: 26px; height: 26px; color: #8fdcb5; }
+.pp-coa-ficha-datos {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+  margin: 1.5rem 0 0; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, .1);
+}
+.pp-coa-ficha-datos dt { font-family: Poppins, ui-sans-serif, system-ui, sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: rgba(255, 255, 255, .4); }
+.pp-coa-ficha-datos dd { margin: .25rem 0 0; font-family: Poppins, ui-sans-serif, system-ui, sans-serif; font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.pp-coa-ficha-sellos { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.5rem; }
+.pp-coa-ficha-sellos span {
+  display: inline-flex; align-items: center; gap: .4rem; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .18);
+  padding: .4rem .75rem; font-family: Poppins, ui-sans-serif, system-ui, sans-serif; font-size: 10px; font-weight: 600;
+  letter-spacing: .08em; text-transform: uppercase; color: rgba(255, 255, 255, .9);
+}
+.pp-coa-ficha-sellos i { width: 6px; height: 6px; border-radius: 999px; background: #8fdcb5; }
+.pp-coa-ficha-boton {
+  margin-top: auto; padding-top: 0; display: inline-flex; width: 100%; align-items: center; justify-content: center; gap: .35rem;
+  border-radius: 12px; border: 0; cursor: pointer; text-decoration: none;
+  background: var(--pp-oro); color: var(--pp-navy);
+  font-family: Poppins, ui-sans-serif, system-ui, sans-serif; font-size: 13px; font-weight: 600; line-height: 1;
+  padding: .95rem 1rem; transition: background-color .15s ease, transform .15s ease;
+}
+.pp-coa-ficha-lab > .pp-coa-ficha-sellos + .pp-coa-ficha-boton,
+.pp-coa-ficha-lab > .pp-coa-ficha-datos + .pp-coa-ficha-boton { margin-top: 1.5rem; }
+@media (min-width: 1024px) {
+  .pp-coa-ficha-lab > .pp-coa-ficha-sellos + .pp-coa-ficha-boton,
+  .pp-coa-ficha-lab > .pp-coa-ficha-datos + .pp-coa-ficha-boton { margin-top: auto; padding-top: 0; }
+  .pp-coa-ficha-lab > .pp-coa-ficha-sellos, .pp-coa-ficha.pendiente .pp-coa-ficha-datos { margin-bottom: 1.5rem; }
+}
+.pp-coa-ficha-boton:hover { background: #f0d27f; transform: translateY(-1px); }
+.pp-coa-ficha-boton:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+.pp-coa-ficha-reg {
+  position: relative; overflow: hidden; display: flex; flex-direction: column;
+  border-radius: 20px; border: 1px solid #e6e8ec; background: #fff;
+}
+.pp-coa-ficha-reg::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px;
+  background: linear-gradient(90deg, var(--pp-cielo), var(--pp-salvia), var(--pp-lavanda));
+}
+.pp-coa-ficha-regcab { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.25rem 1.5rem 1rem; border-bottom: 1px solid #eef0f3; }
+.pp-coa-ficha-regcab p { margin: 0; font-family: Poppins, ui-sans-serif, system-ui, sans-serif; font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: #8998a4; }
+.pp-coa-ficha-cuenta {
+  display: inline-flex; align-items: center; gap: .35rem; white-space: nowrap; border-radius: 999px;
+  background: #e9f5ef; color: var(--pp-verde); padding: .35rem .7rem;
+  font-family: Poppins, ui-sans-serif, system-ui, sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+}
+.pp-coa-ficha-cuenta svg { width: 11px; height: 11px; }
+.pp-coa-ficha-cuenta.pendiente { background: #eef1f3; color: var(--pp-tinta-3); }
+.pp-coa-ficha-filas { list-style: none; margin: 0; padding: 0; }
+.pp-coa-ficha-fila { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .875rem 1.5rem; }
+.pp-coa-ficha-fila + .pp-coa-ficha-fila { border-top: 1px solid #eef0f3; }
+.pp-coa-ficha-mg { min-width: 0; }
+.pp-coa-ficha-mg b { display: block; font-family: Poppins, ui-sans-serif, system-ui, sans-serif; font-size: 14px; font-weight: 600; line-height: 1.2; color: var(--pp-navy); }
+.pp-coa-ficha-mg span { display: block; margin-top: .15rem; font-size: 11px; color: #8998a4; }
+.pp-coa-ficha-chips2 { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .375rem; }
+.pp-coa-ficha-chip, .pp-coa-res-chip {
+  display: inline-flex; align-items: center; gap: .4rem; border-radius: 999px; border: 1px solid #dfe3e8; background: #fff;
+  padding: .35rem .7rem; cursor: pointer; text-decoration: none; white-space: nowrap;
+  font-family: Poppins, ui-sans-serif, system-ui, sans-serif; font-size: 11px; font-weight: 600; line-height: 1; color: var(--pp-navy);
+  font-variant-numeric: tabular-nums; transition: border-color .15s ease, background-color .15s ease;
+}
+.pp-coa-ficha-chip i, .pp-coa-res-chip i { width: 6px; height: 6px; border-radius: 999px; background: #16a34a; }
+.pp-coa-ficha-chip:hover, .pp-coa-res-chip:hover { border-color: var(--pp-navy); background: #f6f7f9; }
+.pp-coa-ficha-chip svg, .pp-coa-res-chip svg { width: 11px; height: 11px; color: #8998a4; }
+.pp-coa-ficha-nota { margin: auto 0 0; padding: .875rem 1.5rem 1rem; border-top: 1px solid #eef0f3; font-size: 12px; line-height: 1.5; color: #8998a4; }
+.pp-coa-ficha-vacio { padding: 1.5rem; display: grid; gap: .75rem; }
+.pp-coa-ficha-vacio p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--pp-tinta-2); }
+.pp-coa-ficha-vacio b { color: var(--pp-navy); font-weight: 600; }
+.pp-coa-ficha-vacio a { font-family: inherit; color: var(--pp-navy); text-decoration: underline; text-underline-offset: 3px; }
+
+/* -- 3. buscador del cierre ----------------------------------------------- */
+.pp-coa-busca .pp-coa-res { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid #e6e6e6; display: grid; gap: .75rem; }
+.pp-coa-busca .pp-coa-res[hidden] { display: none; }
+.pp-coa-res-grupo { border: 1px solid #e6e8ec; border-radius: 14px; background: #fff; padding: 1rem 1.125rem; }
+.pp-coa-res-cab { display: flex; align-items: center; gap: .75rem; }
+.pp-coa-res-vial { flex: none; width: 40px; height: 52px; object-fit: contain; }
+.pp-coa-res-quien { min-width: 0; }
+.pp-coa-res-nombre { margin: 0; font-family: Poppins, ui-sans-serif, system-ui, sans-serif; font-size: 15px; font-weight: 600; line-height: 1.2; color: var(--pp-navy); }
+.pp-coa-res-nombre span { margin-left: .5rem; font-size: 11px; font-weight: 600; letter-spacing: .06em; color: #8998a4; font-variant-numeric: tabular-nums; }
+.pp-coa-res-meta { margin: .2rem 0 0; font-size: 12px; color: #8998a4; }
+.pp-coa-res-ficha { margin-left: auto; flex: none; font-size: 12px; font-weight: 600; color: var(--pp-navy); text-decoration: none; white-space: nowrap; }
+.pp-coa-res-ficha:hover { text-decoration: underline; text-underline-offset: 3px; }
+.pp-coa-res-filas { list-style: none; margin: .75rem 0 0; padding: 0; }
+.pp-coa-res-fila { display: flex; align-items: baseline; gap: .75rem; padding: .5rem 0; border-top: 1px solid #f0f2f4; }
+.pp-coa-res-mg { flex: none; min-width: 5.5rem; font-family: Poppins, ui-sans-serif, system-ui, sans-serif; font-size: 13px; font-weight: 600; color: var(--pp-navy); }
+.pp-coa-res-chips { display: flex; flex-wrap: wrap; gap: .375rem; }
+.pp-coa-res-pendiente, .pp-coa-res-nada, .pp-coa-res-mas { margin: .75rem 0 0; font-size: 13px; line-height: 1.55; color: var(--pp-tinta-2); }
+.pp-coa-res-nada, .pp-coa-res-mas { margin: 0; }
+.pp-coa-res-pendiente a, .pp-coa-res-nada a { font-family: inherit; color: var(--pp-navy); text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 639px) {
+  .pp-coa-res-fila { flex-direction: column; gap: .35rem; }
+  .pp-coa-res-ficha span { display: none; }
+}
+
+/* -- 4. vista previa del certificado -------------------------------------- */
+html.pp-coa-modal-abierto { overflow: hidden; }
+.pp-coa-modal { position: fixed; inset: 0; z-index: 120; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; transition: opacity .18s ease; }
+.pp-coa-modal.visible { opacity: 1; }
+.pp-coa-modal[hidden] { display: none; }
+.pp-coa-modal-fondo { position: absolute; inset: 0; background: rgba(10, 25, 47, .55); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+.pp-coa-modal-caja {
+  position: relative; width: min(1040px, 100%); height: min(92vh, 1100px); display: flex; flex-direction: column;
+  background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 30px 80px rgba(10, 25, 47, .35);
+  transform: translateY(8px) scale(.985); transition: transform .18s ease;
+}
+.pp-coa-modal.visible .pp-coa-modal-caja { transform: none; }
+.pp-coa-modal-cab { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .875rem 1rem .875rem 1.25rem; border-bottom: 1px solid #e8ebef; }
+.pp-coa-modal-id { display: flex; align-items: center; gap: .75rem; min-width: 0; }
+.pp-coa-modal-icono { flex: none; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: #edf1f3; color: var(--pp-navy); }
+.pp-coa-modal-icono svg { width: 20px; height: 20px; }
+.pp-coa-modal-textos { min-width: 0; }
+.pp-coa-modal-cab h2 { margin: 0; font-family: Poppins, ui-sans-serif, system-ui, sans-serif; font-size: 15px; font-weight: 600; line-height: 1.2; color: var(--pp-navy); }
+.pp-coa-modal-sub { margin: .15rem 0 0; font-size: 12px; line-height: 1.35; color: var(--pp-tinta-3); }
+.pp-coa-modal-sub b { color: var(--pp-navy); font-weight: 600; }
+.pp-coa-modal-acciones { display: flex; align-items: center; gap: .5rem; flex: none; }
+.pp-coa-modal-verificar {
+  display: inline-flex; align-items: center; gap: .4rem; border-radius: 10px; background: var(--pp-navy); color: #fff; text-decoration: none;
+  padding: .6rem .9rem; font-family: Poppins, ui-sans-serif, system-ui, sans-serif; font-size: 12px; font-weight: 600; line-height: 1; white-space: nowrap;
+  transition: background-color .15s ease;
+}
+.pp-coa-modal-verificar:hover { background: var(--pp-navy-700); }
+.pp-coa-modal-verificar svg { width: 13px; height: 13px; }
+.pp-coa-modal-bajar, .pp-coa-modal-cerrar {
+  display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; border: 1px solid #dfe3e8; background: #fff; color: var(--pp-navy); cursor: pointer;
+  transition: background-color .15s ease, border-color .15s ease;
+}
+.pp-coa-modal-bajar:hover, .pp-coa-modal-cerrar:hover { background: #f3f5f7; border-color: #c9d0d8; }
+.pp-coa-modal-bajar svg, .pp-coa-modal-cerrar svg { width: 16px; height: 16px; }
+.pp-coa-modal-cerrar:focus-visible, .pp-coa-modal-bajar:focus-visible, .pp-coa-modal-verificar:focus-visible, .pp-coa-modal-lista-item:focus-visible { outline: 2px solid var(--pp-navy); outline-offset: 2px; }
+.pp-coa-modal-cuerpo { flex: 1; min-height: 0; display: grid; grid-template-columns: 224px minmax(0, 1fr); }
+.pp-coa-modal.una .pp-coa-modal-cuerpo { grid-template-columns: minmax(0, 1fr); }
+.pp-coa-modal.una .pp-coa-modal-lista { display: none; }
+.pp-coa-modal-lista { overflow: auto; padding: .75rem; border-right: 1px solid #e8ebef; background: #fafbfc; }
+.pp-coa-modal-lista-t { margin: 0 0 .5rem; padding: .25rem .5rem 0; font-family: Poppins, ui-sans-serif, system-ui, sans-serif; font-size: 12px; font-weight: 600; color: var(--pp-navy); }
+.pp-coa-modal-lista-t span { display: block; margin-top: .1rem; font-size: 11px; font-weight: 500; color: #8998a4; }
+.pp-coa-modal-lista-item {
+  display: flex; flex-direction: column; align-items: flex-start; gap: .1rem; width: 100%; text-align: left; text-decoration: none;
+  padding: .5rem .625rem; border-radius: 10px; border: 1px solid transparent; background: none; cursor: pointer;
+  transition: background-color .12s ease, border-color .12s ease;
+}
+.pp-coa-modal-lista-item + .pp-coa-modal-lista-item { margin-top: .125rem; }
+.pp-coa-modal-lista-item:hover { background: #fff; border-color: #e6e8ec; }
+.pp-coa-modal-lista-item.on { background: #fff; border-color: rgba(10, 25, 47, .35); box-shadow: inset 3px 0 0 var(--pp-navy); }
+.pp-coa-modal-lista-mg { font-family: Poppins, ui-sans-serif, system-ui, sans-serif; font-size: 13px; font-weight: 600; line-height: 1.2; color: var(--pp-navy); }
+.pp-coa-modal-lista-meta { font-size: 11px; color: #8998a4; font-variant-numeric: tabular-nums; }
+.pp-coa-modal-lista-item.externo { position: relative; padding-right: 1.5rem; }
+.pp-coa-modal-lista-item.externo svg { position: absolute; right: .625rem; top: .7rem; width: 12px; height: 12px; color: #8998a4; }
+.pp-coa-modal-visor { overflow: auto; background: #e9ecf0; padding: 1.25rem; }
+.pp-coa-modal-visor img { display: block; width: 100%; max-width: 760px; height: auto; margin: 0 auto; background: #fff; border-radius: 4px; box-shadow: 0 8px 30px rgba(10, 25, 47, .18); }
+.pp-coa-modal-pie { max-width: 760px; margin: .875rem auto 0; font-size: 11px; line-height: 1.5; text-align: center; color: var(--pp-tinta-3); }
+@media (max-width: 767px) {
+  .pp-coa-modal { padding: 0; }
+  .pp-coa-modal-caja { width: 100%; height: 100%; height: 100dvh; max-height: none; border-radius: 0; }
+  .pp-coa-modal-cab { flex-wrap: wrap; padding: .75rem .75rem .75rem 1rem; }
+  .pp-coa-modal-acciones { margin-left: auto; }
+  .pp-coa-modal-cuerpo { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .pp-coa-modal-lista { display: flex; gap: .375rem; overflow-x: auto; overflow-y: hidden; padding: .625rem .75rem; border-right: 0; border-bottom: 1px solid #e8ebef; }
+  .pp-coa-modal-lista-t { flex: none; align-self: center; margin: 0 .5rem 0 0; padding: 0; }
+  .pp-coa-modal-lista-item { flex: none; width: auto; }
+  .pp-coa-modal-lista-item + .pp-coa-modal-lista-item { margin-top: 0; }
+  .pp-coa-modal-visor { padding: .75rem; }
+}
+
+/* -- 5. la misma pastilla en las tarjetas del catálogo (store, home, "Se
+   piden juntos"). Sustituye al chip heredado "✓ 99.83% Ver certificado ›":
+   mismo aspecto que la del héroe, con la pureza real al lado cuando la hay,
+   y abre la vista previa (sin JS lleva a la ficha, #coa). ------------------ */
+.pp-coa-pill.en-tarjeta { bottom: .5rem; left: .5rem; text-decoration: none; box-shadow: 0 2px 8px rgba(10, 25, 47, .10); }
+/* (el número de pureza junto a "Certificado" se retiró el 2026-09-10: el dueño quiere uniformidad, porque cinco certificados miden mg y no %) */
+
+
+/* ==== Cierre del home: "¿Qué péptido buscas?" (2026-09-10) ================
+   El dueño pidió, sobre el pie del home, un bloque como el cierre de las
+   fichas pero que permita buscar el péptido: la misma tarjeta flotante, con
+   buscador por nombre o uso, chips por familia (las del catálogo) y una fila
+   por resultado que lleva a la ficha. Clases propias (pp-busca-pep-*). */
+.pp-busca-pep-familias { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; margin-top: 1.125rem; padding-top: 1.125rem; border-top: 1px solid #e6e6e6; }
+.pp-busca-pep-familias > span { margin-right: .25rem; font-size: 12px; color: #8998a4; }
+.pp-busca-pep-chip {
+  display: inline-flex; align-items: center; border-radius: 999px; border: 1px solid #dfe3e8; background: #fff; cursor: pointer;
+  padding: .4rem .8rem; font-family: Poppins, ui-sans-serif, system-ui, sans-serif; font-size: 12px; font-weight: 600; line-height: 1; color: var(--pp-navy);
+  transition: border-color .15s ease, background-color .15s ease, color .15s ease;
+}
+.pp-busca-pep-chip:hover { border-color: var(--pp-navy); background: #f6f7f9; }
+.pp-busca-pep-chip[aria-pressed="true"] { background: var(--pp-navy); border-color: var(--pp-navy); color: #fff; }
+.pp-busca-pep-chip:focus-visible { outline: 2px solid var(--pp-navy); outline-offset: 2px; }
+.pp-busca-pep-res { margin-top: 1.125rem; padding-top: 1.125rem; border-top: 1px solid #e6e6e6; }
+.pp-busca-pep-res[hidden] { display: none; }
+.pp-busca-pep-cuenta { margin: 0 0 .625rem; font-size: 12px; color: #8998a4; }
+.pp-busca-pep-lista { display: grid; grid-template-columns: 1fr; gap: .5rem; }
+@media (min-width: 768px) { .pp-busca-pep-lista { grid-template-columns: 1fr 1fr; } }
+.pp-busca-pep-fila {
+  display: grid; grid-template-columns: 44px minmax(0, 1fr) auto auto; align-items: center; gap: .75rem;
+  border: 1px solid #e6e8ec; border-radius: 14px; background: #fff; padding: .625rem .875rem .625rem .625rem;
+  text-decoration: none; color: inherit; font-family: inherit;
+  transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease;
+}
+.pp-busca-pep-fila:hover { border-color: rgba(10, 25, 47, .45); transform: translateY(-1px); box-shadow: 0 8px 20px -12px rgba(10, 25, 47, .35); }
+.pp-busca-pep-fila:focus-visible { outline: 2px solid var(--pp-navy); outline-offset: 2px; }
+.pp-busca-pep-fila img { width: 44px; height: 55px; object-fit: cover; border-radius: 8px; background: #f3f5f7; }
+.pp-busca-pep-quien { min-width: 0; display: flex; flex-direction: column; gap: .1rem; }
+.pp-busca-pep-quien b { font-family: Poppins, ui-sans-serif, system-ui, sans-serif; font-size: 14px; font-weight: 600; line-height: 1.2; color: var(--pp-navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pp-busca-pep-quien span { font-size: 11.5px; line-height: 1.3; color: #8998a4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pp-busca-pep-coa { display: inline-flex; align-items: center; gap: .35rem; white-space: nowrap; font-family: Poppins, ui-sans-serif, system-ui, sans-serif; font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: rgba(10, 25, 47, .62); font-variant-numeric: tabular-nums; }
+.pp-busca-pep-coa i { width: 6px; height: 6px; border-radius: 999px; background: #16a34a; }
+.pp-busca-pep-precio { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.1; font-family: Poppins, ui-sans-serif, system-ui, sans-serif; font-size: 15px; font-weight: 600; color: var(--pp-navy); font-variant-numeric: tabular-nums; }
+.pp-busca-pep-precio small { font-family: inherit; font-size: 10px; font-weight: 500; color: #8998a4; }
+.pp-busca-pep-ir { display: none; }
+.pp-busca-pep-nada, .pp-busca-pep-mas { margin: 0; font-size: 13px; line-height: 1.55; color: var(--pp-tinta-2); }
+.pp-busca-pep-mas { display: inline-block; margin-top: .75rem; font-weight: 600; color: var(--pp-navy); text-decoration: none; font-family: inherit; }
+.pp-busca-pep-mas:hover, .pp-busca-pep-nada a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.pp-busca-pep-nada a { font-family: inherit; color: var(--pp-navy); text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 639px) {
+  .pp-busca-pep-fila { grid-template-columns: 44px minmax(0, 1fr) auto; }
+  .pp-busca-pep-coa { display: none; }
+}
+
+/* -- el vial derecho del cierre pisaba el botón "Buscar" (2026-09-10) ------
+   El Nad+ flotante lleva z-[70] y cuelga 70 px por debajo de la sección,
+   justo donde la tarjeta (z-30) pone el botón del buscador: entre 1280 y
+   ~1650 px lo tapaba, en el home y en las fichas (con el boletín de antes
+   pasaba lo mismo, solo que nadie lo pulsaba). El vial pasa por detrás de
+   la tarjeta; a 1920 no se tocaban y nada cambia. */
+section[aria-label="Call to action"] > div[class*="z-[70]"] { z-index: 20; }
+
+/* ==== Cierre del home: "¿Qué péptido buscas?" v3, banda navy (2026-09-10) ==
+   Tras dos intentos con lavado claro + tarjeta + viales flotantes ("no se ve
+   bien"), se lee el home entero: su identidad es navy + oro —la cinta de
+   arriba, el bloque oscuro de "Calidad garantizada" con sus filetes dorados,
+   el pie navy—. El cierre se convierte en la banda que aterriza en el pie:
+   navy-700 → navy, filete dorado arriba (como en "Calidad"), un halo dorado
+   como único efecto, "buscas" en Fraunces dorada, píldora blanca con botón
+   dorado y chips sobre navy. Sin viales, sin tarjeta, sin eyebrow. Un
+   filete blanco tenue separa la banda del pie, que sigue en el mismo navy. */
+.pp-elige {
+  position: relative; padding: 5rem 0 5.25rem; overflow: hidden;
+  background-image: linear-gradient(180deg, var(--pp-navy-700) 0%, var(--pp-navy) 100%);
+  border-top: 1px solid rgba(233, 196, 106, .28);
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+  color: #fff;
+}
+.pp-elige::before {
+  content: ""; position: absolute; left: 50%; top: -220px; width: 900px; height: 520px; translate: -50% 0; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(233, 196, 106, .16), rgba(233, 196, 106, .05) 55%, rgba(233, 196, 106, 0) 100%);
+}
+.pp-elige .content-container { position: relative; }
+.pp-elige-centro { max-width: 760px; margin: 0 auto; text-align: center; }
+.pp-elige-h2 { margin: 0; font-size: clamp(30px, 4vw, 46px); font-weight: 600; line-height: 1.08; letter-spacing: -.01em; color: #fff; }
+.pp-elige-h2 em { font-weight: 500; color: var(--pp-oro); }
+.pp-elige-sub { margin: 1rem auto 0; max-width: 36rem; font-size: 15px; line-height: 1.6; color: #c9d3e0; }
+.pp-elige-form {
+  position: relative; z-index: 2; display: flex; align-items: center; gap: .5rem; max-width: 640px; margin: 1.75rem auto 0;
+  padding: .375rem .375rem .375rem 1rem; border-radius: 999px; background: #fff; border: 1px solid rgba(255, 255, 255, .5);
+  box-shadow: 0 18px 40px -20px rgba(0, 0, 0, .6); transition: box-shadow .15s ease, border-color .15s ease;
+}
+.pp-elige-form:focus-within { border-color: var(--pp-oro); box-shadow: 0 0 0 4px rgba(233, 196, 106, .22), 0 18px 40px -20px rgba(0, 0, 0, .6); }
+.pp-elige-campo { flex: 1; display: flex; align-items: center; gap: .6rem; min-width: 0; color: var(--pp-tinta-3); }
+.pp-elige-campo svg { flex: none; width: 18px; height: 18px; }
+.pp-elige-campo input { flex: 1; min-width: 0; height: 44px; border: 0; background: transparent; font: inherit; font-size: 16px; color: var(--pp-navy); outline: none; caret-color: var(--pp-navy); }
+.pp-elige-campo input::placeholder { color: rgba(10, 25, 47, .5); }
+.pp-elige-campo input::selection { background: rgba(233, 196, 106, .45); }
+.pp-elige-boton {
+  flex: none; height: 44px; padding: 0 1.4rem; border-radius: 999px; border: 0; cursor: pointer;
+  background: var(--pp-oro); color: var(--pp-navy);
+  font-family: Poppins, ui-sans-serif, system-ui, sans-serif; font-size: 14px; font-weight: 600; line-height: 1;
+  transition: background-color .15s ease, transform .15s ease;
+}
+.pp-elige-boton:hover { background: #f0d27f; }
+.pp-elige-boton:active { transform: translateY(1px); }
+.pp-elige-boton:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.pp-elige-familias { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: .625rem; margin-top: 1.5rem; }
+.pp-elige-familias > span { font-size: 12px; letter-spacing: .02em; color: rgba(255, 255, 255, .55); }
+.pp-elige-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; }
+.pp-busca-pep-chip.pp-elige-chip { background: transparent; border-color: rgba(255, 255, 255, .24); color: rgba(255, 255, 255, .92); }
+.pp-busca-pep-chip.pp-elige-chip:hover { background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .5); }
+.pp-busca-pep-chip.pp-elige-chip[aria-pressed="true"] { background: #fff; border-color: #fff; color: var(--pp-navy); }
+.pp-busca-pep-chip.pp-elige-chip:focus-visible { outline: 2px solid var(--pp-oro); outline-offset: 2px; }
+/* resultados: filas blancas sobre navy, como el panel claro dentro del bloque oscuro de "Calidad" */
+.pp-busca-pep .pp-elige-res { position: relative; z-index: 2; max-width: 900px; margin: 1.75rem auto 0; padding-top: 1.25rem; text-align: left; border-top: 1px solid rgba(255, 255, 255, .12); }
+.pp-elige-res .pp-busca-pep-cuenta { text-align: center; color: rgba(255, 255, 255, .6); }
+.pp-elige-res .pp-busca-pep-fila { border-color: rgba(255, 255, 255, .06); box-shadow: 0 10px 24px -16px rgba(0, 0, 0, .55); }
+.pp-elige-res .pp-busca-pep-fila:hover { border-color: rgba(233, 196, 106, .6); box-shadow: 0 14px 30px -14px rgba(0, 0, 0, .6); }
+.pp-elige-res .pp-busca-pep-nada, .pp-elige-res .pp-busca-pep-mas { display: block; text-align: center; color: #c9d3e0; }
+.pp-elige-res .pp-busca-pep-nada a, .pp-elige-res .pp-busca-pep-mas { color: #fff; }
+.pp-elige-res .pp-busca-pep-mas:hover { text-decoration: underline; text-underline-offset: 3px; }
+.pp-elige-pie { margin: 1.75rem 0 0; font-size: 13px; color: rgba(255, 255, 255, .6); }
+.pp-elige-pie a { font-family: inherit; font-weight: 600; color: #fff; text-decoration: none; }
+.pp-elige-pie a:hover { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--pp-oro); }
+@media (max-width: 639px) {
+  .pp-elige { padding: 3.75rem 0 4rem; }
+  .pp-elige::before { width: 640px; top: -260px; }
+  .pp-elige-form { padding-left: .75rem; }
+  .pp-elige-boton { padding: 0 1rem; }
+}
+/* el foco del campo lo lleva la píldora (anillo dorado por :focus-within); el
+   rectángulo navy del :focus-visible global sobraba dentro de ella */
+.pp-elige-campo input:focus, .pp-elige-campo input:focus-visible { outline: none !important; box-shadow: none !important; }
+
+
+/* ==== Móvil (2026-09-11) ====================================================
+   Pasada completa en teléfono (375 × 812 y 360 × 740, dos teléfonos reales).
+   Cada regla responde a un fallo medido o visto en captura:
+   · barra de desplazamiento horizontal en el home y en las fichas: los dos
+     viales decorativos del cierre asoman 20–30 px por los bordes;
+   · campos de 14 px: iOS hace zoom al enfocar cualquier campo < 16 px;
+   · letra de 8–10 px (cinta, insignias, "Desde", cejillas) ilegible en móvil;
+   · enlaces de 16–23 px de alto (pie, índice legal, "Ver en PubChem") por
+     debajo del mínimo táctil;
+   · catálogo: cejilla en cinco líneas apretada contra el selector, y las dos
+     aguas truncadas a «Agua…» «Agua…», indistinguibles;
+   · ficha: "Añadir al carrito · $59.99" partido en dos líneas, la nota de
+     agotado en una columna de 56 px, el precio de "Se piden juntos" tapado
+     por el botón, las filas del registro con «10 / mg» en dos líneas;
+   · carrito: la columna Total se salía por la derecha;
+   · el botón "Señalar lo heredado" tapaba los CTA de abajo a la izquierda.  */
+html, body { overflow-x: clip; }
+
+@media (max-width: 767px) {
+  /* 1. campos a 16 px: sin zoom involuntario en iOS */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select:not([hidden]), textarea:not([hidden]) { font-size: 16px; }
+
+  /* 2. letra mínima: 11 px */
+  .pp-marquee-txt b { font-size: 11px; letter-spacing: .12em; }
+  .text-\[8px\] { font-size: 9px; }
+  .text-\[9px\] { font-size: 10px; letter-spacing: .12em; }
+  .text-\[10px\] { font-size: 11px; }
+  .pp-coa-pill, .pp-coa-pill.en-tarjeta { font-size: 11px; }
+  .pg-pill, .pg-entrada-meta b, .pg-metodo-txt small { font-size: 11px; }
+  .pg-nav small, article small { font-size: 12px; }
+
+  /* 3. objetivos táctiles: mínimo 40 px de alto sin mover el diseño */
+  footer ul.flex-col { gap: 0; }
+  footer ul a { display: inline-block; padding: .55rem 0; }
+  footer p a { display: inline-block; padding: .3rem 0; margin: -.3rem 0; }
+  .pg-indice a, .pg-volver a { display: inline-block; padding: .6rem 0; margin: -.6rem 0; }
+  [data-testid="product-row"] a { display: inline-block; padding: .3rem 0; margin: -.3rem 0; }
+  section[aria-label="Call to action"] a[href="store.html"] { display: inline-block; }
+  /* tarjetas del catálogo y del home: el nombre enlazado, 30 px de alto */
+  main a.hover\:opacity-80.transition-opacity { display: block; padding: .3rem 0; margin: -.3rem 0; }
+  /* biblioteca de certificados: «Retatrutida · 50 mg» entero, sin puntos suspensivos */
+  [data-coa] h3.truncate { white-space: normal; overflow: visible; text-overflow: clip; font-size: 14px; }
+  [data-coa] h3.truncate span { white-space: nowrap; }
+  body a.inline-flex:not([class*="h-1"]):not([class*="rounded-full"]),
+  body button.inline-flex:not([class*="h-1"]):not([class*="rounded-full"]) { padding-top: .6rem; padding-bottom: .6rem; margin-top: -.6rem; margin-bottom: -.6rem; }
+
+  /* 4. catálogo: cabecera apilada (cejilla, título, selector a lo ancho) */
+  [data-testid="category-container"] .items-baseline.justify-between { flex-wrap: wrap; }
+  [data-testid="category-container"] .items-baseline.justify-between > .shrink-0 { flex-basis: 100%; }
+  [data-testid="category-container"] .items-baseline.justify-between select { width: 100%; }
+  /* nombres y descripciones a dos líneas: «Agua Bacteriostática» y
+     «Agua Bacteriostática Hospira» se distinguen */
+  h3[data-testid="product-title"] { -webkit-line-clamp: 3; line-clamp: 3; }
+  [data-testid="product-wrapper"] p.line-clamp-1 { -webkit-line-clamp: 2; line-clamp: 2; }
+
+  /* 5. ficha: "Añadir" a lo ancho y arriba, "Certificado" debajo, la nota de
+     agotado a lo ancho; en "Se piden juntos" el precio arriba y el botón
+     a lo ancho */
+  main div.items-center.gap-3.mt-auto:has(> [data-pp-anadir]) { flex-wrap: wrap; }
+  main div.mt-auto > [data-pp-anadir] { flex: 1 1 100%; order: -1; }
+  main div.mt-auto > button[aria-label^="Ver certificados"] { flex: 1 1 auto; }
+  main div.mt-auto > [data-pp-aviso-agotado] { flex-basis: 100%; order: 1; margin-top: 0; }
+  .flex-none.w-\[180px\] .justify-between.gap-2.mt-auto { flex-wrap: wrap; }
+  .flex-none.w-\[180px\] .justify-between.gap-2.mt-auto > button { flex: 1 1 100%; justify-content: center; }
+  main a[data-pp-asesor] { height: auto; min-height: 2.75rem; padding: .55rem 1rem; line-height: 1.25; text-align: center; }
+
+  /* 6. registro de certificados: cada fila en columna */
+  .pp-coa-ficha-regcab { flex-wrap: wrap; gap: .5rem .75rem; padding: 1rem 1.125rem .75rem; }
+  .pp-coa-ficha-fila { flex-direction: column; align-items: stretch; gap: .5rem; padding: .875rem 1.125rem; }
+  .pp-coa-ficha-mg { display: flex; align-items: baseline; gap: .5rem; }
+  .pp-coa-ficha-mg span { margin-top: 0; }
+  .pp-coa-ficha-chips2 { justify-content: flex-start; }
+
+  /* 7. botones de WhatsApp de contacto y FAQ en una sola línea */
+  main a.h-12.px-8 { padding-left: 1.25rem; padding-right: 1.25rem; font-size: 15px; }
+
+  /* 8. "Señalar lo heredado": bolita discreta que no tapa los CTA */
+  #pp-senalar { left: 8px; bottom: 8px; width: 28px; height: 28px; padding: 0; font-size: 0; border-radius: 50%; opacity: .45; }
+  #pp-senalar::before { content: "!"; font-size: 14px; font-weight: 800; }
+  #pp-senalar-lista { width: calc(100vw - 16px); left: 8px; bottom: 44px; }
+}
+
+@media (max-width: 639px) {
+  /* 9. carrito: la tabla cabe en 360 px (menos aire entre columnas) */
+  [data-testid="cart-container"] th, [data-testid="cart-container"] td { padding-right: .5rem; }
+  [data-testid="cart-container"] td:first-child { width: 4.5rem; }
+  [data-testid="cart-container"] select[data-testid="product-select-button"] { width: 3.5rem; padding-left: .5rem; padding-right: 1.5rem; }
+}

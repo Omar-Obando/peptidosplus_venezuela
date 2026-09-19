@@ -2,8 +2,6 @@
 import { getLocalProducts, getLocalVisibleCategories } from '../../lib/local-product-data';
 import { formatPrice, isInStock } from '../../lib/woocommerce';
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import Header from '@/components/Header.astro';
-import Footer from '@/components/Footer.astro';
 import Section from '@/components/Section.astro';
 import ProductCard from '@/components/shop/ProductCard.astro';
 import ArrowRight from '@lucide/astro/icons/arrow-right';
@@ -30,7 +28,7 @@ const filterAttributes = Array.from(attributeMap.entries()).map(([name, values])
 ---
 
 <BaseLayout title="Shop" description="Browse our product collection">
-    <Header />
+
     <main id="main-content">
         <!-- Hero -->
         <div class="relative overflow-hidden bg-gradient-to-br from-primary/5 via-surface to-primary-light/10">
@@ -221,7 +219,7 @@ const filterAttributes = Array.from(attributeMap.entries()).map(([name, values])
             </div>
         </Section>
     </main>
-    <Footer />
+
 </BaseLayout>
 
 <script>

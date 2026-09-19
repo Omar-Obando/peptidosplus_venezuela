@@ -1,0 +1,411 @@
+/* Registro de productos para el buscador del home. GENERADO por
+ * scratchpad/generar-productos-datos.js desde las tarjetas de store.html y
+ * assets/datos/coas.js; no editar a mano. 29 productos, 6 familias.
+ * Generado el 2026-09-11. */
+window.PP_PRODUCTOS = {
+ "familias": [
+  {
+   "clave": "metabolico",
+   "etiqueta": "Metabólico"
+  },
+  {
+   "clave": "gh",
+   "etiqueta": "Hormona de crecimiento"
+  },
+  {
+   "clave": "piel",
+   "etiqueta": "Piel y tejido"
+  },
+  {
+   "clave": "neuro",
+   "etiqueta": "Neuro"
+  },
+  {
+   "clave": "celular",
+   "etiqueta": "Celular"
+  },
+  {
+   "clave": "insumos",
+   "etiqueta": "Insumos"
+  }
+ ],
+ "productos": [
+  {
+   "nombre": "Retatrutida",
+   "pagina": "producto-retatrutida.html",
+   "img": "assets/productos/Retatrutida-5mg.webp",
+   "sub": "Triple agonista · estudios metabólicos",
+   "familia": "metabolico",
+   "familiaEtiqueta": "Metabólico",
+   "desde": 59.99,
+   "busca": "retatrutida triple agonista · estudios metabólicos glp-3 glp3 reta",
+   "orden": 0,
+   "coa": true,
+   "pureza": "99.83"
+  },
+  {
+   "nombre": "Tirzepatida",
+   "pagina": "producto-tirzepatida.html",
+   "img": "assets/productos/Tirzepatida-10mg.webp",
+   "sub": "GLP-1 / GIP · estudios metabólicos",
+   "familia": "metabolico",
+   "familiaEtiqueta": "Metabólico",
+   "desde": 89.99,
+   "busca": "tirzepatida glp-1 / gip · estudios metabólicos glp-2 glp2 tirze",
+   "orden": 1,
+   "coa": true,
+   "pureza": "99.83"
+  },
+  {
+   "nombre": "Semaglutida",
+   "pagina": "producto-semaglutida.html",
+   "img": "assets/productos/Semaglutida-10mg.webp",
+   "sub": "Agonista GLP-1 · estudios metabólicos",
+   "familia": "metabolico",
+   "familiaEtiqueta": "Metabólico",
+   "desde": 69.99,
+   "busca": "semaglutida agonista glp-1 · estudios metabólicos glp-1 glp1 sema",
+   "orden": 2,
+   "coa": true,
+   "pureza": "99.46"
+  },
+  {
+   "nombre": "GHK-Cu",
+   "pagina": "producto-ghk-cu.html",
+   "img": "assets/productos/GHK-Cu-50mg.webp",
+   "sub": "Tripéptido de cobre · piel y colágeno",
+   "familia": "piel",
+   "familiaEtiqueta": "Piel y tejido",
+   "desde": 39.99,
+   "busca": "ghk-cu tripéptido de cobre · piel y colágeno ghk cobre",
+   "orden": 3,
+   "coa": true,
+   "pureza": "99.14"
+  },
+  {
+   "nombre": "Tesamorelin",
+   "pagina": "producto-tesamorelin.html",
+   "img": "assets/productos/Tesamorelin-10mg.webp",
+   "sub": "Análogo de GHRH · composición corporal",
+   "familia": "gh",
+   "familiaEtiqueta": "Hormona de crecimiento",
+   "desde": 89.99,
+   "busca": "tesamorelin análogo de ghrh · composición corporal tesa",
+   "orden": 4,
+   "coa": true,
+   "pureza": "98.59"
+  },
+  {
+   "nombre": "MOTS-c",
+   "pagina": "producto-mots-c.html",
+   "img": "assets/productos/Mots-c-10mg.webp",
+   "sub": "Péptido mitocondrial · metabolismo",
+   "familia": "metabolico",
+   "familiaEtiqueta": "Metabólico",
+   "desde": 49.99,
+   "busca": "mots-c péptido mitocondrial · metabolismo motsc mots",
+   "orden": 5,
+   "coa": true,
+   "pureza": "99.31"
+  },
+  {
+   "nombre": "NAD+",
+   "pagina": "producto-nad.html",
+   "img": "assets/productos/Nad+-500mg.webp",
+   "sub": "Coenzima · metabolismo celular",
+   "familia": "celular",
+   "familiaEtiqueta": "Celular",
+   "desde": 49.99,
+   "busca": "nad+ coenzima · metabolismo celular nad plus nad+",
+   "orden": 6,
+   "coa": true,
+   "pureza": null
+  },
+  {
+   "nombre": "CJC-1295 + Ipamorelin",
+   "pagina": "producto-cjc-1295-ipamorelin.html",
+   "img": "assets/productos/CJC-1295-+-Ipamorelin-10mg.webp",
+   "sub": "GHRH + secretagogo de GH",
+   "familia": "gh",
+   "familiaEtiqueta": "Hormona de crecimiento",
+   "desde": 69.99,
+   "busca": "cjc-1295 + ipamorelin ghrh + secretagogo de gh cjc ipa mezcla cjc1295",
+   "orden": 7,
+   "coa": true,
+   "pureza": "99.54"
+  },
+  {
+   "nombre": "Agua Bacteriostática",
+   "pagina": "producto-agua-bacteriostatica.html",
+   "img": "assets/productos/Agua-Bac-10ml.webp",
+   "sub": "Diluyente estéril · reconstitución",
+   "familia": "insumos",
+   "familiaEtiqueta": "Insumos",
+   "desde": 15,
+   "busca": "agua bacteriostática diluyente estéril · reconstitución agua bac bacteriostatica 10 ml",
+   "orden": 8,
+   "coa": false,
+   "pureza": null
+  },
+  {
+   "nombre": "Agua Bacteriostática Hospira",
+   "pagina": "producto-agua-bacteriostatica-hospira.html",
+   "img": "assets/productos/Agua-Bac-30ml.webp",
+   "sub": "30 ml · Bacteriostatic Water for Injection, USP",
+   "familia": "insumos",
+   "familiaEtiqueta": "Insumos",
+   "desde": 39.99,
+   "busca": "agua bacteriostática hospira bacteriostatic water 30 ml · reconstitución agua bac hospira bacteriostatic water 30 ml",
+   "orden": 8.5,
+   "coa": true,
+   "pureza": null
+  },
+  {
+   "nombre": "KPV",
+   "pagina": "producto-kpv.html",
+   "img": "assets/productos/KPV-10mg.webp",
+   "sub": "Tripéptido · vía NF-κB",
+   "familia": "piel",
+   "familiaEtiqueta": "Piel y tejido",
+   "desde": 49.99,
+   "busca": "kpv tripéptido · vía nf-κb ",
+   "orden": 9,
+   "coa": true,
+   "pureza": "99.19"
+  },
+  {
+   "nombre": "KLOW",
+   "pagina": "producto-klow.html",
+   "img": "assets/productos/Klow-80mg.webp",
+   "sub": "Mezcla · BPC + TB + GHK + KPV",
+   "familia": "piel",
+   "familiaEtiqueta": "Piel y tejido",
+   "desde": 159.99,
+   "busca": "klow mezcla · bpc + tb + ghk + kpv bpc tb ghk kpv mezcla",
+   "orden": 10,
+   "coa": true,
+   "pureza": null
+  },
+  {
+   "nombre": "Semax",
+   "pagina": "producto-semax.html",
+   "img": "assets/productos/Semax-10mg.webp",
+   "sub": "Péptido · estudios cognitivos",
+   "familia": "neuro",
+   "familiaEtiqueta": "Neuro",
+   "desde": 59.99,
+   "busca": "semax péptido · estudios cognitivos ",
+   "orden": 11,
+   "coa": true,
+   "pureza": "99.29"
+  },
+  {
+   "nombre": "Glutatión",
+   "pagina": "producto-glutation.html",
+   "img": "assets/productos/Glutatión-1500mg.webp",
+   "sub": "Tripéptido · estrés oxidativo",
+   "familia": "celular",
+   "familiaEtiqueta": "Celular",
+   "desde": 59.99,
+   "busca": "glutatión tripéptido · estrés oxidativo glutation glutathione",
+   "orden": 12,
+   "coa": false,
+   "pureza": null
+  },
+  {
+   "nombre": "Melanotan 2",
+   "pagina": "producto-melanotan-2.html",
+   "img": "assets/productos/Melanotan-2-10mg.webp",
+   "sub": "Análogo de α-MSH · vía melanocortina",
+   "familia": "piel",
+   "familiaEtiqueta": "Piel y tejido",
+   "desde": 49.99,
+   "busca": "melanotan 2 análogo de α-msh · vía melanocortina mt2 mt-2",
+   "orden": 13,
+   "coa": true,
+   "pureza": "99.85"
+  },
+  {
+   "nombre": "Glow",
+   "pagina": "producto-glow.html",
+   "img": "assets/productos/Glow-70mg.webp",
+   "sub": "Mezcla · BPC + TB + GHK-Cu",
+   "familia": "piel",
+   "familiaEtiqueta": "Piel y tejido",
+   "desde": 149.99,
+   "busca": "glow mezcla · bpc + tb + ghk-cu bpc tb ghk mezcla",
+   "orden": 14,
+   "coa": true,
+   "pureza": null
+  },
+  {
+   "nombre": "Selank",
+   "pagina": "producto-selank.html",
+   "img": "assets/productos/Selank-10mg.webp",
+   "sub": "Péptido · estudios de conducta",
+   "familia": "neuro",
+   "familiaEtiqueta": "Neuro",
+   "desde": 69.99,
+   "busca": "selank péptido · estudios de conducta ",
+   "orden": 15,
+   "coa": true,
+   "pureza": "99.87"
+  },
+  {
+   "nombre": "Wolverine (BPC-157 + TB-500)",
+   "pagina": "producto-wolverine-bpc-157-tb-500.html",
+   "img": "assets/productos/Wolverine-20mg.webp",
+   "sub": "Mezcla · BPC-157 + TB-500",
+   "familia": "piel",
+   "familiaEtiqueta": "Piel y tejido",
+   "desde": 129.99,
+   "busca": "wolverine (bpc-157 + tb-500) mezcla · bpc-157 + tb-500 bpc bpc157 tb tb500 mezcla",
+   "orden": 16,
+   "coa": true,
+   "pureza": null
+  },
+  {
+   "nombre": "PT-141",
+   "pagina": "producto-pt-141.html",
+   "img": "assets/productos/PT-141-10mg.webp",
+   "sub": "Vía melanocortina",
+   "familia": "neuro",
+   "familiaEtiqueta": "Neuro",
+   "desde": 69.99,
+   "busca": "pt-141 vía melanocortina pt141",
+   "orden": 17,
+   "coa": true,
+   "pureza": "99.62"
+  },
+  {
+   "nombre": "Cagrilintida",
+   "pagina": "producto-cagrilintida.html",
+   "img": "assets/productos/Cagrilintida-10mg.webp",
+   "sub": "Análogo de amilina · estudios metabólicos",
+   "familia": "metabolico",
+   "familiaEtiqueta": "Metabólico",
+   "desde": 99.99,
+   "busca": "cagrilintida análogo de amilina · estudios metabólicos cagri",
+   "orden": 18,
+   "coa": false,
+   "pureza": null
+  },
+  {
+   "nombre": "DSIP",
+   "pagina": "producto-dsip.html",
+   "img": "assets/productos/DSIP-5mg.webp",
+   "sub": "Péptido · estudios de sueño",
+   "familia": "neuro",
+   "familiaEtiqueta": "Neuro",
+   "desde": 39.99,
+   "busca": "dsip péptido · estudios de sueño ",
+   "orden": 19,
+   "coa": true,
+   "pureza": "99.45"
+  },
+  {
+   "nombre": "Epitalón",
+   "pagina": "producto-epitalon.html",
+   "img": "assets/productos/Epitalón-10mg.webp",
+   "sub": "Péptido pineal · estudios de envejecimiento",
+   "familia": "celular",
+   "familiaEtiqueta": "Celular",
+   "desde": 49.99,
+   "busca": "epitalón péptido pineal · estudios de envejecimiento epitalon epithalon",
+   "orden": 20,
+   "coa": true,
+   "pureza": "98.42"
+  },
+  {
+   "nombre": "Ipamorelin",
+   "pagina": "producto-ipamorelin.html",
+   "img": "assets/productos/Ipamorelin-5mg.webp",
+   "sub": "Secretagogo de GH · eje somatotropo",
+   "familia": "gh",
+   "familiaEtiqueta": "Hormona de crecimiento",
+   "desde": 59.99,
+   "busca": "ipamorelin secretagogo de gh · eje somatotropo ipa",
+   "orden": 21,
+   "coa": true,
+   "pureza": "99.54"
+  },
+  {
+   "nombre": "Thymosin Alpha-1",
+   "pagina": "producto-thymosin-alpha-1.html",
+   "img": "assets/productos/Thymosin-a1-10mg.webp",
+   "sub": "Péptido tímico · estudios inmunológicos",
+   "familia": "celular",
+   "familiaEtiqueta": "Celular",
+   "desde": 89.99,
+   "busca": "thymosin alpha-1 péptido tímico · estudios inmunológicos timosina alfa ta1",
+   "orden": 22,
+   "coa": false,
+   "pureza": null
+  },
+  {
+   "nombre": "Sermorelin",
+   "pagina": "producto-sermorelin.html",
+   "img": "assets/productos/Sermorelin-5mg.webp",
+   "sub": "Análogo de GHRH · secreción de GH",
+   "familia": "gh",
+   "familiaEtiqueta": "Hormona de crecimiento",
+   "desde": 79.99,
+   "busca": "sermorelin análogo de ghrh · secreción de gh ",
+   "orden": 23,
+   "coa": true,
+   "pureza": "99.38"
+  },
+  {
+   "nombre": "Kisspeptin",
+   "pagina": "producto-kisspeptin-10.html",
+   "img": "assets/productos/Kisspeptin-10mg.webp",
+   "sub": "Eje reproductivo · estudios de GnRH",
+   "familia": "gh",
+   "familiaEtiqueta": "Hormona de crecimiento",
+   "desde": 59.99,
+   "busca": "kisspeptin eje reproductivo · estudios de gnrh kisspeptina kiss",
+   "orden": 24,
+   "coa": false,
+   "pureza": null
+  },
+  {
+   "nombre": "SS-31 (Elamipretide)",
+   "pagina": "producto-ss-31.html",
+   "img": "assets/productos/SS-31-10mg.webp",
+   "sub": "Péptido mitocondrial · estrés oxidativo",
+   "familia": "celular",
+   "familiaEtiqueta": "Celular",
+   "desde": 69.99,
+   "busca": "ss-31 (elamipretide) péptido mitocondrial · estrés oxidativo ss31 elamipretide",
+   "orden": 25,
+   "coa": true,
+   "pureza": "99.16"
+  },
+  {
+   "nombre": "CJC-1295 (sin DAC)",
+   "pagina": "producto-cjc-1295-sin-dac.html",
+   "img": "assets/productos/CJC-1295-ND-5mg.webp",
+   "sub": "Análogo de GHRH · acción corta",
+   "familia": "gh",
+   "familiaEtiqueta": "Hormona de crecimiento",
+   "desde": 59.99,
+   "busca": "cjc-1295 (sin dac) análogo de ghrh · acción corta cjc nd cjc1295",
+   "orden": 26,
+   "coa": true,
+   "pureza": "99.60"
+  },
+  {
+   "nombre": "Lemon Bottle",
+   "pagina": "producto-lemon-bottle.html",
+   "img": "assets/productos/Lemon-Bottle-10ml.webp",
+   "sub": "Solución · 10 ml",
+   "familia": "metabolico",
+   "familiaEtiqueta": "Metabólico",
+   "desde": 39.99,
+   "busca": "lemon bottle solución · 10 ml lemon",
+   "orden": 27,
+   "coa": false,
+   "pureza": null
+  }
+ ]
+};

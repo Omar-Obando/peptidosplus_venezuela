@@ -1,7 +1,5 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import Header from '@/components/Header.astro';
-import Footer from '@/components/Footer.astro';
 import Section from '@/components/Section.astro';
 import ShieldCheck from '@lucide/astro/icons/shield-check';
 import Lock from '@lucide/astro/icons/lock';
@@ -13,7 +11,7 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
 ---
 
 <BaseLayout title="Checkout">
-    <Header />
+
     <main id="main-content">
         <!-- Header -->
         <div class="bg-surface border-b border-outline">
@@ -333,7 +331,7 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
             </form>
         </Section>
     </main>
-    <Footer />
+
 </BaseLayout>
 
 <script>

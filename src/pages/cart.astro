@@ -1,7 +1,5 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import Header from '@/components/Header.astro';
-import Footer from '@/components/Footer.astro';
 import Section from '@/components/Section.astro';
 import ArrowLeft from '@lucide/astro/icons/arrow-left';
 import ShieldCheck from '@lucide/astro/icons/shield-check';
@@ -11,7 +9,7 @@ export const prerender = true;
 ---
 
 <BaseLayout title="Shopping Cart">
-    <Header />
+
     <main id="main-content">
         <!-- Header -->
         <div class="bg-surface border-b border-outline">
@@ -142,7 +140,7 @@ export const prerender = true;
             </div>
         </Section>
     </main>
-    <Footer />
+
 </BaseLayout>
 
 <script>

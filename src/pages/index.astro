@@ -1,202 +1,136 @@
 ---
-import { getLocalProducts, getLocalCategories, getLocalFeaturedProducts } from '../lib/local-product-data';
-import { formatPrice, isInStock } from '../lib/woocommerce';
-import BaseLayout from '@/layouts/BaseLayout.astro';
-import Header from '@/components/Header.astro';
-import Footer from '@/components/Footer.astro';
-import Section from '@/components/Section.astro';
-import ProductCard from '@/components/shop/ProductCard.astro';
-import ArrowRight from '@lucide/astro/icons/arrow-right';
-import Truck from '@lucide/astro/icons/truck';
-import ShieldCheck from '@lucide/astro/icons/shield-check';
-import CreditCard from '@lucide/astro/icons/credit-card';
-import Headphones from '@lucide/astro/icons/headphones';
+/**
+ * Home — diseño de marca de Peptidos Plus (navy).
+ * Secciones y clases reales del sitio original (hero v3, marquee,
+ * "Productos destacados", calidad). Datos de productos del CMS.
+ */
+import BrandLayout from '@/layouts/BrandLayout.astro';
+import { SITE } from '@/lib/site';
+import { getLocalProducts } from '@/lib/local-product-data';
+import { formatStorePrice } from '@/config/store';
 
 export const prerender = true;
 
-const allProducts = await getLocalProducts();
-const featuredProducts = await getLocalFeaturedProducts(4);
-const recentProducts = allProducts.slice(0, 8);
-const categories = await getLocalCategories();
-const topCategories = categories.filter(c => c.parent === 0 && c.count > 0).slice(0, 6);
+let products: any[] = [];
+try {
+  products = await getLocalProducts();
+} catch {
+  products = [];
+}
+const featured = products.slice(0, 6);
+
+const title = 'Peptidos Plus — Péptidos de investigación en Venezuela';
+const description =
+  'Péptidos de investigación con certificado de análisis público en cada lote, emitido por laboratorio independiente. Kit de aplicación incluido y envíos a toda Venezuela por MRW/Zoom.';
 ---
 
-<BaseLayout title="Shop">
-    <Header />
-    <main id="main-content">
-        <!-- Hero -->
-        <div class="relative overflow-hidden bg-gradient-to-br from-primary/5 via-surface to-primary-light/10">
-            <div class="absolute inset-0 bg-[linear-gradient(to_right,var(--color-outline)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-outline)_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-30"></div>
-            <div class="absolute top-20 right-10 w-72 h-72 bg-primary/10 rounded-full blur-[100px]"></div>
-            <div class="absolute bottom-10 left-10 w-96 h-96 bg-primary-light/10 rounded-full blur-[100px]"></div>
-            <Section padding="lg" class="relative z-10">
-                <div class="text-center max-w-4xl mx-auto py-8 md:py-16">
-                    <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8 tracking-wide">
-                        <span class="w-1.5 h-1.5 bg-primary rounded-full animate-ping"></span>
-                        Welcome to Shop
-                    </span>
-                    <h1 class="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight text-content mb-6 leading-tight">
-                        Discover Our
-                        <span class="bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent"> Collection</span>
-                    </h1>
-                    <p class="text-lg md:text-xl text-content-light max-w-2xl mx-auto mb-10 leading-relaxed">
-                        Browse our curated selection of products. Quality items, great prices, and fast shipping.
-                    </p>
-                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <a href="/shop" class="group inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-4 rounded-xl font-semibold hover:shadow-xl hover:shadow-primary/25 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer">
-                            Shop Now
-                            <ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                        </a>
-                        {topCategories.length > 0 && (
-                            <a href="#categories" class="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-semibold border border-outline text-content hover:border-primary hover:text-primary transition-all duration-300 cursor-pointer">
-                                Browse Categories
-                            </a>
-                        )}
-                    </div>
-                </div>
-            </Section>
+<BrandLayout
+  title={title}
+  rawTitle={title}
+  description={description}
+  canonicalUrl={`${SITE.url}/`}
+>
+  <slot name="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: SITE.name,
+      url: SITE.url,
+      description,
+    })} />
+  </slot>
+
+  <!-- ===================== HERO v3 (marca) ===================== -->
+  <section class="pp-hero-v3" aria-label="Peptidos Plus — péptidos de investigación en Venezuela">
+    <canvas class="pp-hero-particulas" aria-hidden="true"></canvas>
+    <div class="pp-sec-inner pp-hero-v3-grid">
+      <div class="pp-hero-v3-text">
+        <h1 class="pp-hero-v3-title">Péptidos y compuestos de investigación <em>en Venezuela.</em></h1>
+        <p class="pp-hero-v3-tagline">Compuestos de grado investigación con certificado de análisis en cada lote. Pureza garantizada por encima del 98 %.</p>
+        <div class="pp-hero-v3-cta">
+          <a href="/shop" class="pp-hero-btn pp-hero-btn-primario">Ver catálogo<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+          <a href="/certificados" class="pp-hero-v3-enlace">Ver los certificados<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
         </div>
+      </div>
+      <div class="pp-hero-v3-vials" aria-hidden="true">
+        <div class="pp-vial pp-vial-left"><img decoding="async" sizes="(max-width: 767px) 34vw, 200px" srcset="/assets/viales-ficha/chico/Retatrutida-10mg.webp 400w, /assets/viales-ficha/mini/Retatrutida-10mg.webp 640w, /assets/viales-ficha/Retatrutida-10mg.webp 1002w" src="/assets/viales-ficha/Retatrutida-10mg.webp" alt="" width="1002" height="1959" loading="eager" /></div>
+        <div class="pp-vial pp-vial-center"><img decoding="async" sizes="(max-width: 767px) 34vw, 200px" srcset="/assets/viales-ficha/chico/Tirzepatida-10mg.webp 400w, /assets/viales-ficha/mini/Tirzepatida-10mg.webp 640w, /assets/viales-ficha/Tirzepatida-10mg.webp 1002w" src="/assets/viales-ficha/Tirzepatida-10mg.webp" alt="" width="1002" height="1959" loading="eager" /></div>
+        <div class="pp-vial pp-vial-right"><img decoding="async" sizes="(max-width: 767px) 34vw, 200px" srcset="/assets/viales-ficha/chico/Glow-70mg.webp 400w, /assets/viales-ficha/mini/Glow-70mg.webp 640w, /assets/viales-ficha/Glow-70mg.webp 1002w" src="/assets/viales-ficha/Glow-70mg.webp" alt="" width="1002" height="1959" loading="eager" /></div>
+      </div>
+    </div>
+  </section>
 
-        <!-- Featured Products -->
-        {featuredProducts.length > 0 && (
-            <Section padding="lg">
-                <div class="flex items-end justify-between mb-12">
-                    <div>
-                        <span class="text-sm font-semibold text-primary tracking-wide uppercase">Featured</span>
-                        <h2 class="text-3xl sm:text-4xl font-black tracking-tight text-content mt-2">Top Picks</h2>
-                    </div>
-                    <a href="/shop" class="group hidden sm:inline-flex items-center gap-2 text-primary font-medium hover:gap-3 transition-all cursor-pointer">
-                        View all
-                        <ArrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </a>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-                    {featuredProducts.map(product => (
-                        <ProductCard product={product} />
-                    ))}
-                </div>
-                <div class="sm:hidden mt-8 text-center">
-                    <a href="/shop" class="inline-flex items-center gap-2 text-primary font-medium cursor-pointer">
-                        View all products
-                        <ArrowRight class="w-4 h-4" />
-                    </a>
-                </div>
-            </Section>
-        )}
+  <!-- ===================== MARQUEE (marca) ===================== -->
+  <div class="pp-marquee" aria-hidden="true">
+    <div class="pp-marquee-track">
+      <div class="pp-marquee-grupo">
+        <span class="pp-marquee-item"><span class="pp-marquee-ic">✓</span><span class="pp-marquee-txt">Certificado en cada lote</span></span>
+        <span class="pp-marquee-item"><span class="pp-marquee-ic">✓</span><span class="pp-marquee-txt">Pureza HPLC ≥ 98 %</span></span>
+        <span class="pp-marquee-item"><span class="pp-marquee-ic">✓</span><span class="pp-marquee-txt">Kit de aplicación incluido</span></span>
+        <span class="pp-marquee-item"><span class="pp-marquee-ic">✓</span><span class="pp-marquee-txt">Envíos a toda Venezuela</span></span>
+        <span class="pp-marquee-item"><span class="pp-marquee-ic">✓</span><span class="pp-marquee-txt">Laboratorio independiente</span></span>
+      </div>
+      <div class="pp-marquee-grupo">
+        <span class="pp-marquee-item"><span class="pp-marquee-ic">✓</span><span class="pp-marquee-txt">Certificado en cada lote</span></span>
+        <span class="pp-marquee-item"><span class="pp-marquee-ic">✓</span><span class="pp-marquee-txt">Pureza HPLC ≥ 98 %</span></span>
+        <span class="pp-marquee-item"><span class="pp-marquee-ic">✓</span><span class="pp-marquee-txt">Kit de aplicación incluido</span></span>
+        <span class="pp-marquee-item"><span class="pp-marquee-ic">✓</span><span class="pp-marquee-txt">Envíos a toda Venezuela</span></span>
+        <span class="pp-marquee-item"><span class="pp-marquee-ic">✓</span><span class="pp-marquee-txt">Laboratorio independiente</span></span>
+      </div>
+    </div>
+  </div>
 
-        <!-- Categories -->
-        {topCategories.length > 0 && (
-            <Section bg="surface-alt" padding="lg" id="categories">
-                <div class="text-center mb-12">
-                    <span class="text-sm font-semibold text-primary tracking-wide uppercase">Categories</span>
-                    <h2 class="text-3xl sm:text-4xl font-black tracking-tight text-content mt-2">Shop by Category</h2>
-                </div>
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 lg:gap-6">
-                    {topCategories.map(category => (
-                        <a
-                            href={`/shop/category/${category.slug}`}
-                            class="group relative bg-surface rounded-2xl border border-outline p-6 text-center hover:border-primary hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden"
-                        >
-                            <div class="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            <div class="relative z-10">
-                                {category.image?.src ? (
-                                    <img
-                                        src={category.image.src}
-                                        alt={category.name}
-                                        class="w-16 h-16 mx-auto mb-4 rounded-xl object-cover"
-                                    />
-                                ) : (
-                                    <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-primary/10 flex items-center justify-center">
-                                        <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
-                                        </svg>
-                                    </div>
-                                )}
-                                <h3 class="font-semibold text-content group-hover:text-primary transition-colors text-sm">{category.name}</h3>
-                                <p class="text-xs text-content-lighter mt-1">{category.count} products</p>
-                            </div>
-                        </a>
-                    ))}
-                </div>
-            </Section>
-        )}
-
-        <!-- Recent Products -->
-        {recentProducts.length > 0 && (
-            <Section padding="lg">
-                <div class="flex items-end justify-between mb-12">
-                    <div>
-                        <span class="text-sm font-semibold text-primary tracking-wide uppercase">New Arrivals</span>
-                        <h2 class="text-3xl sm:text-4xl font-black tracking-tight text-content mt-2">Latest Products</h2>
-                    </div>
-                    <a href="/shop" class="group hidden sm:inline-flex items-center gap-2 text-primary font-medium hover:gap-3 transition-all cursor-pointer">
-                        View all
-                        <ArrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </a>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-                    {recentProducts.map(product => (
-                        <ProductCard product={product} />
-                    ))}
-                </div>
-            </Section>
-        )}
-
-        <!-- Trust Badges -->
-        <Section bg="surface-alt" padding="md">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-                <div class="flex items-center gap-4 p-6 bg-surface rounded-2xl border border-outline">
-                    <div class="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                        <Truck class="w-6 h-6 text-primary" />
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-content text-sm">Free Shipping</h3>
-                        <p class="text-xs text-content-lighter">On orders over $50</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-4 p-6 bg-surface rounded-2xl border border-outline">
-                    <div class="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                        <ShieldCheck class="w-6 h-6 text-primary" />
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-content text-sm">Secure Payment</h3>
-                        <p class="text-xs text-content-lighter">SSL encrypted checkout</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-4 p-6 bg-surface rounded-2xl border border-outline">
-                    <div class="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                        <CreditCard class="w-6 h-6 text-primary" />
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-content text-sm">Easy Returns</h3>
-                        <p class="text-xs text-content-lighter">30-day return policy</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-4 p-6 bg-surface rounded-2xl border border-outline">
-                    <div class="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                        <Headphones class="w-6 h-6 text-primary" />
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-content text-sm">24/7 Support</h3>
-                        <p class="text-xs text-content-lighter">Dedicated customer care</p>
-                    </div>
-                </div>
-            </div>
-        </Section>
-
-        <!-- CTA -->
-        <div class="relative overflow-hidden">
-            <div class="absolute inset-0 bg-gradient-to-br from-primary via-primary-dark to-primary"></div>
-            <div class="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
-            <Section padding="lg" class="relative z-10 text-center text-white">
-                <h2 class="text-3xl sm:text-4xl font-black tracking-tight mb-4">Ready to Get Started?</h2>
-                <p class="text-lg text-white/80 max-w-xl mx-auto mb-8">Join thousands of happy customers and find exactly what you're looking for.</p>
-                <a href="/shop" class="group inline-flex items-center gap-2 bg-white text-primary px-8 py-4 rounded-xl font-semibold hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 cursor-pointer">
-                    Browse Products
-                    <ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </a>
-            </Section>
+  <!-- ===================== PRODUCTOS DESTACADOS (marca) ===================== -->
+  {featured.length > 0 && (
+    <section class="py-12 w-full max-w-[100vw] overflow-x-hidden">
+      <div class="content-container">
+        <div class="flex items-end justify-between gap-6 mb-6 lg:mb-8">
+          <div>
+            <h2 class="font-semibold text-2xl sm:text-3xl lg:text-4xl text-brand-black leading-tight mb-1">Productos destacados</h2>
+            <p class="text-gray-500 text-sm lg:text-base">Compuestos con certificado de análisis en cada lote.</p>
+          </div>
+          <a href="/shop" class="shrink-0 inline-flex items-center gap-1.5 text-sm lg:text-base font-medium text-brand-black hover:opacity-70 transition-opacity">Ver todos<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg></a>
         </div>
-    </main>
-    <Footer />
-</BaseLayout>
+        <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+          {featured.map((p) => (
+            <a class="group h-full" href={`/shop/${p.slug}`} data-testid="product-wrapper">
+              <div class="bg-neutral-100 rounded-[20px] lg:rounded-[24px] overflow-hidden h-full flex flex-col border border-black/[0.08] transition-shadow duration-200 hover:shadow-[0_14px_32px_-14px_rgba(19,19,21,0.22)]">
+                <div class="relative aspect-[4/5] overflow-hidden">
+                  <img alt={p.name} loading="lazy" decoding="async" class="object-cover object-[80%_center] transition-transform duration-300 group-hover:scale-105" sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" src={p.images?.[0]?.src || '/assets/img/landing/QuickCards/Boxes.webp'} />
+                  <span class="pp-coa-pill en-tarjeta" aria-label={`Ver el certificado de análisis de ${p.name}`}><i aria-hidden="true"></i>Certificado</span>
+                </div>
+                <div class="p-3 lg:p-4 flex flex-col flex-grow bg-white border-t border-black/[0.05] rounded-b-[20px] lg:rounded-b-[24px]">
+                  <h3 class="font-semibold text-[15px] lg:text-lg text-brand-black leading-tight line-clamp-1">{p.name}</h3>
+                  <p class="text-gray-500 text-[11px] lg:text-xs mt-0.5 line-clamp-1">{p.short_description?.replace(/<[^>]*>/g, '') || 'Péptido de investigación'}</p>
+                  <div class="mt-1.5 flex items-baseline gap-1.5 flex-wrap">
+                    <span class="text-gray-500 text-[10px] lg:text-xs">Desde</span>
+                    <span class="font-poppins font-semibold text-[17px] lg:text-xl text-brand-black leading-tight">{formatStorePrice(Number(p.price || 0))}</span>
+                  </div>
+                  <div class="mt-auto pt-2.5 flex gap-1.5">
+                    <span class="flex-1 h-9 lg:h-10 rounded-full border border-black/15 text-xs lg:text-sm font-medium text-black/70 hover:border-black hover:text-black transition-colors flex items-center justify-center">Ver detalles</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- ===================== CALIDAD / CERTIFICADO (marca) ===================== -->
+  <section class="py-8 lg:py-12 bg-white">
+    <div class="content-container grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
+      <div>
+        <h2 class="text-xl md:text-2xl lg:text-3xl font-semibold text-black leading-[1.05] mb-2">Calidad garantizada</h2>
+        <p class="text-gray-500 leading-relaxed mb-6">No reutilizamos certificados: cada lote nuevo se analiza (HPLC) y se publica. El certificado de tu vial es el de su lote, verificable en el portal del laboratorio independiente.</p>
+        <a href="/certificados" class="inline-flex items-center gap-2.5 bg-brand-black text-white text-sm lg:text-base font-medium px-6 lg:px-7 h-11 lg:h-12 rounded-full hover:bg-gray-800 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 leading-none">Ver certificados<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg></a>
+      </div>
+      <div class="pp-calidad-viales relative z-10" aria-hidden="false">
+        <img alt="Vial de Tesamorelin 10 mg de Peptidos Plus" loading="lazy" width="320" height="450" decoding="async" class="pp-cv-lado pp-cv-izq" src="/assets/viales-ficha/Tesamorelin-10mg.webp" />
+        <img alt="Vial de Retatrutida de Peptidos Plus" loading="lazy" width="320" height="450" decoding="async" class="pp-cv-centro" src="/assets/viales-ficha/Retatrutida-10mg.webp" />
+        <img alt="Vial de Tirzepatida de Peptidos Plus" loading="lazy" width="320" height="450" decoding="async" class="pp-cv-lado pp-cv-der" src="/assets/viales-ficha/Tirzepatida-10mg.webp" />
+      </div>
+    </div>
+  </section>
+</BrandLayout>

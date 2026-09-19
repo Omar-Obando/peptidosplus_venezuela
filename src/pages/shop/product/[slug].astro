@@ -5,8 +5,6 @@ import { formatPrice, isInStock, getDiscountPercentage, stripHtml } from '../../
 import { getLocalProductImageUrl } from '../../../lib/product-media';
 import { storeConfig } from '../../../config/store';
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import Header from '@/components/Header.astro';
-import Footer from '@/components/Footer.astro';
 import Section from '@/components/Section.astro';
 import ProductCard from '@/components/shop/ProductCard.astro';
 import AddToCartButton from '@/components/shop/AddToCartButton.astro';
@@ -95,7 +93,7 @@ const pageImage = product.images?.[0]?.src || '';
 ---
 
 <BaseLayout title={product.name} description={pageDescription} image={pageImage}>
-    <Header />
+
     <script type="application/ld+json" set:html={jsonLdString} />
     <main id="main-content">
         <!-- Breadcrumb -->
@@ -513,7 +511,7 @@ const pageImage = product.images?.[0]?.src || '';
             </Section>
         )}
     </main>
-    <Footer />
+
 </BaseLayout>
 
 <script>

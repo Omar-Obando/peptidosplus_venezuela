@@ -1,10 +1,9 @@
 ---
 /**
- * Category archive — /categoria/[slug] (SSR on-demand)
+ * Category archive — /categoria/[slug] (SSR on-demand, diseño de marca).
  */
-import BlogLayout from '@/layouts/BlogLayout.astro';
-import PostCard from '@/components/blog/PostCard.astro';
-import { safePosts, safeCategories, postTitle, postExcerpt } from '@/lib/blog';
+import BrandLayout from '@/layouts/BrandLayout.astro';
+import { safeCategories, postTitle, postExcerpt, catName, esDate, readTime } from '@/lib/blog';
 import { getCategoryBySlug, getPostsByCategory } from '@/lib/wordpress';
 import { SITE } from '@/lib/site';
 
@@ -25,49 +24,52 @@ const title = category?.name || 'Categoría';
 const description =
   category?.description || `Artículos y guías de la categoría ${title} en ${SITE.name}.`;
 const canonicalUrl = `${SITE.url}/categoria/${slug}`;
+
+const pageLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: title,
+  url: canonicalUrl,
+  description,
+  isPartOf: { '@type': 'Blog', url: `${SITE.url}/blog` },
+};
 ---
 
-<BlogLayout
-  title={title}
-  description={description}
-  canonicalUrl={canonicalUrl}
-  breadcrumbs={[
-    { name: 'Inicio', path: '/' },
-    { name: 'Blog', path: '/blog' },
-    { name: 'Categorías', path: '/blog' },
-    { name: title, path: canonicalUrl },
-  ]}
-  heroTitle={title}
-  heroDescription={description}
-  jsonLd={[
-    {
-      '@context': 'https://schema.org',
-      '@type': 'CollectionPage',
-      name: title,
-      url: canonicalUrl,
-      description,
-      isPartOf: { '@type': 'Blog', url: `${SITE.url}/blog` },
-    },
-  ]}
->
-  {posts.length === 0 ? (
-    <p class="text-content-light py-12 text-center">Aún no hay artículos en esta categoría.</p>
-  ) : (
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-      {posts.map((p) => (
-        <PostCard post={p} />
-      ))}
-    </div>
-  )}
+<BrandLayout title={title} description={description} canonicalUrl={canonicalUrl}>
+  <slot name="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(pageLd)} />
+  </slot>
 
-  {others.length > 0 && (
-    <div class="mt-14 pt-8 border-t border-outline">
-      <h2 class="text-lg font-bold text-content mb-5">Otras categorías</h2>
-      <div class="flex flex-wrap gap-2">
-        {others.map((c) => (
-          <a key={c.slug} href={`/categoria/${c.slug}`} class="px-4 py-2 rounded-full text-sm font-medium border border-outline text-content-light hover:border-primary hover:text-primary transition-colors">{c.name}</a>
+  <div class="content-container pp-art-wrap py-12 md:py-16">
+    <header class="pg-art-cab mb-10">
+      <p class="pg-cejilla font-poppins">Categoría · {postTitle({ title: { rendered: title } } as any)}</p>
+      <h1 class="pg-h1">{title}</h1>
+      <p class="pg-sub">{description}</p>
+    </header>
+
+    {posts.length === 0 ? (
+      <p class="pg-gris">Aún no hay artículos en esta categoría.</p>
+    ) : (
+      <div class="pg-lista">
+        {posts.map((p) => (
+          <a class="pg-entrada" href={`/blog/${p.slug}`} data-cat={catName(p)}>
+            <span class="pg-entrada-meta"><b class="font-poppins">{catName(p)}</b><span>{esDate(p.date)} · {readTime(p)} min</span></span>
+            <h3>{postTitle(p)}</h3>
+            <p>{postExcerpt(p, 150)}</p>
+          </a>
         ))}
       </div>
-    </div>
-  )}
-</BlogLayout>
+    )}
+
+    {others.length > 0 && (
+      <div class="pg-otras mt-10">
+        <h3 class="font-poppins text-sm font-bold uppercase tracking-wide text-[var(--pp-tinta-3)] mb-3">Otras categorías</h3>
+        <div class="flex flex-wrap gap-2">
+          {others.map((c) => (
+            <a key={c.slug} href={`/categoria/${c.slug}`} class="pg-tag">{c.name}</a>
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+</BrandLayout>

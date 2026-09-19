@@ -1,160 +1,72 @@
 ---
 /**
- * Blog index — /blog
- *
- * SSR: fetch posts + categories from the headless CMS with timeouts; if the
- * CMS is empty/unreachable the page degrades to an empty state (never 500).
+ * Blog index — /blog (diseño de marca: pg-entrada / pg-lista del sitio original,
+ * datos del CMS headless).
  */
-import BlogLayout from '@/layouts/BlogLayout.astro';
-import PostCard from '@/components/blog/PostCard.astro';
-import { safePosts, safeCategories, catSlug, postTitle, postExcerpt, postImage } from '@/lib/blog';
+import BrandLayout from '@/layouts/BrandLayout.astro';
+import { safePosts, safeCategories, postTitle, postExcerpt, postImage, catName, esDate, readTime } from '@/lib/blog';
 import { SITE } from '@/lib/site';
 
 const posts = await safePosts(100);
 const categories = await safeCategories();
 
-const title = 'Blog';
+const title = 'Artículos y revisiones — Peptidos Plus';
 const description =
   'Artículos, guías y análisis sobre péptidos research grade para investigación: mecanismos, certificados de análisis, reconstitución y más.';
 const canonicalUrl = `${SITE.url}/blog`;
 
-const featured = posts[0] || null;
-const rest = posts.slice(1);
+const blogLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Blog',
+  name: `Blog ${SITE.name}`,
+  url: canonicalUrl,
+  description,
+  blogPost: posts.slice(0, 10).map((p) => ({
+    '@type': 'BlogPosting',
+    headline: postTitle(p),
+    url: `${SITE.url}/blog/${p.slug}`,
+    datePublished: p.date,
+    image: postImage(p) || undefined,
+  })),
+};
+const itemListLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Últimos artículos',
+  itemListElement: posts.slice(0, 20).map((p, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    url: `${SITE.url}/blog/${p.slug}`,
+    name: postTitle(p),
+  })),
+};
 ---
 
-<BlogLayout
-  title={title}
-  description={description}
-  canonicalUrl={canonicalUrl}
-  breadcrumbs={[{ name: 'Inicio', path: '/' }, { name: 'Blog', path: '/blog' }]}
-  heroTitle="Blog de Péptidos Plus"
-  heroDescription={description}
-  jsonLd={[
-    {
-      '@context': 'https://schema.org',
-      '@type': 'Blog',
-      name: `Blog ${SITE.name}`,
-      url: canonicalUrl,
-      description,
-      blogPost: posts.slice(0, 10).map((p) => ({
-        '@type': 'BlogPosting',
-        headline: postTitle(p),
-        url: `${SITE.url}/blog/${p.slug}`,
-        datePublished: p.date,
-        image: postImage(p) || undefined,
-      })),
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'ItemList',
-      name: 'Últimos artículos',
-      itemListElement: posts.slice(0, 20).map((p, i) => ({
-        '@type': 'ListItem',
-        position: i + 1,
-        url: `${SITE.url}/blog/${p.slug}`,
-        name: postTitle(p),
-      })),
-    },
-  ]}
->
-  <!-- Toolbar: category filters + search -->
-  {categories.length > 0 && (
-    <section class="mb-10 bg-surface-alt rounded-2xl border border-outline p-5">
-      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div class="flex flex-wrap gap-2" id="blog-filters">
-          <button type="button" data-filter="all" class="blog-filter px-4 py-2 rounded-full text-sm font-medium bg-primary text-white transition-all cursor-pointer">Todos</button>
-          {categories.map((c) => (
-            <button
-              type="button"
-              data-filter={c.slug}
-              class="blog-filter px-4 py-2 rounded-full text-sm font-medium bg-surface text-content-light border border-outline hover:border-primary hover:text-primary transition-all cursor-pointer"
-            >
-              {c.name}
-            </button>
-          ))}
-        </div>
-        <div class="relative lg:w-72">
-          <input
-            type="search"
-            id="blog-search"
-            placeholder="Buscar artículos..."
-            class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-outline bg-surface text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-          />
-          <svg class="w-4 h-4 text-content-lighter absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
-        </div>
+<BrandLayout title={title} rawTitle={title} description={description} canonicalUrl={canonicalUrl}>
+  <slot name="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(blogLd)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(itemListLd)} />
+  </slot>
+
+  <div class="content-container pp-art-wrap py-12 md:py-16">
+    <header class="pg-art-cab mb-10">
+      <p class="pg-cejilla font-poppins">Blog · Peptidos Plus</p>
+      <h1 class="pg-h1">Artículos y revisiones</h1>
+      <p class="pg-sub">{description}</p>
+    </header>
+
+    {posts.length === 0 ? (
+      <p class="pg-gris">Aún no hay artículos publicados. Vuelve pronto.</p>
+    ) : (
+      <div class="pg-lista">
+        {posts.map((p) => (
+          <a class="pg-entrada" href={`/blog/${p.slug}`} data-cat={catName(p)}>
+            <span class="pg-entrada-meta"><b class="font-poppins">{catName(p)}</b><span>{esDate(p.date)} · {readTime(p)} min</span></span>
+            <h3>{postTitle(p)}</h3>
+            <p>{postExcerpt(p, 150)}</p>
+          </a>
+        ))}
       </div>
-    </section>
-  )}
-
-  {posts.length === 0 ? (
-    <section class="py-16 text-center">
-      <div class="max-w-md mx-auto">
-        <div class="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-          <svg class="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
-        </div>
-        <h2 class="text-2xl font-bold text-content mb-3">Aún no hay artículos publicados</h2>
-        <p class="text-content-light">Estamos preparando contenido nuevo. Vuelve pronto para descubrir guías y análisis de péptidos.</p>
-      </div>
-    </section>
-  ) : (
-    <div id="blog-results" class="space-y-12">
-      {featured && (
-        <div class="post-item" data-cat={catSlug(featured)} data-search={`${postTitle(featured)} ${postExcerpt(featured, 500)}`.toLowerCase()}>
-          <PostCard post={featured} featured />
-        </div>
-      )}
-
-      {rest.length > 0 && (
-        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {rest.map((p) => (
-            <div class="post-item" data-cat={catSlug(p)} data-search={`${postTitle(p)} ${postExcerpt(p, 500)}`.toLowerCase()}>
-              <PostCard post={p} />
-            </div>
-          ))}
-        </div>
-      )}
-
-      <p id="blog-empty" class="hidden text-center text-content-light py-16">No se encontraron artículos que coincidan con tu búsqueda.</p>
-    </div>
-  )}
-</BlogLayout>
-
-<script>
-  // Client-side category + search filter over rendered post cards.
-  const items = Array.from(document.querySelectorAll<HTMLElement>('.post-item'));
-  const filters = Array.from(document.querySelectorAll<HTMLButtonElement>('.blog-filter'));
-  const search = document.getElementById('blog-search') as HTMLInputElement | null;
-  const empty = document.getElementById('blog-empty');
-
-  let activeCat = 'all';
-
-  function apply(): void {
-    const q = (search?.value || '').trim().toLowerCase();
-    let visible = 0;
-    items.forEach((el) => {
-      const cat = el.dataset.cat || 'all';
-      const hay = el.dataset.search || '';
-      const okCat = activeCat === 'all' || cat === activeCat;
-      const okSearch = !q || hay.includes(q);
-      const show = okCat && okSearch;
-      el.classList.toggle('hidden', !show);
-      if (show) visible++;
-    });
-    if (empty) empty.classList.toggle('hidden', visible !== 0);
-  }
-
-  filters.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      activeCat = btn.dataset.filter || 'all';
-      filters.forEach((b) => {
-        const active = b === btn;
-        b.className = active
-          ? 'blog-filter px-4 py-2 rounded-full text-sm font-medium bg-primary text-white transition-all cursor-pointer'
-          : 'blog-filter px-4 py-2 rounded-full text-sm font-medium bg-surface text-content-light border border-outline hover:border-primary hover:text-primary transition-all cursor-pointer';
-      });
-      apply();
-    });
-  });
-
-  if (search) search.addEventListener('input', apply);
-</script>
+    )}
+  </div>
+</BrandLayout>

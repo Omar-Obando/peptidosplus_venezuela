@@ -1,7 +1,5 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import Header from '@/components/Header.astro';
-import Footer from '@/components/Footer.astro';
 import Section from '@/components/Section.astro';
 import ArrowLeft from '@lucide/astro/icons/arrow-left';
 
@@ -9,7 +7,7 @@ export const prerender = true;
 ---
 
 <BaseLayout title="My Addresses">
-    <Header />
+
     <main id="main-content">
         <div class="bg-surface border-b border-outline">
             <Section padding="none" class="py-8">
@@ -184,7 +182,7 @@ export const prerender = true;
             </div>
         </Section>
     </main>
-    <Footer />
+
 </BaseLayout>
 
 <script>

@@ -1,0 +1,56 @@
+---
+/**
+ * Tag archive — /tag/[slug] (SSR on-demand)
+ */
+import BlogLayout from '@/layouts/BlogLayout.astro';
+import PostCard from '@/components/blog/PostCard.astro';
+import { getTagBySlug, getPostsByTag } from '@/lib/wordpress';
+import { SITE } from '@/lib/site';
+
+const { slug } = Astro.params;
+
+if (!slug) return Astro.redirect('/404');
+
+let tag: any = null;
+try { tag = await getTagBySlug(slug); } catch { tag = null; }
+
+let posts: any[] = [];
+try { posts = await getPostsByTag(slug); } catch { posts = []; }
+
+const title = tag?.name || 'Etiqueta';
+const description = `Artículos etiquetados como "${title}" en el blog de ${SITE.name}.`;
+const canonicalUrl = `${SITE.url}/tag/${slug}`;
+---
+
+<BlogLayout
+  title={title}
+  description={description}
+  canonicalUrl={canonicalUrl}
+  breadcrumbs={[
+    { name: 'Inicio', path: '/' },
+    { name: 'Blog', path: '/blog' },
+    { name: title, path: canonicalUrl },
+  ]}
+  heroTitle={`#${title}`}
+  heroDescription={description}
+  jsonLd={[
+    {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: title,
+      url: canonicalUrl,
+      description,
+      isPartOf: { '@type': 'Blog', url: `${SITE.url}/blog` },
+    },
+  ]}
+>
+  {posts.length === 0 ? (
+    <p class="text-content-light py-12 text-center">Aún no hay artículos con esta etiqueta.</p>
+  ) : (
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+      {posts.map((p) => (
+        <PostCard post={p} />
+      ))}
+    </div>
+  )}
+</BlogLayout>

@@ -1,0 +1,18 @@
+---
+// Search widget for sidebar
+---
+
+<form action="/search" method="get" class="flex gap-2">
+  <input 
+    type="search" 
+    name="q" 
+    placeholder="Search posts..." 
+    class="flex-1 px-3 py-2 border border-outline rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm bg-surface text-content"
+  />
+  <button 
+    type="submit" 
+    class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm font-medium cursor-pointer"
+  >
+    Search
+  </button>
+</form>

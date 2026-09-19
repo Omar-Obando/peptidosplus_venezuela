@@ -1,0 +1,202 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import Section from '@/components/Section.astro';
+
+export const prerender = true;
+
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
+---
+
+<BaseLayout title="Sign In">
+    <Header />
+    <main id="main-content">
+        <div class="relative overflow-hidden bg-gradient-to-br from-primary/5 via-surface to-primary-light/10 min-h-[calc(100vh-5rem)]">
+            <div class="absolute inset-0 bg-[linear-gradient(to_right,var(--color-outline)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-outline)_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-30"></div>
+            <Section padding="lg" class="relative z-10">
+                <div class="max-w-md mx-auto">
+                    <div class="text-center mb-8">
+                        <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-content mb-2">Welcome Back</h1>
+                        <p class="text-content-light">Sign in to your account to continue</p>
+                    </div>
+                    
+                    <div class="bg-surface rounded-2xl border border-outline p-8 shadow-xl shadow-black/5">
+                        <form id="login-form" class="space-y-5">
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-content mb-2">
+                                    Email Address
+                                </label>
+                                <input 
+                                    type="email" 
+                                    id="email" 
+                                    name="email" 
+                                    required
+                                    class="w-full px-4 py-3 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface transition-colors"
+                                    placeholder="your@email.com"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label for="password" class="block text-sm font-medium text-content mb-2">
+                                    Password
+                                </label>
+                                <input 
+                                    type="password" 
+                                    id="password" 
+                                    name="password" 
+                                    required
+                                    class="w-full px-4 py-3 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface transition-colors"
+                                    placeholder="Enter your password"
+                                />
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input 
+                                        type="checkbox" 
+                                        id="remember" 
+                                        name="remember"
+                                        class="w-4 h-4 text-primary border-outline rounded focus:ring-primary cursor-pointer"
+                                    />
+                                    <span class="text-sm text-content">Remember me</span>
+                                </label>
+                                
+                                <a href="/forgot-password" class="text-sm text-primary hover:text-primary-dark transition-colors cursor-pointer font-medium">
+                                    Forgot password?
+                                </a>
+                            </div>
+                            
+                            {turnstileSiteKey && (
+                                <div id="turnstile-container" data-turnstile-site-key={turnstileSiteKey}></div>
+                            )}
+
+                            <!-- Error Message -->
+                            <div id="login-error" class="hidden p-4 bg-error/10 text-error rounded-xl text-sm">
+                                <p id="error-message"></p>
+                            </div>
+                            
+                            <button 
+                                type="submit"
+                                id="submit-btn"
+                                class="w-full bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-3.5 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <span id="btn-text">Sign In</span>
+                                <span id="btn-loading" class="hidden">
+                                    <svg class="animate-spin h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </span>
+                            </button>
+                        </form>
+                        
+                        <p class="text-center text-content-light mt-6 text-sm">
+                            Don't have an account?{' '}
+                            <a href="/register" class="text-primary hover:text-primary-dark font-semibold cursor-pointer">
+                                Create one
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </Section>
+        </div>
+    </main>
+    <Footer />
+</BaseLayout>
+
+<script>
+    import { login, $isLoggedIn, initAuth } from '../lib/auth';
+    
+    initAuth();
+    
+    if ($isLoggedIn.get()) {
+        window.location.href = '/account';
+    }
+    
+    // Turnstile setup
+    let turnstileToken = '';
+    const turnstileContainer = document.getElementById('turnstile-container');
+    const turnstileSiteKey = turnstileContainer?.dataset.turnstileSiteKey;
+    if (turnstileSiteKey && turnstileContainer) {
+        const script = document.createElement('script');
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad';
+        script.async = true;
+        (window as any).onTurnstileLoad = () => {
+            (window as any).turnstile.render(turnstileContainer, {
+                sitekey: turnstileSiteKey,
+                callback: (token: string) => { turnstileToken = token; },
+                'expired-callback': () => { turnstileToken = ''; },
+                'error-callback': () => { turnstileToken = ''; },
+                theme: 'auto',
+            });
+        };
+        document.head.appendChild(script);
+    }
+    
+    const form = document.getElementById('login-form') as HTMLFormElement;
+    const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+    const btnText = document.getElementById('btn-text');
+    const btnLoading = document.getElementById('btn-loading');
+    const loginError = document.getElementById('login-error');
+    const errorMessage = document.getElementById('error-message');
+    
+    function showError(message: string) {
+        if (loginError && errorMessage) {
+            errorMessage.textContent = message;
+            loginError.classList.remove('hidden');
+        }
+    }
+    
+    function hideError() {
+        if (loginError) {
+            loginError.classList.add('hidden');
+        }
+    }
+    
+    function setLoading(loading: boolean) {
+        if (submitBtn) submitBtn.disabled = loading;
+        if (btnText) btnText.classList.toggle('hidden', loading);
+        if (btnLoading) btnLoading.classList.toggle('hidden', !loading);
+    }
+    
+    form?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideError();
+        
+        if (turnstileSiteKey && !turnstileToken) {
+            showError('Please complete the security verification.');
+            return;
+        }
+        
+        setLoading(true);
+        
+        const formData = new FormData(form);
+        const email = formData.get('email') as string;
+        const password = formData.get('password') as string;
+        
+        try {
+            const result = await login(email, password, turnstileToken || undefined);
+            
+            if (result.success) {
+                const params = new URLSearchParams(window.location.search);
+                const redirect = params.get('redirect') || '/account';
+                window.location.href = redirect;
+            } else {
+                showError(result.error || 'Login failed. Please check your credentials.');
+                setLoading(false);
+                if (turnstileSiteKey && (window as any).turnstile) {
+                    turnstileToken = '';
+                    (window as any).turnstile.reset(turnstileContainer);
+                }
+            }
+        } catch (error) {
+            showError('An error occurred. Please try again.');
+            setLoading(false);
+            if (turnstileSiteKey && (window as any).turnstile) {
+                turnstileToken = '';
+                (window as any).turnstile.reset(turnstileContainer);
+            }
+        }
+    });
+</script>

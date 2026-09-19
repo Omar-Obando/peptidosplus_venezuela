@@ -1,0 +1,41 @@
+{
+  "menus": [
+    {
+      "id": "main_default",
+      "name": "Main",
+      "slug": "main",
+      "items": [],
+      "style": "horizontal",
+      "showHome": true,
+      "mobileHamburger": true,
+      "autoSync": true,
+      "excludedPages": [
+        "/order-complete",
+        "/search",
+        "/login",
+        "/register",
+        "/checkout",
+        "/cart",
+        "/forgot-password",
+        "/reset-password",
+        "/account/orders",
+        "/account/addresses",
+        "/account/settings"
+      ]
+    }
+  ],
+  "excludedPages": [
+    "/order-complete",
+    "/search",
+    "/login",
+    "/register",
+    "/checkout",
+    "/cart",
+    "/forgot-password",
+    "/reset-password",
+    "/account/orders",
+    "/account/addresses",
+    "/account/settings"
+  ],
+  "activeMenuId": "main_default"
+}

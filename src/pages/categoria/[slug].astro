@@ -1,0 +1,73 @@
+---
+/**
+ * Category archive — /categoria/[slug] (SSR on-demand)
+ */
+import BlogLayout from '@/layouts/BlogLayout.astro';
+import PostCard from '@/components/blog/PostCard.astro';
+import { safePosts, safeCategories, postTitle, postExcerpt } from '@/lib/blog';
+import { getCategoryBySlug, getPostsByCategory } from '@/lib/wordpress';
+import { SITE } from '@/lib/site';
+
+const { slug } = Astro.params;
+
+if (!slug) return Astro.redirect('/404');
+
+let category: any = null;
+try { category = await getCategoryBySlug(slug); } catch { category = null; }
+
+let posts: any[] = [];
+try { posts = await getPostsByCategory(slug); } catch { posts = []; }
+
+const allCategories = await safeCategories();
+const others = allCategories.filter((c) => c.slug !== slug).slice(0, 8);
+
+const title = category?.name || 'Categoría';
+const description =
+  category?.description || `Artículos y guías de la categoría ${title} en ${SITE.name}.`;
+const canonicalUrl = `${SITE.url}/categoria/${slug}`;
+---
+
+<BlogLayout
+  title={title}
+  description={description}
+  canonicalUrl={canonicalUrl}
+  breadcrumbs={[
+    { name: 'Inicio', path: '/' },
+    { name: 'Blog', path: '/blog' },
+    { name: 'Categorías', path: '/blog' },
+    { name: title, path: canonicalUrl },
+  ]}
+  heroTitle={title}
+  heroDescription={description}
+  jsonLd={[
+    {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: title,
+      url: canonicalUrl,
+      description,
+      isPartOf: { '@type': 'Blog', url: `${SITE.url}/blog` },
+    },
+  ]}
+>
+  {posts.length === 0 ? (
+    <p class="text-content-light py-12 text-center">Aún no hay artículos en esta categoría.</p>
+  ) : (
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+      {posts.map((p) => (
+        <PostCard post={p} />
+      ))}
+    </div>
+  )}
+
+  {others.length > 0 && (
+    <div class="mt-14 pt-8 border-t border-outline">
+      <h2 class="text-lg font-bold text-content mb-5">Otras categorías</h2>
+      <div class="flex flex-wrap gap-2">
+        {others.map((c) => (
+          <a key={c.slug} href={`/categoria/${c.slug}`} class="px-4 py-2 rounded-full text-sm font-medium border border-outline text-content-light hover:border-primary hover:text-primary transition-colors">{c.name}</a>
+        ))}
+      </div>
+    </div>
+  )}
+</BlogLayout>

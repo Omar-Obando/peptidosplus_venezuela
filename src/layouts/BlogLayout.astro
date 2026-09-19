@@ -1,0 +1,98 @@
+---
+/**
+ * BlogLayout — layout de página de listado de blog (index, categoría, tag).
+ * Como PostLayout pero para colecciones/archivos.
+ */
+import BaseLayout from './BaseLayout.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import { SITE } from '@/lib/site';
+
+interface Props {
+  title: string;
+  description?: string;
+  canonicalUrl?: string;
+  image?: string;
+  robots?: string[];
+  breadcrumbs?: Array<{ name: string; path: string }>;
+  jsonLd?: Record<string, unknown>[];
+  heroTitle?: string;
+  heroDescription?: string;
+}
+
+const {
+  title,
+  description = '',
+  canonicalUrl,
+  image,
+  robots,
+  breadcrumbs = [],
+  jsonLd = [],
+  heroTitle,
+  heroDescription,
+} = Astro.props;
+
+const fullTitle = `${title} - ${SITE.name}`;
+
+const breadcrumbLd = breadcrumbs.length
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: breadcrumbs.map((b, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: b.name,
+        item: b.path.startsWith('http') ? b.path : new URL(b.path, SITE.url).href,
+      })),
+    }
+  : null;
+
+const allJsonLd = [breadcrumbLd, ...jsonLd].filter(Boolean) as Record<string, unknown>[];
+---
+
+<BaseLayout
+  title={title}
+  rawTitle={fullTitle}
+  description={description}
+  image={image}
+  canonicalUrl={canonicalUrl}
+  robots={robots}
+  openGraph={{ title: fullTitle, description, image, type: 'website' }}
+  twitter={{ title: fullTitle, description, image }}
+>
+  {allJsonLd.map((ld) => (
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(ld)} />
+  ))}
+
+  <Header />
+  <main id="main-content" class="bg-surface">
+    <div class="container mx-auto px-4 pt-24 md:pt-28 pb-16">
+      {breadcrumbs.length > 0 && (
+        <nav aria-label="Breadcrumb" class="text-sm text-content-light mb-6">
+          <ol class="flex flex-wrap items-center gap-2">
+            {breadcrumbs.map((b, i) => (
+              <li class="flex items-center gap-2">
+                {i > 0 && <span aria-hidden="true">/</span>}
+                {i === breadcrumbs.length - 1 ? (
+                  <span class="text-content font-medium">{b.name}</span>
+                ) : (
+                  <a href={b.path} class="hover:text-primary transition-colors">{b.name}</a>
+                )}
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )}
+
+      {(heroTitle || title) && (
+        <div class="max-w-3xl mb-12">
+          <h1 class="text-4xl sm:text-5xl font-bold text-content mb-4">{heroTitle || title}</h1>
+          {heroDescription !== undefined && <p class="text-lg text-content-light leading-relaxed">{heroDescription}</p>}
+        </div>
+      )}
+
+      <slot />
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

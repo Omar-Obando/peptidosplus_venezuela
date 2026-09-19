@@ -1,0 +1,391 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import Section from '@/components/Section.astro';
+import ArrowLeft from '@lucide/astro/icons/arrow-left';
+import ShieldCheck from '@lucide/astro/icons/shield-check';
+import Truck from '@lucide/astro/icons/truck';
+
+export const prerender = true;
+---
+
+<BaseLayout title="Shopping Cart">
+    <Header />
+    <main id="main-content">
+        <!-- Header -->
+        <div class="bg-surface border-b border-outline">
+            <Section padding="none" class="py-8">
+                <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-content">Shopping Cart</h1>
+            </Section>
+        </div>
+
+        <Section padding="lg" bg="surface-alt">
+            <!-- Empty Cart State -->
+            <div id="empty-cart" class="text-center py-20 bg-surface rounded-2xl border border-outline">
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-primary/10 mb-6">
+                    <svg class="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-content mb-2">Your cart is empty</h2>
+                <p class="text-content-lighter mb-8 max-w-sm mx-auto">Looks like you haven't added any products yet. Browse our collection and find something you love.</p>
+                <a href="/shop" class="group inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
+                    <ArrowLeft class="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                    Continue Shopping
+                </a>
+            </div>
+            
+            <!-- Cart Content -->
+            <div id="cart-content" class="hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Cart Items -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-surface rounded-2xl border border-outline overflow-hidden">
+                            <div class="p-6 border-b border-outline">
+                                <div class="flex items-center justify-between">
+                                    <h2 class="text-lg font-semibold text-content">Cart Items</h2>
+                                    <button 
+                                        id="clear-cart-btn"
+                                        class="text-sm text-error hover:text-error-dark transition-colors cursor-pointer font-medium"
+                                    >
+                                        Clear Cart
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div id="cart-items" class="divide-y divide-outline">
+                            </div>
+                        </div>
+                        
+                        <!-- Coupon Code -->
+                        <div class="bg-surface rounded-2xl border border-outline p-6 mt-6">
+                            <h3 class="text-sm font-semibold text-content mb-3">Coupon Code</h3>
+                            <div class="flex gap-2">
+                                <input 
+                                    type="text" 
+                                    id="coupon-input"
+                                    placeholder="Enter coupon code"
+                                    class="flex-1 px-4 py-2.5 border border-outline rounded-xl text-sm focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface transition-colors"
+                                />
+                                <button 
+                                    id="apply-coupon-btn"
+                                    class="px-5 py-2.5 bg-primary text-white text-sm font-medium rounded-xl hover:bg-primary-dark transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Apply
+                                </button>
+                            </div>
+                            <p id="coupon-error" class="hidden mt-2 text-sm text-error"></p>
+                            <p id="coupon-success" class="hidden mt-2 text-sm text-success"></p>
+                            <div id="applied-coupons" class="mt-3 flex flex-wrap gap-2"></div>
+                        </div>
+
+                        <a href="/shop" class="group inline-flex items-center gap-2 mt-6 text-primary font-medium hover:gap-3 transition-all cursor-pointer">
+                            <ArrowLeft class="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                            Continue Shopping
+                        </a>
+                    </div>
+                    
+                    <!-- Order Summary -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-surface rounded-2xl border border-outline p-6 sticky top-24">
+                            <h2 class="text-lg font-semibold text-content mb-6">Order Summary</h2>
+                            
+                            <div class="space-y-4 mb-6">
+                                <div class="flex justify-between text-content">
+                                    <span>Subtotal</span>
+                                    <span id="cart-subtotal" class="font-medium">$0.00</span>
+                                </div>
+                                <div id="discount-row" class="hidden flex justify-between text-success">
+                                    <span>Discount</span>
+                                    <span id="cart-discount" class="font-medium">-$0.00</span>
+                                </div>
+                                <div class="flex justify-between text-content-light text-sm">
+                                    <span>Shipping</span>
+                                    <span>Calculated at checkout</span>
+                                </div>
+                                <div class="flex justify-between text-content-light text-sm">
+                                    <span>Tax</span>
+                                    <span>Calculated at checkout</span>
+                                </div>
+                            </div>
+                            
+                            <hr class="border-outline mb-6" />
+                            
+                            <div class="flex justify-between text-xl font-bold text-content mb-6">
+                                <span>Total</span>
+                                <span id="cart-total">$0.00</span>
+                            </div>
+                            
+                            <a 
+                                href="/checkout" 
+                                id="checkout-btn"
+                                class="block w-full bg-gradient-to-r from-primary to-primary-dark text-white text-center px-6 py-4 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer"
+                            >
+                                Proceed to Checkout
+                            </a>
+                            
+                            <!-- Trust Indicators -->
+                            <div class="mt-6 pt-6 border-t border-outline space-y-3">
+                                <div class="flex items-center gap-2 text-sm text-content-lighter">
+                                    <ShieldCheck class="w-4 h-4 text-success" />
+                                    <span>Secure SSL checkout</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm text-content-lighter">
+                                    <Truck class="w-4 h-4 text-primary" />
+                                    <span>Free shipping on orders over $50</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Section>
+    </main>
+    <Footer />
+</BaseLayout>
+
+<script>
+    import { 
+        $cart, 
+        $cartTotal,
+        $cartSubtotalValue,
+        $cartDiscount,
+        $appliedCoupons,
+        $cartIsEmpty,
+        initCart, 
+        removeFromCart, 
+        updateQuantity,
+        incrementQuantity,
+        decrementQuantity,
+        clearCart,
+        applyCoupon,
+        removeCoupon,
+        formatCartPrice,
+    } from '../lib/cart';
+    
+    initCart();
+    
+    function escapeHtml(str: string): string {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+    
+    const emptyCart = document.getElementById('empty-cart');
+    const cartContent = document.getElementById('cart-content');
+    const cartItems = document.getElementById('cart-items');
+    const cartSubtotal = document.getElementById('cart-subtotal');
+    const cartTotal = document.getElementById('cart-total');
+    const clearCartBtn = document.getElementById('clear-cart-btn');
+    const couponInput = document.getElementById('coupon-input') as HTMLInputElement;
+    const applyCouponBtn = document.getElementById('apply-coupon-btn');
+    const couponError = document.getElementById('coupon-error');
+    const couponSuccess = document.getElementById('coupon-success');
+    const appliedCouponsEl = document.getElementById('applied-coupons');
+    const discountRow = document.getElementById('discount-row');
+    const cartDiscountEl = document.getElementById('cart-discount');
+    
+    function renderCartItem(item: any) {
+        const safeName = escapeHtml(item.name || '');
+        const safeImage = item.image ? escapeHtml(item.image) : '';
+        const varId = item.variation_id || '';
+        const attrHtml = item.attributes
+            ? Object.entries(item.attributes).map(([k, v]) => `<span class="text-xs text-content-lighter">${escapeHtml(String(k))}: ${escapeHtml(String(v))}</span>`).join('<span class="text-xs text-content-lighter mx-1">/</span>')
+            : '';
+        return `
+            <div class="p-6 flex gap-4" data-cart-item="${item.id}">
+                <div class="w-24 h-24 flex-shrink-0 bg-surface-alt rounded-xl overflow-hidden border border-outline">
+                    ${safeImage 
+                        ? `<img src="${safeImage}" alt="${safeName}" class="w-full h-full object-cover" />`
+                        : `<div class="w-full h-full flex items-center justify-center">
+                            <svg class="w-8 h-8 text-content-lighter" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>`
+                    }
+                </div>
+                
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-semibold text-content truncate">${safeName}</h3>
+                    ${attrHtml ? `<div class="flex flex-wrap gap-1 mt-0.5">${attrHtml}</div>` : ''}
+                    <p class="text-primary font-bold mt-1">${formatCartPrice(item.price)}</p>
+                    
+                    <div class="flex items-center gap-4 mt-3">
+                        <div class="flex items-center border border-outline rounded-xl overflow-hidden">
+                            <button 
+                                class="w-9 h-9 flex items-center justify-center text-content-light hover:text-content hover:bg-surface-alt transition-colors cursor-pointer"
+                                data-action="decrement"
+                                data-id="${item.id}"
+                                data-variation-id="${varId}"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                </svg>
+                            </button>
+                            <span class="w-12 text-center text-content font-medium text-sm">${item.quantity}</span>
+                            <button 
+                                class="w-9 h-9 flex items-center justify-center text-content-light hover:text-content hover:bg-surface-alt transition-colors cursor-pointer"
+                                data-action="increment"
+                                data-id="${item.id}"
+                                data-variation-id="${varId}"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <button 
+                            class="text-error hover:text-error-dark transition-colors cursor-pointer"
+                            data-action="remove"
+                            data-id="${item.id}"
+                            data-variation-id="${varId}"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="text-right">
+                    <p class="font-bold text-content">${formatCartPrice(item.price * item.quantity)}</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    function renderCart() {
+        const items = $cart.get();
+        const isEmpty = items.length === 0;
+        
+        if (emptyCart) emptyCart.classList.toggle('hidden', !isEmpty);
+        if (cartContent) cartContent.classList.toggle('hidden', isEmpty);
+        
+        if (cartItems && !isEmpty) {
+            cartItems.innerHTML = items.map(renderCartItem).join('');
+            attachItemListeners();
+        }
+        
+        const subtotal = $cartSubtotalValue.get();
+        const discount = $cartDiscount.get();
+        const total = $cartTotal.get();
+
+        if (cartSubtotal) cartSubtotal.textContent = formatCartPrice(subtotal);
+        if (cartTotal) cartTotal.textContent = formatCartPrice(total);
+
+        if (discountRow && cartDiscountEl) {
+            if (discount > 0) {
+                discountRow.classList.remove('hidden');
+                cartDiscountEl.textContent = `-${formatCartPrice(discount)}`;
+            } else {
+                discountRow.classList.add('hidden');
+            }
+        }
+
+        renderAppliedCoupons();
+    }
+
+    function renderAppliedCoupons() {
+        if (!appliedCouponsEl) return;
+        const coupons = $appliedCoupons.get();
+        if (coupons.length === 0) {
+            appliedCouponsEl.innerHTML = '';
+            return;
+        }
+        appliedCouponsEl.innerHTML = coupons.map(c => {
+            const desc = c.description === 'fixed_amount'
+                ? `${formatCartPrice(c.discount_amount)} off`
+                : c.description;
+            return `
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-success/10 text-success text-sm rounded-lg font-medium">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"></path>
+                </svg>
+                ${c.code.toUpperCase()} (${desc})
+                <button data-remove-coupon="${c.code}" class="ml-1 hover:text-error transition-colors cursor-pointer">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </span>
+        `}).join('');
+
+        appliedCouponsEl.querySelectorAll('[data-remove-coupon]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const code = (btn as HTMLElement).dataset.removeCoupon;
+                if (code) removeCoupon(code);
+            });
+        });
+    }
+    
+    function attachItemListeners() {
+        document.querySelectorAll('[data-action]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const el = btn as HTMLElement;
+                const action = el.dataset.action;
+                const id = parseInt(el.dataset.id || '0');
+                const varId = el.dataset.variationId ? parseInt(el.dataset.variationId) : undefined;
+
+                switch (action) {
+                    case 'increment':
+                        incrementQuantity(id, varId);
+                        break;
+                    case 'decrement':
+                        decrementQuantity(id, varId);
+                        break;
+                    case 'remove':
+                        removeFromCart(id, varId);
+                        break;
+                }
+            });
+        });
+    }
+    
+    clearCartBtn?.addEventListener('click', () => {
+        if (confirm('Are you sure you want to clear your cart?')) {
+            clearCart();
+        }
+    });
+
+    applyCouponBtn?.addEventListener('click', async () => {
+        if (!couponInput) return;
+        const code = couponInput.value.trim();
+        if (!code) return;
+
+        if (couponError) { couponError.classList.add('hidden'); couponError.textContent = ''; }
+        if (couponSuccess) { couponSuccess.classList.add('hidden'); couponSuccess.textContent = ''; }
+        
+        applyCouponBtn.setAttribute('disabled', '');
+        const result = await applyCoupon(code);
+        applyCouponBtn.removeAttribute('disabled');
+
+        if (result.success) {
+            couponInput.value = '';
+            if (couponSuccess) {
+                couponSuccess.textContent = 'Coupon applied!';
+                couponSuccess.classList.remove('hidden');
+                setTimeout(() => couponSuccess.classList.add('hidden'), 3000);
+            }
+        } else {
+            if (couponError) {
+                couponError.textContent = result.error || 'Invalid coupon';
+                couponError.classList.remove('hidden');
+            }
+        }
+    });
+
+    couponInput?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            applyCouponBtn?.click();
+        }
+    });
+    
+    $cart.subscribe(() => renderCart());
+    $appliedCoupons.subscribe(() => renderCart());
+    window.addEventListener('cart:currency-updated', renderCart);
+    
+    renderCart();
+</script>

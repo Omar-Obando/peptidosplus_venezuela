@@ -1,0 +1,58 @@
+---
+/**
+ * Author archive — /autor/[slug] (SSR on-demand)
+ */
+import BlogLayout from '@/layouts/BlogLayout.astro';
+import PostCard from '@/components/blog/PostCard.astro';
+import { getUserBySlug, getPosts } from '@/lib/wordpress';
+import { postTitle, postExcerpt, safePosts } from '@/lib/blog';
+import { SITE } from '@/lib/site';
+
+const { slug } = Astro.params;
+
+if (!slug) return Astro.redirect('/404');
+
+let user: any = null;
+try { user = await getUserBySlug(slug); } catch { user = null; }
+if (!user) return Astro.redirect('/404');
+
+let userPosts: any[] = [];
+try { userPosts = await getPosts({ author: user.id, perPage: 100 }); } catch { userPosts = []; }
+
+const title = user.name;
+const description = user.description || `Artículos escritos por ${user.name} en el blog de ${SITE.name}.`;
+const canonicalUrl = `${SITE.url}/autor/${slug}`;
+---
+
+<BlogLayout
+  title={title}
+  description={description}
+  canonicalUrl={canonicalUrl}
+  breadcrumbs={[
+    { name: 'Inicio', path: '/' },
+    { name: 'Blog', path: '/blog' },
+    { name: 'Autores', path: '/blog' },
+    { name: title, path: canonicalUrl },
+  ]}
+  heroTitle={title}
+  heroDescription={description}
+  jsonLd={[
+    {
+      '@context': 'https://schema.org',
+      '@type': 'ProfilePage',
+      name: title,
+      url: canonicalUrl,
+      mainEntity: { '@type': 'Person', name: user.name, url: canonicalUrl },
+    },
+  ]}
+>
+  {userPosts.length === 0 ? (
+    <p class="text-content-light py-12 text-center">Este autor aún no tiene artículos publicados.</p>
+  ) : (
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+      {userPosts.map((p) => (
+        <PostCard post={p} />
+      ))}
+    </div>
+  )}
+</BlogLayout>

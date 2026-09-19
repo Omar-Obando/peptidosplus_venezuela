@@ -1,0 +1,37 @@
+---
+/**
+ * Organization Schema (JSON-LD)
+ *
+ * Render a `<script type="application/ld+json">` block with
+ * https://schema.org/Organization for the brand. Used site-wide so
+ * Knowledge Panels and rich results can associate the domain with the brand.
+ *
+ * Props:
+ *  - name: string (required)
+ *  - url: string (required)
+ *  - logo: string (optional, absolute URL)
+ *  - sameAs: string[] (optional, social profiles)
+ *  - contactEmail: string (optional)
+ */
+interface Props {
+  name: string;
+  url: string;
+  logo?: string;
+  sameAs?: string[];
+  contactEmail?: string;
+}
+
+const { name, url, logo, sameAs = [], contactEmail } = Astro.props;
+
+const data: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name,
+  url,
+  ...(logo ? { logo } : {}),
+  ...(sameAs.length ? { sameAs } : {}),
+  ...(contactEmail ? { contactPoint: [{ '@type': 'ContactPoint', email: contactEmail, contactType: 'customer support' }] } : {}),
+};
+---
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(data)} />

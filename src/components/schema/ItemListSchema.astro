@@ -1,0 +1,35 @@
+---
+/**
+ * ItemList Schema (JSON-LD)
+ *
+ * Renders https://schema.org/ItemList with a list of items (blog posts,
+ * products, etc.). Used on listing/index pages for potential rich results.
+ *
+ * Props:
+ *  - items: Array<{ name; url; image?; description? }>
+ */
+interface Props {
+  items: Array<{ name: string; url: string; image?: string; description?: string }>;
+}
+
+const { items = [] } = Astro.props;
+const base = Astro.site || 'https://ve.peptidosplus.com';
+const url = (path: string) => (path.startsWith('http') ? path : new URL(path, base).href);
+
+const itemListElement = items.map((item, i) => ({
+  '@type': 'ListItem',
+  position: i + 1,
+  url: url(item.url),
+  name: item.name,
+  ...(item.image ? { image: item.image } : {}),
+  ...(item.description ? { description: item.description } : {}),
+}));
+
+const data = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  itemListElement,
+};
+---
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(data)} />

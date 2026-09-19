@@ -1,0 +1,54 @@
+---
+/**
+ * SocialShare — botones de compartir (X/Twitter, Facebook, WhatsApp, LinkedIn)
+ * con enlaces de compartir generados por servidor (JS-free, sin SDKs).
+ */
+import { SITE } from '@/lib/site';
+
+interface Props {
+  url: string;
+  title: string;
+}
+const { url, title } = Astro.props;
+const encodedUrl = encodeURIComponent(url);
+const encodedTitle = encodeURIComponent(title);
+
+const links = [
+  {
+    label: 'Compartir en X',
+    href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
+    icon: '𝕏',
+  },
+  {
+    label: 'Compartir en Facebook',
+    href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+    icon: 'f',
+  },
+  {
+    label: 'Compartir en WhatsApp',
+    href: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`,
+    icon: '✆',
+  },
+  {
+    label: 'Compartir en LinkedIn',
+    href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+    icon: 'in',
+  },
+];
+---
+<div class="mt-10 pt-6 border-t border-outline">
+  <span class="text-sm font-semibold text-content mb-3 block">Compartir este artículo</span>
+  <div class="flex flex-wrap gap-2">
+    {links.map((l) => (
+      <a
+        href={l.href}
+        target="_blank"
+        rel="noopener noreferrer nofollow"
+        aria-label={l.label}
+        class="inline-flex items-center justify-center w-10 h-10 rounded-xl border border-outline text-content-light hover:bg-primary hover:text-white hover:border-primary transition-all"
+      >
+        <span class="font-bold">{l.icon}</span>
+      </a>
+    ))}
+  </div>
+</div>

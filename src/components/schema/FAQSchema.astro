@@ -1,0 +1,31 @@
+---
+/**
+ * FAQ Schema (JSON-LD)
+ *
+ * Renders https://schema.org/FAQPage from an array of `{ question, answer }`.
+ * Pair it with visible FAQ content on the same page (Google requires the
+ * marked-up questions to be visible).
+ */
+interface Props {
+  faqs: Array<{ question: string; answer: string }>;
+}
+
+const { faqs = [] } = Astro.props;
+
+const mainEntity = faqs.map((f) => ({
+  '@type': 'Question',
+  name: f.question,
+  acceptedAnswer: {
+    '@type': 'Answer',
+    text: f.answer,
+  },
+}));
+
+const data = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity,
+};
+---
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(data)} />

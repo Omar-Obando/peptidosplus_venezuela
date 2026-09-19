@@ -1,0 +1,237 @@
+---
+/**
+ * Add to Cart Button Component
+ * 
+ * Reusable add-to-cart button with optional quantity selector
+ */
+
+import { getPublicProductImageUrl } from '../../lib/product-media';
+
+interface Props {
+    product: {
+        id: number;
+        name: string;
+        price: string;
+        stock_status: string;
+        purchasable: boolean;
+        images?: Array<{ src: string; alt: string }>;
+        sku?: string;
+    };
+    showQuantity?: boolean;
+    size?: 'small' | 'medium' | 'large';
+    class?: string;
+    maxQuantity?: number;
+    soldIndividually?: boolean;
+}
+
+const { 
+    product, 
+    showQuantity = false, 
+    size = 'medium',
+    class: className = '',
+    maxQuantity,
+    soldIndividually = false,
+} = Astro.props;
+
+const inStock = product.stock_status === 'instock' && product.purchasable;
+const buttonId = `add-to-cart-${product.id}`;
+const quantityId = `quantity-${product.id}`;
+const effectiveMax = soldIndividually ? 1 : (maxQuantity ?? 0);
+const showQuantitySelector = showQuantity && inStock && !soldIndividually;
+
+// Get optimized WebP image URL for cart (from public folder)
+const originalImageUrl = product.images?.[0]?.src || '';
+const cartImageUrl = getPublicProductImageUrl(originalImageUrl) || originalImageUrl;
+
+const sizeClasses = {
+    small: 'py-2 px-4 text-sm',
+    medium: 'py-3 px-6 text-base',
+    large: 'py-4 px-8 text-lg',
+};
+---
+
+<div class={`flex flex-col gap-2 ${className}`} data-add-to-cart-wrapper data-max-qty={effectiveMax || undefined}>
+    <div class="flex items-center gap-4">
+    {showQuantitySelector && (
+        <div class="flex items-center border border-outline rounded-lg overflow-hidden">
+            <button 
+                type="button"
+                class="w-10 h-10 flex items-center justify-center text-content-light hover:text-content hover:bg-surface-alt transition-colors cursor-pointer"
+                data-quantity-decrease
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                </svg>
+            </button>
+            <input 
+                type="number" 
+                id={quantityId}
+                min="1"
+                max={effectiveMax > 0 ? effectiveMax : undefined}
+                value="1"
+                class="w-14 h-10 text-center border-x border-outline text-content bg-surface focus:outline-none"
+                data-quantity-input
+            />
+            <button 
+                type="button"
+                class="w-10 h-10 flex items-center justify-center text-content-light hover:text-content hover:bg-surface-alt transition-colors cursor-pointer"
+                data-quantity-increase
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+            </button>
+        </div>
+    )}
+    
+    <button 
+        type="button"
+        id={buttonId}
+        class={`flex-1 flex items-center justify-center gap-2 rounded-lg font-semibold transition-colors cursor-pointer ${sizeClasses[size]} ${
+            inStock 
+                ? 'bg-primary text-white hover:bg-primary-dark' 
+                : 'bg-surface-alt text-content-lighter cursor-not-allowed'
+        }`}
+        data-product-id={product.id}
+        data-product-name={product.name}
+        data-product-price={product.price}
+        data-product-image={cartImageUrl}
+        data-product-sku={product.sku || ''}
+        disabled={!inStock}
+    >
+        {inStock ? (
+            <>
+                <svg data-btn-icon class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+                <span data-btn-text>Add to Cart</span>
+                <svg data-btn-loading class="hidden animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <svg data-btn-success-icon class="hidden w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span data-btn-success class="hidden">Added!</span>
+            </>
+        ) : (
+            <span>Out of Stock</span>
+        )}
+    </button>
+    </div>
+    {inStock && soldIndividually && (
+        <p class="text-xs text-content-lighter">Limit 1 per order</p>
+    )}
+    {inStock && !soldIndividually && effectiveMax > 0 && (
+        <p class="text-xs text-content-lighter">{effectiveMax} available</p>
+    )}
+</div>
+
+<script>
+    // Add to cart functionality - handles all buttons on the page
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('[data-add-to-cart-wrapper]').forEach(wrapper => {
+            const button = wrapper.querySelector('button[data-product-id]') as HTMLButtonElement;
+            const quantityInput = wrapper.querySelector('input[data-quantity-input]') as HTMLInputElement | null;
+            const decreaseBtn = wrapper.querySelector('button[data-quantity-decrease]');
+            const increaseBtn = wrapper.querySelector('button[data-quantity-increase]');
+            
+            if (!button) return;
+
+            const maxQty = parseInt((wrapper as HTMLElement).dataset.maxQty || '0') || 0;
+            
+            // Quantity controls
+            decreaseBtn?.addEventListener('click', () => {
+                if (quantityInput) {
+                    const current = parseInt(quantityInput.value) || 1;
+                    if (current > 1) {
+                        quantityInput.value = String(current - 1);
+                    }
+                }
+            });
+            
+            increaseBtn?.addEventListener('click', () => {
+                if (quantityInput) {
+                    const current = parseInt(quantityInput.value) || 1;
+                    if (maxQty > 0 && current >= maxQty) return;
+                    quantityInput.value = String(current + 1);
+                }
+            });
+            
+            // Validate quantity input
+            quantityInput?.addEventListener('change', () => {
+                let value = parseInt(quantityInput.value) || 1;
+                if (value < 1) value = 1;
+                if (maxQty > 0 && value > maxQty) value = maxQty;
+                quantityInput.value = String(value);
+            });
+            
+            // Add to cart
+            button.addEventListener('click', async () => {
+                if (button.disabled) return;
+                
+                const btnIcon = button.querySelector('[data-btn-icon]');
+                const btnText = button.querySelector('[data-btn-text]');
+                const btnLoading = button.querySelector('[data-btn-loading]');
+                const btnSuccessIcon = button.querySelector('[data-btn-success-icon]');
+                const btnSuccess = button.querySelector('[data-btn-success]');
+                
+                // Get quantity
+                const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
+                
+                // Show loading
+                btnIcon?.classList.add('hidden');
+                btnText?.classList.add('hidden');
+                btnLoading?.classList.remove('hidden');
+                button.disabled = true;
+                
+                try {
+                    // Import cart store and add item
+                    const { addToCart, openCartDrawer } = await import('../../lib/cart');
+                    
+                    const cartItem: any = {
+                        id: parseInt(button.dataset.productId || '0'),
+                        name: button.dataset.productName || '',
+                        price: parseFloat(button.dataset.productPrice || '0'),
+                        quantity,
+                        image: button.dataset.productImage || '',
+                        sku: button.dataset.productSku || '',
+                    };
+                    if (button.dataset.variationId) {
+                        cartItem.variation_id = parseInt(button.dataset.variationId);
+                    }
+                    if (button.dataset.variationAttributes) {
+                        try { cartItem.attributes = JSON.parse(button.dataset.variationAttributes); } catch {}
+                    }
+                    addToCart(cartItem);
+                    
+                    // Show success state
+                    btnLoading?.classList.add('hidden');
+                    btnSuccessIcon?.classList.remove('hidden');
+                    btnSuccess?.classList.remove('hidden');
+                    
+                    // Open cart drawer
+                    openCartDrawer();
+                    
+                    // Reset after delay
+                    setTimeout(() => {
+                        btnSuccessIcon?.classList.add('hidden');
+                        btnSuccess?.classList.add('hidden');
+                        btnIcon?.classList.remove('hidden');
+                        btnText?.classList.remove('hidden');
+                        button.disabled = false;
+                        
+                        // Reset quantity
+                        if (quantityInput) quantityInput.value = '1';
+                    }, 2000);
+                } catch (error) {
+                    console.error('Failed to add to cart:', error);
+                    btnLoading?.classList.add('hidden');
+                    btnIcon?.classList.remove('hidden');
+                    btnText?.classList.remove('hidden');
+                    button.disabled = false;
+                }
+            });
+        });
+    });
+</script>

@@ -1,0 +1,296 @@
+---
+import { getLocalProducts, getLocalVisibleCategories } from '../lib/local-product-data';
+import { formatPrice, isInStock } from '../lib/woocommerce';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import Section from '@/components/Section.astro';
+import ProductCard from '@/components/shop/ProductCard.astro';
+import SearchIcon from '@lucide/astro/icons/search';
+import XIcon from '@lucide/astro/icons/x';
+
+export const prerender = false;
+
+const query = Astro.url.searchParams.get('q')?.trim() || '';
+const categoryFilter = Astro.url.searchParams.get('category') || '';
+
+const allProducts = await getLocalProducts();
+const categories = await getLocalVisibleCategories();
+
+let results = allProducts;
+
+if (query) {
+    const lowerQuery = query.toLowerCase();
+    results = results.filter(product => {
+        const name = (product.name || '').toLowerCase();
+        const description = (product.short_description || product.description || '').toLowerCase();
+        const sku = (product.sku || '').toLowerCase();
+        const cats = (product.categories || []).map((c: any) => c.name.toLowerCase()).join(' ');
+        const tags = (product.tags || []).map((t: any) => t.name.toLowerCase()).join(' ');
+        return name.includes(lowerQuery)
+            || description.includes(lowerQuery)
+            || sku.includes(lowerQuery)
+            || cats.includes(lowerQuery)
+            || tags.includes(lowerQuery);
+    });
+}
+
+if (categoryFilter) {
+    results = results.filter(product =>
+        (product.categories || []).some((c: any) => c.slug === categoryFilter)
+    );
+}
+---
+
+<BaseLayout title={query ? `Search: ${query}` : 'Search Products'} description="Search our product catalog">
+    <Header />
+    <main id="main-content">
+        <!-- Hero / Search Bar -->
+        <div class="relative overflow-hidden bg-gradient-to-br from-primary/5 via-surface to-primary-light/10">
+            <div class="absolute inset-0 bg-[linear-gradient(to_right,var(--color-outline)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-outline)_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-30"></div>
+            <Section padding="md" class="relative z-10">
+                <div class="text-center max-w-2xl mx-auto">
+                    <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-content mb-6">
+                        Search Products
+                    </h1>
+                    <form action="/search" method="get" class="relative">
+                        <div class="relative">
+                            <SearchIcon class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-content-lighter pointer-events-none" />
+                            <input
+                                type="text"
+                                name="q"
+                                value={query}
+                                placeholder="What are you looking for?"
+                                autocomplete="off"
+                                class="w-full pl-12 pr-28 py-4 rounded-2xl border border-outline bg-surface text-content text-lg placeholder:text-content-lighter focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary shadow-sm"
+                            />
+                            {categoryFilter && (
+                                <input type="hidden" name="category" value={categoryFilter} />
+                            )}
+                            <button
+                                type="submit"
+                                class="absolute right-2 top-1/2 -translate-y-1/2 bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-2.5 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer text-sm"
+                            >
+                                Search
+                            </button>
+                        </div>
+                    </form>
+
+                    {/* Category pills */}
+                    {categories.length > 0 && (
+                        <div class="flex flex-wrap items-center justify-center gap-2 mt-6">
+                            <a
+                                href={query ? `/search?q=${encodeURIComponent(query)}` : '/search'}
+                                class:list={[
+                                    'px-4 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer border',
+                                    !categoryFilter
+                                        ? 'bg-primary text-white border-primary'
+                                        : 'bg-surface text-content-light border-outline hover:border-primary hover:text-primary',
+                                ]}
+                            >
+                                All
+                            </a>
+                            {categories.slice(0, 8).map(cat => (
+                                <a
+                                    href={query
+                                        ? `/search?q=${encodeURIComponent(query)}&category=${cat.slug}`
+                                        : `/search?category=${cat.slug}`}
+                                    class:list={[
+                                        'px-4 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer border',
+                                        categoryFilter === cat.slug
+                                            ? 'bg-primary text-white border-primary'
+                                            : 'bg-surface text-content-light border-outline hover:border-primary hover:text-primary',
+                                    ]}
+                                >
+                                    {cat.name}
+                                </a>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </Section>
+        </div>
+
+        <Section padding="lg" bg="surface-alt">
+            {/* Results header */}
+            {query && (
+                <div class="flex items-center justify-between mb-8">
+                    <p class="text-content-light">
+                        <span id="product-count-range"></span>{results.length === 0 ? 'No results' : `${results.length} result${results.length === 1 ? '' : 's'}`} for
+                        <span class="font-semibold text-content">"{query}"</span>
+                        {categoryFilter && (
+                            <span> in <span class="font-semibold text-content">{categories.find(c => c.slug === categoryFilter)?.name || categoryFilter}</span></span>
+                        )}
+                    </p>
+                    <a
+                        href="/search"
+                        class="inline-flex items-center gap-1.5 text-sm text-content-lighter hover:text-primary transition-colors cursor-pointer"
+                    >
+                        <XIcon class="w-4 h-4" />
+                        Clear search
+                    </a>
+                </div>
+            )}
+
+            {!query && !categoryFilter ? (
+                <div class="text-center py-16">
+                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-primary/10 mb-6">
+                        <SearchIcon class="w-10 h-10 text-primary" />
+                    </div>
+                    <h2 class="text-2xl font-bold text-content mb-2">Start searching</h2>
+                    <p class="text-content-lighter max-w-md mx-auto">
+                        Type a product name, category, or keyword above to find what you need.
+                    </p>
+                </div>
+            ) : results.length > 0 ? (
+                <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {results.map(product => (
+                        <ProductCard product={product} />
+                    ))}
+                </div>
+                
+                <!-- Pagination -->
+                <div id="pagination-controls" class="hidden mt-8 flex items-center justify-center gap-2">
+                    <button id="page-prev" class="px-4 py-2 border border-outline rounded-lg text-sm font-medium text-content hover:bg-surface-alt transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
+                        Previous
+                    </button>
+                    <div id="page-numbers" class="flex items-center gap-1"></div>
+                    <button id="page-next" class="px-4 py-2 border border-outline rounded-lg text-sm font-medium text-content hover:bg-surface-alt transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
+                        Next
+                    </button>
+                </div>
+            ) : (
+                <div class="text-center py-16 bg-surface rounded-2xl border border-outline">
+                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-surface-alt mb-6">
+                        <SearchIcon class="w-10 h-10 text-content-lighter" />
+                    </div>
+                    <h2 class="text-2xl font-bold text-content mb-2">No products found</h2>
+                    <p class="text-content-lighter mb-8 max-w-md mx-auto">
+                        We could not find any products matching your search. Try different keywords or browse our catalog.
+                    </p>
+                    <div class="flex items-center justify-center gap-4">
+                        <a
+                            href="/search"
+                            class="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-outline text-content font-medium hover:bg-surface-alt transition-colors cursor-pointer"
+                        >
+                            Clear Search
+                        </a>
+                        <a
+                            href="/shop"
+                            class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer"
+                        >
+                            Browse All Products
+                        </a>
+                    </div>
+                </div>
+            )}
+        </Section>
+    </main>
+    <Footer />
+</BaseLayout>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const PRODUCTS_PER_PAGE = 24;
+        const grid = document.getElementById('product-grid');
+        const productCountRange = document.getElementById('product-count-range');
+        const paginationControls = document.getElementById('pagination-controls');
+        const pagePrev = document.getElementById('page-prev') as HTMLButtonElement;
+        const pageNext = document.getElementById('page-next') as HTMLButtonElement;
+        const pageNumbers = document.getElementById('page-numbers');
+        
+        if (!grid) return;
+        
+        const allCards = Array.from(grid.querySelectorAll('[data-product-card]'));
+        let currentPage = 1;
+        
+        function updateDisplay() {
+            const totalPages = Math.max(1, Math.ceil(allCards.length / PRODUCTS_PER_PAGE));
+            
+            if (currentPage > totalPages) currentPage = totalPages;
+            
+            const start = (currentPage - 1) * PRODUCTS_PER_PAGE;
+            const end = start + PRODUCTS_PER_PAGE;
+            
+            allCards.forEach((card, i) => {
+                (card as HTMLElement).style.display = (i >= start && i < end) ? '' : 'none';
+            });
+            
+            const showStart = allCards.length > 0 ? start + 1 : 0;
+            const showEnd = Math.min(end, allCards.length);
+            
+            if (productCountRange && allCards.length > PRODUCTS_PER_PAGE) {
+                productCountRange.textContent = `${showStart}-${showEnd} of `;
+            } else if (productCountRange) {
+                productCountRange.textContent = '';
+            }
+            
+            renderPagination(totalPages);
+            
+            const url = new URL(window.location.href);
+            if (currentPage > 1) {
+                url.searchParams.set('page', String(currentPage));
+            } else {
+                url.searchParams.delete('page');
+            }
+            history.replaceState(null, '', url.toString());
+        }
+        
+        function renderPagination(totalPages: number) {
+            if (!paginationControls || !pageNumbers) return;
+            
+            if (totalPages <= 1) {
+                paginationControls.classList.add('hidden');
+                return;
+            }
+            paginationControls.classList.remove('hidden');
+            
+            if (pagePrev) pagePrev.disabled = currentPage <= 1;
+            if (pageNext) pageNext.disabled = currentPage >= totalPages;
+            
+            let html = '';
+            const maxVisible = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+            if (endPage - startPage < maxVisible - 1) {
+                startPage = Math.max(1, endPage - maxVisible + 1);
+            }
+            
+            if (startPage > 1) {
+                html += `<button data-page="1" class="w-10 h-10 rounded-lg text-sm font-medium text-content hover:bg-surface-alt border border-outline transition-colors cursor-pointer">1</button>`;
+                if (startPage > 2) html += `<span class="px-1 text-content-lighter">...</span>`;
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const isActive = i === currentPage;
+                html += `<button data-page="${i}" class="w-10 h-10 rounded-lg text-sm font-medium transition-colors cursor-pointer ${isActive ? 'bg-primary text-white' : 'text-content hover:bg-surface-alt border border-outline'}">${i}</button>`;
+            }
+            
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) html += `<span class="px-1 text-content-lighter">...</span>`;
+                html += `<button data-page="${totalPages}" class="w-10 h-10 rounded-lg text-sm font-medium text-content hover:bg-surface-alt border border-outline transition-colors cursor-pointer">${totalPages}</button>`;
+            }
+            
+            pageNumbers.innerHTML = html;
+            pageNumbers.querySelectorAll('button[data-page]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    currentPage = parseInt((btn as HTMLElement).dataset.page || '1');
+                    updateDisplay();
+                    window.scrollTo({ top: grid.offsetTop - 100, behavior: 'smooth' });
+                });
+            });
+        }
+        
+        pagePrev?.addEventListener('click', () => {
+            if (currentPage > 1) { currentPage--; updateDisplay(); window.scrollTo({ top: grid.offsetTop - 100, behavior: 'smooth' }); }
+        });
+        pageNext?.addEventListener('click', () => {
+            currentPage++; updateDisplay(); window.scrollTo({ top: grid.offsetTop - 100, behavior: 'smooth' });
+        });
+        
+        const urlPage = new URL(window.location.href).searchParams.get('page');
+        if (urlPage) currentPage = Math.max(1, parseInt(urlPage));
+        
+        updateDisplay();
+    });
+</script>

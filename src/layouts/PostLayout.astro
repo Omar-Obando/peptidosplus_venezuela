@@ -1,0 +1,142 @@
+---
+/**
+ * PostLayout — layout de artículo de blog (SSR).
+ *
+ * Propiedades SEO: title/description/canonical/robots, Open Graph, Twitter,
+ * JSON-LD (Article + BreadcrumbList). Estilo basado en los tokens del tema
+ * (bg-surface, text-content, border-outline, primary, etc.).
+ */
+import BaseLayout from './BaseLayout.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import { SITE } from '@/lib/site';
+
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+  canonicalUrl?: string;
+  robots?: string[];
+  openGraph?: { title?: string; description?: string; image?: string; type?: string };
+  twitter?: { title?: string; description?: string; image?: string; card?: string };
+  breadcrumbs?: Array<{ name: string; path: string }>;
+  jsonLd?: Record<string, unknown>[];
+  authorName?: string;
+  datePublished?: string;
+  dateModified?: string;
+}
+
+const {
+  title,
+  description = '',
+  image,
+  canonicalUrl,
+  robots,
+  openGraph,
+  twitter,
+  breadcrumbs = [],
+  jsonLd = [],
+  authorName,
+  datePublished,
+  dateModified,
+} = Astro.props;
+
+const fullTitle = `${title} - ${SITE.name}`;
+const ogTitle = openGraph?.title || fullTitle;
+const ogDescription = openGraph?.description || description;
+const ogImage = openGraph?.image || image;
+const twitterCard = twitter?.card || 'summary_large_image';
+const twitterTitle = twitter?.title || fullTitle;
+
+// JSON-LD Article (auto if provided/derivable)
+const articleLd: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: title,
+  ...(description ? { description } : {}),
+  ...(image ? { image } : {}),
+  ...(authorName ? { author: { '@type': 'Person', name: authorName } } : { author: { '@type': 'Organization', name: SITE.name } }),
+  publisher: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+  ...(datePublished ? { datePublished } : {}),
+  ...(dateModified ? { dateModified } : {}),
+  ...(canonicalUrl ? { mainEntityOfPage: canonicalUrl } : {}),
+};
+
+const breadcrumbLd = breadcrumbs.length
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: breadcrumbs.map((b, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: b.name,
+        item: b.path.startsWith('http') ? b.path : new URL(b.path, SITE.url).href,
+      })),
+    }
+  : null;
+
+const allJsonLd = [articleLd, breadcrumbLd, ...jsonLd].filter(Boolean) as Record<string, unknown>[];
+---
+
+<BaseLayout
+  title={title}
+  rawTitle={fullTitle}
+  description={description}
+  image={ogImage}
+  canonicalUrl={canonicalUrl}
+  robots={robots}
+  openGraph={{ title: ogTitle, description: ogDescription, image: ogImage, type: 'article' }}
+  twitter={{ title: twitterTitle, description: ogDescription, image: ogImage, card: twitterCard }}
+>
+  {allJsonLd.map((ld) => (
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(ld)} />
+  ))}
+
+  <Header />
+  <main id="main-content" class="bg-surface">
+    <div class="container mx-auto px-4 pt-24 md:pt-28 pb-16">
+      <!-- Breadcrumbs -->
+      {breadcrumbs.length > 0 && (
+        <nav aria-label="Breadcrumb" class="text-sm text-content-light mb-8">
+          <ol class="flex flex-wrap items-center gap-2">
+            {breadcrumbs.map((b, i) => (
+              <li class="flex items-center gap-2">
+                {i > 0 && <span aria-hidden="true">/</span>}
+                {i === breadcrumbs.length - 1 ? (
+                  <span class="text-content font-medium">{b.name}</span>
+                ) : (
+                  <a href={b.path} class="hover:text-primary transition-colors">{b.name}</a>
+                )}
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )}
+
+      <div class="grid lg:grid-cols-12 gap-12">
+        <!-- Article -->
+        <article class="lg:col-span-8">
+          <header class="mb-10">
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-content leading-tight mb-6">{title}</h1>
+            {description && <p class="text-lg text-content-light leading-relaxed mb-6">{description}</p>}
+            {image && (
+              <figure class="overflow-hidden rounded-2xl mb-8">
+                <img src={image} alt={title} class="w-full aspect-video object-cover" fetchpriority="high" />
+              </figure>
+            )}
+          </header>
+
+          <slot />
+        </article>
+
+        <!-- Sidebar -->
+        <aside class="lg:col-span-4">
+          <div class="lg:sticky lg:top-24 space-y-6">
+            <slot name="sidebar" />
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

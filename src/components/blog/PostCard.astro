@@ -1,0 +1,79 @@
+---
+/**
+ * PostCard — tarjeta de artículo del blog (listing pages).
+ *
+ * Props:
+ *  - post: WP post object
+ *  - featured?: boolean (hero card styling)
+ */
+import { postImage, postTitle, postExcerpt, catName, esDate, readTime } from '@/lib/blog';
+
+interface Props {
+  post: any;
+  featured?: boolean;
+}
+const { post, featured = false } = Astro.props;
+const image = postImage(post);
+const title = postTitle(post);
+const excerpt = postExcerpt(post, featured ? 200 : 130);
+const href = `/blog/${post.slug}`;
+---
+
+{
+  featured ? (
+    <article class="group relative overflow-hidden rounded-3xl border border-outline bg-surface shadow-sm hover:shadow-xl transition-all duration-300">
+      <a href={href} class="flex flex-col lg:flex-row">
+        <div class="relative lg:w-3/5 aspect-[16/10] overflow-hidden">
+          {image ? (
+            <img src={image} alt={title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="eager" />
+          ) : (
+            <div class="w-full h-full bg-gradient-to-br from-primary/10 to-primary-light/20 flex items-center justify-center">
+              <span class="text-4xl font-black text-primary/40">{title.slice(0, 2).toUpperCase()}</span>
+            </div>
+          )}
+          <span class="absolute top-4 left-4 px-3 py-1 rounded-full bg-primary text-white text-xs font-semibold">Destacado</span>
+        </div>
+        <div class="lg:w-2/5 p-6 lg:p-8 flex flex-col justify-center">
+          <div class="flex items-center gap-3 text-xs text-content-light mb-3">
+            <span class="font-semibold text-primary uppercase tracking-wide">{catName(post)}</span>
+            <span>•</span>
+            <time datetime={post.date}>{esDate(post.date)}</time>
+          </div>
+          <h2 class="text-2xl lg:text-3xl font-bold text-content group-hover:text-primary transition-colors mb-4" set:html={title} />
+          <p class="text-content-light leading-relaxed line-clamp-3">{excerpt}</p>
+          <span class="mt-5 inline-flex items-center gap-2 text-sm font-medium text-primary">
+            Leer artículo
+            <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7" /></svg>
+          </span>
+        </div>
+      </a>
+    </article>
+  ) : (
+    <article class="group flex flex-col h-full rounded-2xl border border-outline bg-surface overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+      <a href={href} class="flex flex-col h-full">
+        <div class="aspect-[4/3] overflow-hidden bg-surface-alt">
+          {image ? (
+            <img src={image} alt={title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+          ) : (
+            <div class="w-full h-full bg-gradient-to-br from-primary/10 to-primary-light/20 flex items-center justify-center">
+              <span class="text-5xl font-black text-primary/30">{title.slice(0, 2).toUpperCase()}</span>
+            </div>
+          )}
+        </div>
+        <div class="p-5 flex flex-col flex-1">
+          <div class="flex items-center gap-2 text-xs text-content-light mb-3">
+            <span class="font-semibold text-primary uppercase tracking-wide">{catName(post)}</span>
+            <span>•</span>
+            <time datetime={post.date}>{esDate(post.date)}</time>
+          </div>
+          <h3 class="text-lg font-bold text-content group-hover:text-primary transition-colors mb-2 line-clamp-2" set:html={title} />
+          <p class="text-sm text-content-light leading-relaxed line-clamp-2 mb-4">{excerpt}</p>
+          <div class="mt-auto flex items-center justify-between text-xs text-content-lighter">
+            <span>{readTime(post)} min de lectura</span>
+            <span class="font-medium text-primary group-hover:translate-x-0.5 transition-transform">Leer →</span>
+          </div>
+        </div>
+      </a>
+    </article>
+  )
+}

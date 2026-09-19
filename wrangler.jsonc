@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "peptidosplus_venezuela",
+  "account_id": "a09d78afd5388a0918b6405708714308",
+  "compatibility_date": "2026-07-31",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
+  "kv_namespaces": [
+    {
+      "binding": "CACHE",
+      "id": "dba5a5873e444b8697bfb7d68571e398"
+    }
+  ],
+  "vars": {
+    "WP_API_URL": "https://ve-cms.peptidosplus.com/wp-json",
+    "WC_API_URL": "https://ve-cms.peptidosplus.com/wp-json",
+    "PUBLIC_SITE_URL": "https://ve.peptidosplus.com"
+  }
+}

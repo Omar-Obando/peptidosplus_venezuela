@@ -1,0 +1,109 @@
+---
+import { getLocalProducts, getLocalVisibleCategories } from '../lib/local-product-data';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import Section from '@/components/Section.astro';
+import ProductCard from '@/components/shop/ProductCard.astro';
+import SearchIcon from '@lucide/astro/icons/search';
+import ShoppingBag from '@lucide/astro/icons/shopping-bag';
+import House from '@lucide/astro/icons/house';
+
+export const prerender = true;
+
+const products = await getLocalProducts();
+const suggestedProducts = products
+    .filter(p => p.featured || (p.average_rating && parseFloat(p.average_rating) >= 4))
+    .slice(0, 4);
+const fallbackProducts = suggestedProducts.length > 0 ? suggestedProducts : products.slice(0, 4);
+const categories = await getLocalVisibleCategories();
+---
+
+<BaseLayout title="Page Not Found">
+    <Header />
+    <main id="main-content">
+        <div class="relative overflow-hidden bg-gradient-to-br from-primary/5 via-surface to-primary-light/10">
+            <div class="absolute inset-0 bg-[linear-gradient(to_right,var(--color-outline)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-outline)_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20"></div>
+            <Section padding="lg" class="relative z-10">
+                <div class="text-center max-w-2xl mx-auto">
+                    <p class="text-8xl md:text-9xl font-black bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent leading-none mb-6">
+                        404
+                    </p>
+                    <h1 class="text-2xl md:text-3xl font-bold text-content mb-4">
+                        Page not found
+                    </h1>
+                    <p class="text-content-light text-lg mb-8 max-w-md mx-auto">
+                        The page you are looking for does not exist or may have been moved.
+                    </p>
+
+                    {/* Search bar */}
+                    <form action="/search" method="get" class="max-w-lg mx-auto mb-8">
+                        <div class="relative">
+                            <SearchIcon class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-content-lighter pointer-events-none" />
+                            <input
+                                type="text"
+                                name="q"
+                                placeholder="Search for products..."
+                                class="w-full pl-12 pr-28 py-3.5 rounded-2xl border border-outline bg-surface text-content placeholder:text-content-lighter focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary shadow-sm"
+                            />
+                            <button
+                                type="submit"
+                                class="absolute right-2 top-1/2 -translate-y-1/2 bg-gradient-to-r from-primary to-primary-dark text-white px-5 py-2 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer text-sm"
+                            >
+                                Search
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="flex items-center justify-center gap-4 flex-wrap">
+                        <a
+                            href="/"
+                            class="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-outline bg-surface text-content font-medium hover:bg-surface-alt transition-colors cursor-pointer"
+                        >
+                            <House class="w-4 h-4" />
+                            Go Home
+                        </a>
+                        <a
+                            href="/shop"
+                            class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer"
+                        >
+                            <ShoppingBag class="w-4 h-4" />
+                            Browse Shop
+                        </a>
+                    </div>
+                </div>
+            </Section>
+        </div>
+
+        {/* Category quick links */}
+        {categories.length > 0 && (
+            <Section padding="md" bg="surface">
+                <div class="text-center mb-6">
+                    <h2 class="text-lg font-semibold text-content">Browse by Category</h2>
+                </div>
+                <div class="flex flex-wrap items-center justify-center gap-2">
+                    {categories.slice(0, 10).map(cat => (
+                        <a
+                            href={`/shop/category/${cat.slug}`}
+                            class="px-5 py-2 rounded-full text-sm font-medium bg-surface-alt text-content hover:bg-primary hover:text-white border border-outline hover:border-primary transition-colors cursor-pointer"
+                        >
+                            {cat.name}
+                        </a>
+                    ))}
+                </div>
+            </Section>
+        )}
+
+        {/* Suggested products */}
+        {fallbackProducts.length > 0 && (
+            <Section padding="lg" bg="surface-alt" title="You might like">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {fallbackProducts.map(product => (
+                        <ProductCard product={product} />
+                    ))}
+                </div>
+            </Section>
+        )}
+    </main>
+    <Footer />
+</BaseLayout>

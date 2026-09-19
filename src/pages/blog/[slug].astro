@@ -1,0 +1,150 @@
+---
+/**
+ * Blog post detail — /blog/[slug] (SSR on-demand)
+ *
+ * Fetches the article from the headless CMS at request time, so every slug
+ * resolves (no static page limit / pre-render cap). Same approach as the
+ * reference sites (sesioniniciar.com, registrounicotributario.com).
+ */
+import PostLayout from '@/layouts/PostLayout.astro';
+import TableOfContents from '@/components/blog/TableOfContents.astro';
+import SocialShare from '@/components/blog/SocialShare.astro';
+import {
+  safePost,
+  resolveAuthor,
+  relatedPosts,
+  postTitle,
+  postExcerpt,
+  postImage,
+  firstCategory,
+  catName,
+  esDate,
+} from '@/lib/blog';
+import {
+  addHeadingIds,
+  rewriteContentUrls,
+  extractHeadings,
+  calculateReadingTime,
+  seoDescription,
+  sanitizePostContent,
+  applyExternalLinkPolicy,
+} from '@/lib/seo';
+import { SITE } from '@/lib/site';
+import { getPostTags } from '@/lib/wordpress';
+
+const { slug } = Astro.params;
+
+if (!slug) return Astro.redirect('/404');
+
+const post = await safePost(slug);
+if (!post) return Astro.redirect('/404');
+
+const title = postTitle(post);
+const description = seoDescription(post, postExcerpt(post, 160));
+const canonicalUrl = `${SITE.url}/blog/${slug}`;
+
+const author = await resolveAuthor(post);
+const tags = getPostTags(post) || [];
+const cat = firstCategory(post);
+const featuredImage = postImage(post) || '';
+
+const bodyHtml = applyExternalLinkPolicy(
+  addHeadingIds(rewriteContentUrls(sanitizePostContent(post?.content?.rendered || '')))
+);
+const headings = extractHeadings(bodyHtml);
+const readingTime = calculateReadingTime(post?.content?.rendered || '');
+const related = await relatedPosts(post, 3);
+---
+
+<PostLayout
+  title={title}
+  description={description}
+  image={featuredImage || undefined}
+  canonicalUrl={canonicalUrl}
+  authorName={author?.name || SITE.name}
+  datePublished={post.date}
+  dateModified={post.modified || post.date}
+  breadcrumbs={[
+    { name: 'Inicio', path: '/' },
+    { name: 'Blog', path: '/blog' },
+    ...(cat ? [{ name: catName(post), path: `/categoria/${cat.slug}` }] : []),
+    { name: title, path: canonicalUrl },
+  ]}
+>
+  <Fragment slot="sidebar">
+    {cat && (
+      <div class="rounded-2xl border border-outline bg-surface-alt/60 p-6">
+        <h2 class="text-sm font-bold uppercase tracking-wider text-content mb-3">Categoría</h2>
+        <a href={`/categoria/${cat.slug}`} class="font-semibold text-primary hover:underline">{catName(post)}</a>
+      </div>
+    )}
+    {related.length > 0 && (
+      <div class="rounded-2xl border border-outline bg-surface p-6">
+        <h2 class="text-sm font-bold uppercase tracking-wider text-content mb-4">Artículos relacionados</h2>
+        <div class="space-y-5">
+          {related.map((r) => (
+            <a key={r.slug} href={`/blog/${r.slug}`} class="group flex gap-3">
+              <div class="w-20 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-surface-alt">
+                {postImage(r) && <img src={postImage(r)!} alt={postTitle(r)} class="w-full h-full object-cover" loading="lazy" />}
+              </div>
+              <div>
+                <p class="text-sm font-medium text-content group-hover:text-primary transition-colors leading-snug line-clamp-2">{postTitle(r)}</p>
+                <p class="text-xs text-content-lighter mt-1">{esDate(r.date)}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
+  </Fragment>
+
+  <div class="prose prose-lg prose-slate max-w-none">
+    {/* Article meta */}
+    <div class="flex flex-wrap items-center gap-3 text-sm text-content-light mb-8 not-prose">
+      {cat && (
+        <a href={`/categoria/${cat.slug}`} class="inline-flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/10 px-3 py-1.5 rounded-full hover:bg-primary/20 transition-colors">{catName(post)}</a>
+      )}
+      <time datetime={post.date}>{esDate(post.date)}</time>
+      <span aria-hidden="true">•</span>
+      <span>{readingTime} min de lectura</span>
+    </div>
+
+    {headings.length > 0 && <TableOfContents headings={headings} readingTime={readingTime} />}
+
+    <div set:html={bodyHtml} />
+
+    {tags.length > 0 && (
+      <div class="mt-10 pt-6 border-t border-outline not-prose">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-sm font-medium text-content">Etiquetas:</span>
+          {tags.map((t: any) => (
+            <a key={t.id} href={`/tag/${t.slug}`} class="text-xs font-medium text-content-light bg-surface-alt px-3 py-1.5 rounded-full hover:text-primary hover:bg-primary/10 transition-colors">{t.name}</a>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {author?.name && (
+      <div class="mt-8 p-6 bg-surface-alt rounded-2xl border border-outline not-prose">
+        <div class="flex items-center gap-4">
+          {author.avatar_urls?.['96'] ? (
+            <img src={author.avatar_urls['96']} alt={author.name} class="w-14 h-14 rounded-full object-cover" />
+          ) : (
+            <div class="w-14 h-14 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center text-white font-bold text-xl">{author.name.charAt(0)}</div>
+          )}
+          <div>
+            <p class="text-sm text-content-light">Escrito por</p>
+            {author.slug ? (
+              <a href={`/autor/${author.slug}`} class="font-semibold text-content hover:text-primary transition-colors">{author.name}</a>
+            ) : (
+              <p class="font-semibold text-content">{author.name}</p>
+            )}
+            {author.description && <p class="text-sm text-content-light mt-0.5">{author.description}</p>}
+          </div>
+        </div>
+      </div>
+    )}
+
+    <SocialShare url={canonicalUrl} title={title} />
+  </div>
+</PostLayout>

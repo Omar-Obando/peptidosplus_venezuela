@@ -52,8 +52,8 @@ const productImages = import.meta.glob('/src/media/products/*', { eager: true })
 const localImageModule = isLocalImage && productImages[imageUrl];
 const localImageSrc = localImageModule?.default;
 
-// For cart, use optimized WebP from public folder
-const cartImageUrl = getPublicProductImageUrl(originalUrl) || originalUrl;
+// For cart, use optimized WebP from public folder (fallback to brand catalog)
+const cartImageUrl = getPublicProductImageUrl(originalUrl, product.slug, product.name) || originalUrl;
 const attributesJson = JSON.stringify((product.attributes || []).reduce((acc, attr) => { acc[attr.name.toLowerCase().replace(/\s+/g, '-')] = (attr.terms || attr.options || []).map(t => typeof t === 'string' ? t : t.name); return acc; }, {} as Record<string, string[]>));
 ---
 
@@ -89,6 +89,16 @@ const attributesJson = JSON.stringify((product.attributes || []).reduce((acc, at
                     width="400"
                     height="400"
                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                    decoding="async"
+                />
+            ) : cartImageUrl ? (
+                <img 
+                    src={cartImageUrl} 
+                    alt={product.name}
+                    width="400"
+                    height="400"
+                    class="w-full h-full object-cover object-[80%_center] group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
                     decoding="async"
                 />

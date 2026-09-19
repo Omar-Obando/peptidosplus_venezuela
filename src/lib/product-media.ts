@@ -47,19 +47,30 @@ export function getLocalProductImageUrl(originalUrl: string | null): string | nu
  * Get public image URL for runtime use (cart, checkout)
  * Returns path from public folder (same filename as src)
  */
-export function getPublicProductImageUrl(originalUrl: string | null): string | null {
-    if (!originalUrl) return null;
-    
-    // First get the src path
-    const srcPath = getLocalProductImageUrl(originalUrl);
-    
-    // If it's a local path, convert to public path
-    if (srcPath && srcPath.startsWith('/src/media/')) {
-        return toPublicPath(srcPath);
+export function getPublicProductImageUrl(originalUrl: string | null, productSlug?: string, productName?: string): string | null {
+    if (originalUrl) {
+        // First get the src path
+        const srcPath = getLocalProductImageUrl(originalUrl);
+
+        // If it's a local path, convert to public path
+        if (srcPath && srcPath.startsWith('/src/media/')) {
+            return toPublicPath(srcPath);
+        }
+
+        // Return original URL as fallback
+        return originalUrl;
     }
-    
-    // Return original URL as fallback
-    return originalUrl;
+
+    // No CMS image: fall back to the brand catalog assets (/assets/productos/*.webp)
+    if (productName || productSlug) {
+        const slugified = String(productName || productSlug)
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, '');
+        return `/assets/productos/${slugified}.webp`;
+    }
+
+    return null;
 }
 
 /**

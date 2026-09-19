@@ -1,6 +1,13 @@
-// Minimal WordPress client stub for WooCommerce sites.
-// FeaturedImage.astro imports IMAGE_SOURCE_MODE from this file.
-// If you connect a WordPress blog later, this file will be replaced
-// with the full WordPress REST client.
+/**
+ * WordPress integration entry point.
+ *
+ * As of PhantomWP infrastructure 1.25 the actual WordPress helpers live in
+ * @phantomwp/wordpress (.phantomwp/runtime/lib/wordpress.ts) and your
+ * connection config lives in src/lib/wordpress-config.ts.
+ *
+ * This file is just a re-export so existing imports like
+ *   import { getPosts } from '../lib/wordpress';
+ * keep working. New code can import from '@phantomwp/wordpress' directly.
+ */
 
-export const IMAGE_SOURCE_MODE: 'local' | 'cdn' = 'local';
+export * from '@phantomwp/wordpress';

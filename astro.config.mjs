@@ -5,14 +5,31 @@ import react from '@astrojs/react';
 import vercel from '@astrojs/vercel';
 import tailwindcss from '@tailwindcss/vite';
 
+// PhantomWP dev tools (Vite plugins for the IDE inspector).
+// Imported lazily so users who eject .phantomwp/ide/ can still build.
+let devComponentIdPlugin;
+try {
+    ({ devComponentIdPlugin } = await import('./.phantomwp/ide/dev-tools.mjs'));
+} catch {
+    devComponentIdPlugin = () => ({ name: 'phantom-dev-tools-noop', apply: 'serve' });
+}
+
+// https://astro.build/config
 export default defineConfig({
-  output: 'static',
+  output: 'server',
   adapter: vercel(),
   integrations: [mdx(), sitemap(), react()],
   image: {
     service: { entrypoint: 'astro/assets/services/sharp' },
     remotePatterns: [
-      
+      {
+        protocol: 'https',
+        hostname: 've-cms.peptidosplus.com',
+      },
+      {
+        protocol: 'http',
+        hostname: 've-cms.peptidosplus.com',
+      },
       {
         protocol: 'https',
         hostname: '*.wp.com',
@@ -29,32 +46,18 @@ export default defineConfig({
         protocol: 'https',
         hostname: 'i2.wp.com',
       },
-      {
-        protocol: 'https',
-        hostname: '*.cloudinary.com',
-      },
-      {
-        protocol: 'https',
-        hostname: '*.imgix.net',
-      },
-      {
-        protocol: 'https',
-        hostname: '*.amazonaws.com',
-      },
-      {
-        protocol: 'https',
-        hostname: '*.googleusercontent.com',
-      },
     ],
   },
+  server: {
+    host: true,
+    allowedHosts: ['.app.github.dev'],
+  },
   vite: {
-    plugins: [tailwindcss()],
+    plugins: [tailwindcss(), devComponentIdPlugin()],
     server: {
       headers: {
         'Content-Security-Policy': "frame-ancestors *",
       },
-      allowedHosts: ['localhost', '.fly.dev'],
-      cors: { origin: /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/ },
       hmr: {
         clientPort: 443,
         protocol: 'wss',

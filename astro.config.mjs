@@ -30,9 +30,9 @@ export default defineConfig({
     sitemap(),
     react(),
     compress({
-      CSS: true,
-      HTML: true,
-      JavaScript: true,
+      CSS: false,
+      HTML: false,
+      JavaScript: false,
       Image: false,
       SVG: false,
     }),

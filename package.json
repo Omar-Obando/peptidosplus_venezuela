@@ -7,7 +7,8 @@
     "start": "astro dev --host",
     "build": "echo \"Product images synced via WooCommerce Settings\" && astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "deploy": "wrangler deploy"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.0",
@@ -34,9 +35,13 @@
     "stripe": "^17.0.0",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.0.0",
-    "ws": "^8.14.2"
+    "ws": "^8.14.2",
+    "@astrojs/cloudflare": "^13.5.0"
   },
   "overrides": {
     "vite": "^7"
+  },
+  "devDependencies": {
+    "wrangler": "^4.68.0"
   }
 }

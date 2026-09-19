@@ -5,8 +5,10 @@
  */
 
 import productMediaMap from './product-media-map.json';
+import productImageMap from './product-image-map.json';
 
 const mediaMap = productMediaMap as Record<string, string>;
+const imageMap = productImageMap as Record<string, string>;
 
 /**
  * Convert src path to public path (same filename)
@@ -61,13 +63,16 @@ export function getPublicProductImageUrl(originalUrl: string | null, productSlug
         return originalUrl;
     }
 
-    // No CMS image: fall back to the brand catalog assets (/assets/productos/*.webp)
-    if (productName || productSlug) {
-        const slugified = String(productName || productSlug)
+    // No CMS image: use the brand catalog map (slug -> /assets/productos/<Real>.webp)
+    if (productSlug && imageMap[productSlug]) {
+        return imageMap[productSlug];
+    }
+    if (productName) {
+        const slugified = String(productName)
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/^-|-$/g, '');
-        return `/assets/productos/${slugified}.webp`;
+        if (imageMap[slugified]) return imageMap[slugified];
     }
 
     return null;

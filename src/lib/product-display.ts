@@ -41,7 +41,11 @@ export function formatPrice(
             ? `${groupedInteger}${decimal}${fractionPart}`
             : groupedInteger;
 
-        return `${prices.currency_prefix || ''}${number}${prices.currency_suffix || ''}`;
+        // Marca: precio en dólares ($) como en el catálogo original de Peptidos Plus.
+        const prefix = '$';
+        const suffix = '';
+
+        return `${prefix}${number}${suffix}`;
     };
 
     const formatStorePrices = (prices: WCProductPrices): string => {

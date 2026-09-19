@@ -11,6 +11,7 @@
  * /contacto, /faq).
  */
 import { SITE } from '@/lib/site';
+import GeoCountryBanner from '@/components/GeoCountryBanner.astro';
 
 interface Props {
   title: string;
@@ -45,6 +46,9 @@ const canonical = canonicalUrl && /^https?:\/\//.test(canonicalUrl)
   : `${SITE.url}${canonicalUrl || Astro.url.pathname}`;
 
 const robotsContent = robots.length ? robots.join(', ') : 'index, follow';
+
+// Geo-detect: Cloudflare injects CF-IPCountry on the Worker edge (e.g. "NI", "VE").
+const detectCountry = Astro.request.headers.get('CF-IPCountry') || '';
 ---
 
 <!doctype html>

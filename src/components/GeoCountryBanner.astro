@@ -1,0 +1,124 @@
+/**
+ * GeoCountryBanner — banner/modal de país detectado por IP (Cloudflare CF-IPCountry).
+ *
+ * Muestra: "Pareces estar en Nicaragua. ¿Quieres ir a nuestro sitio de Nicaragua
+ * (ni.peptidosplus.com) o continuar en Venezuela (ve.peptidosplus.com)?" — y
+ * viceversa. Recuerda la elección en localStorage (pp_country_choice) para no
+ * volver a preguntar.
+ *
+ * Props:
+ *  - detectCountry: string | null (código ISO del país detectado por IP, ej. "NI", "VE")
+ *  - currentCountry: string (país del sitio actual, ej. "VE")
+ *  - otherSiteUrl: string (URL del sitio del otro país, ej. https://ni.peptidosplus.com)
+ *  - otherLabel?: string ("Nicaragua" / "Venezuela")
+ */
+interface Props {
+  detectCountry?: string | null;
+  currentCountry?: string;
+  otherSiteUrl?: string;
+  otherLabel?: string;
+}
+
+const {
+  detectCountry = '',
+  currentCountry = 'VE',
+  otherSiteUrl = 'https://ni.peptidosplus.com',
+  otherLabel = 'Nicaragua',
+} = Astro.props;
+
+// Sense: if the visitor's country differs from the site's country and the choice
+// hasn't been made yet, show the banner.
+const shouldShow = detectCountry && detectCountry.toUpperCase() !== currentCountry.toUpperCase();
+const detectLabel = detectCountry?.toUpperCase() === 'NI' ? 'Nicaragua' : 'Venezuela';
+const siteLabel = currentCountry.toUpperCase() === 'VE' ? 'Venezuela' : 'Nicaragua';
+---
+
+{shouldShow && (
+  <div id="pp-geo-banner" class="pp-geo-banner" role="dialog" aria-modal="false" aria-label={`Cambiar de sitio a ${detectLabel}`} data-detect-country={detectCountry} data-current-country={currentCountry}>
+    <div class="pp-geo-banner-inner">
+      <div class="pp-geo-banner-flags">
+        <span class="pp-geo-flag" aria-hidden="true">🌎</span>
+      </div>
+      <div class="pp-geo-banner-text">
+        <strong>Pareces estar en {detectLabel}</strong>
+        <p>¿Quieres ir al sitio de {detectLabel} (<b>{otherSiteUrl.replace('https://', '')}</b>) o continuar en el de {siteLabel} (<b>peptidosplus.com</b>)?</p>
+      </div>
+      <div class="pp-geo-banner-actions">
+        <a href={otherSiteUrl} class="pp-geo-btn pp-geo-btn-primario" data-pp-geo-go>{`Ir a ${detectLabel}`}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+        <button type="button" class="pp-geo-btn pp-geo-btn-secundario" data-pp-geo-stay>Continuar en {siteLabel}</button>
+        <button type="button" class="pp-geo-close" data-pp-geo-close aria-label="Cerrar aviso">×</button>
+      </div>
+    </div>
+  </div>
+)}
+
+<style is:global>
+  .pp-geo-banner {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 9999;
+    background: var(--pp-navy, #0a192f);
+    color: #fff;
+    box-shadow: 0 6px 24px rgba(10,25,47,.25);
+    transform: translateY(-110%);
+    transition: transform .45s cubic-bezier(.22,1,.36,1);
+  }
+  .pp-geo-banner.pp-geo-visible { transform: translateY(0); }
+  .pp-geo-banner-inner {
+    max-width: 1200px; margin: 0 auto; padding: 12px 20px;
+    display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;
+  }
+  .pp-geo-banner-flags .pp-geo-flag { font-size: 22px; }
+  .pp-geo-banner-text strong { display:block; font-size:14px; }
+  .pp-geo-banner-text p { font-size:12.5px; color: rgba(255,255,255,.8); margin:2px 0 0; }
+  .pp-geo-banner-actions { display:flex; align-items:center; gap:8px; }
+  .pp-geo-btn {
+    border:none; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px;
+    height:36px; padding:0 16px; border-radius:999px; font-size:13px; font-weight:600; transition:all .2s;
+  }
+  .pp-geo-btn-primario { background:#e9c46a; color:#0a192f; }
+  .pp-geo-btn-primario:hover { background:#f2d58a; transform:translateY(-1px); }
+  .pp-geo-btn-secundario { background:#ffffff; color:#0a192f; }
+  .pp-geo-btn-secundario:hover { background:#e4ecf7; }
+  .pp-geo-close {
+    background:transparent; border:none; color:rgba(255,255,255,.7); font-size:22px; line-height:1;
+    cursor:pointer; padding:4px 8px; border-radius:8px;
+  }
+  .pp-geo-close:hover { color:#fff; background:rgba(255,255,255,.1); }
+  @media (max-width:640px) {
+    .pp-geo-banner-inner { flex-direction:column; text-align:center; gap:8px; padding:14px 16px; }
+    .pp-geo-btn { height:34px; padding:0 14px; font-size:12.5px; }
+  }
+</style>
+
+<script>
+  // Show the banner after a beat, remember the choice (localStorage).
+  const banner = document.getElementById('pp-geo-banner');
+  if (banner) {
+    const KEY = 'pp_country_choice';
+    const detect = banner.dataset.detectCountry || '';
+    const current = banner.dataset.currentCountry || '';
+    const choiceKey = `pp_choice_${detect}`;
+
+    // Never ask again if already decided for this detected>current pair.
+    let saved: string | null = null;
+    try { saved = localStorage.getItem(choiceKey); } catch { saved = null; }
+    if (saved === 'decided') {
+      banner.remove();
+    } else {
+      requestAnimationFrame(() => banner.classList.add('pp-geo-visible'));
+
+      const persist = () => {
+        try { localStorage.setItem(choiceKey, 'decided'); } catch { /* noop */ }
+      };
+
+      banner.querySelector('[data-pp-geo-stay], [data-pp-geo-close]')?.addEventListener('click', () => {
+        persist();
+        banner.classList.remove('pp-geo-visible');
+        setTimeout(() => banner.remove(), 450);
+      });
+      // "Ir a X" navigates; persist choice so back-navigation doesn't re-ask.
+      banner.querySelector('[data-pp-geo-go]')?.addEventListener('click', () => persist());
+    }
+  }
+</script>

@@ -3,43 +3,29 @@ bash.exe: warning: could not find /tmp, please create!
 > ve-peptidosplus-com@1.0.0 build
 > astro build
 
-(node:26284) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(node:16452) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-[2m10:13:06[22m [34m[@astrojs/cloudflare][39m Enabling compile-time image optimization. Images will be pre-optimized at build time.
-[2m10:13:06[22m [34m[@astrojs/cloudflare][39m Enabling sessions with Cloudflare KV with the "SESSION" KV binding.
+[2m17:05:36[22m [34m[@astrojs/cloudflare][39m Enabling compile-time image optimization. Images will be pre-optimized at build time.
+[2m17:05:36[22m [34m[@astrojs/cloudflare][39m Enabling sessions with Cloudflare KV with the "SESSION" KV binding.
 Using secrets defined in .env
-[2m10:13:13[22m [34m[content][39m Syncing content
-[33m[1m10:13:13[22m [WARN] [glob-loader][39m The base directory "D:\codigo6\peptidos\ve.peptidosplus.com-main\ve.peptidosplus.com-main\src\content\products\" does not exist.
-[33m[1m10:13:13[22m [WARN] [glob-loader][39m The base directory "D:\codigo6\peptidos\ve.peptidosplus.com-main\ve.peptidosplus.com-main\src\content\projects\" does not exist.
-[2m10:13:13[22m [34m[content][39m Synced content
-[2m10:13:13[22m [34m[types][39m Generated [2m5.61s[22m
-[2m10:13:13[22m [34m[build][39m output: [34m"server"[39m
-[2m10:13:13[22m [34m[build][39m mode: [34m"server"[39m
-[2m10:13:13[22m [34m[build][39m directory: [34mD:\codigo6\peptidos\ve.peptidosplus.com-main\ve.peptidosplus.com-main\dist\[39m
-[2m10:13:13[22m [34m[build][39m adapter: [32m@astrojs/cloudflare[39m
-[2m10:13:13[22m [34m[build][39m Collecting build info...
-[2m10:13:13[22m [34m[build][39m [32m✓ Completed in 6.62s.[39m
-[2m10:13:13[22m [34m[build][39m Building server entrypoints...
-[33m[1m10:13:14[22m [WARN] [vite][39m [33mnode_modules/zod/v4/core/regexes.js (74:0): A comment
-
-"/** Anchors a pattern source. The interpolation lives here rather than at the call site because
- * esbuild will not drop a `@__PURE__` call whose own argument interpolates a variable, but it
- * will drop `anchor(dateSource)`. Keeping it inline pinned `date` into every bundle. */"
-
-in "node_modules/zod/v4/core/regexes.js" contains an annotation that Rollup cannot interpret due to the position of the comment. The comment will be removed to avoid issues.[39m
-[33m[1m10:13:14[22m [WARN] [vite][39m [33mnode_modules/zod/v4/core/util.js (400:0): A comment
+[2m17:05:41[22m [34m[content][39m Syncing content
+[33m[1m17:05:41[22m [WARN] [glob-loader][39m The base directory "D:\codigo6\peptidos\ve.peptidosplus.com-main\ve.peptidosplus.com-main\src\content\projects\" does not exist.
+[33m[1m17:05:41[22m [WARN] [glob-loader][39m The base directory "D:\codigo6\peptidos\ve.peptidosplus.com-main\ve.peptidosplus.com-main\src\content\products\" does not exist.
+[2m17:05:41[22m [34m[content][39m Synced content
+[2m17:05:41[22m [34m[types][39m Generated [2m4.19s[22m
+[2m17:05:41[22m [34m[build][39m output: [34m"server"[39m
+[2m17:05:41[22m [34m[build][39m mode: [34m"server"[39m
+[2m17:05:41[22m [34m[build][39m directory: [34mD:\codigo6\peptidos\ve.peptidosplus.com-main\ve.peptidosplus.com-main\dist\[39m
+[2m17:05:41[22m [34m[build][39m adapter: [32m@astrojs/cloudflare[39m
+[2m17:05:41[22m [34m[build][39m Collecting build info...
+[2m17:05:41[22m [34m[build][39m [32m✓ Completed in 5.40s.[39m
+[2m17:05:41[22m [34m[build][39m Building server entrypoints...
+[33m[1m17:05:42[22m [WARN] [vite][39m [33mnode_modules/zod/v4/core/util.js (400:0): A comment
 
 "// Wrapped in a `@__PURE__` IIFE: esbuild never tree-shakes a top-level initializer that contains a member access on `Number`, so the bare object literal survived into every bundle."
 
 in "node_modules/zod/v4/core/util.js" contains an annotation that Rollup cannot interpret due to the position of the comment. The comment will be removed to avoid issues.[39m
-Using secrets defined in .env
-[2m10:13:16[22m [34m[vite][39m [32m✓ built in 3.17s[39m
-[33m[1m10:13:17[22m [WARN] [vite][39m [33mnode_modules/zod/v4/core/util.js (400:0): A comment
-
-"// Wrapped in a `@__PURE__` IIFE: esbuild never tree-shakes a top-level initializer that contains a member access on `Number`, so the bare object literal survived into every bundle."
-
-in "node_modules/zod/v4/core/util.js" contains an annotation that Rollup cannot interpret due to the position of the comment. The comment will be removed to avoid issues.[39m
-[33m[1m10:13:17[22m [WARN] [vite][39m [33mnode_modules/zod/v4/core/regexes.js (74:0): A comment
+[33m[1m17:05:42[22m [WARN] [vite][39m [33mnode_modules/zod/v4/core/regexes.js (74:0): A comment
 
 "/** Anchors a pattern source. The interpolation lives here rather than at the call site because
  * esbuild will not drop a `@__PURE__` call whose own argument interpolates a variable, but it
@@ -47,65 +33,79 @@ in "node_modules/zod/v4/core/util.js" contains an annotation that Rollup cannot 
 
 in "node_modules/zod/v4/core/regexes.js" contains an annotation that Rollup cannot interpret due to the position of the comment. The comment will be removed to avoid issues.[39m
 Using secrets defined in .env
-[2m10:13:19[22m [34m[vite][39m [32m✓ built in 2.77s[39m
-[2m10:13:23[22m [34m[vite][39m [32m✓ built in 3.61s[39m
+[2m17:05:45[22m [34m[vite][39m [32m✓ built in 3.50s[39m
+[33m[1m17:05:46[22m [WARN] [vite][39m [33mnode_modules/zod/v4/core/regexes.js (74:0): A comment
+
+"/** Anchors a pattern source. The interpolation lives here rather than at the call site because
+ * esbuild will not drop a `@__PURE__` call whose own argument interpolates a variable, but it
+ * will drop `anchor(dateSource)`. Keeping it inline pinned `date` into every bundle. */"
+
+in "node_modules/zod/v4/core/regexes.js" contains an annotation that Rollup cannot interpret due to the position of the comment. The comment will be removed to avoid issues.[39m
+[33m[1m17:05:46[22m [WARN] [vite][39m [33mnode_modules/zod/v4/core/util.js (400:0): A comment
+
+"// Wrapped in a `@__PURE__` IIFE: esbuild never tree-shakes a top-level initializer that contains a member access on `Number`, so the bare object literal survived into every bundle."
+
+in "node_modules/zod/v4/core/util.js" contains an annotation that Rollup cannot interpret due to the position of the comment. The comment will be removed to avoid issues.[39m
+Using secrets defined in .env
+[2m17:05:48[22m [34m[vite][39m [32m✓ built in 3.02s[39m
+[2m17:05:51[22m [34m[vite][39m [32m✓ built in 3.73s[39m
 [2mDefault inspector port 9229 not available, using 9230 instead
 [22m
 Using secrets defined in dist\server\.prerender\.dev.vars
 
 [42m[30m prerendering static routes [39m[49m
-[2m10:13:31[22m   [34m├─[39m [2m/404.html[22m [2m(+62ms)[22m 
-[2m10:13:31[22m   [34m├─[39m [2m/account/addresses/index.html[22m [2m(+51ms)[22m 
-[2m10:13:31[22m   [34m├─[39m [2m/account/orders/index.html[22m [2m(+45ms)[22m 
-[2m10:13:31[22m   [34m├─[39m [2m/account/settings/index.html[22m [2m(+49ms)[22m 
-[2m10:13:31[22m   [34m├─[39m [2m/account/index.html[22m [2m(+49ms)[22m 
-[2m10:13:31[22m   [34m├─[39m [2m/cart/index.html[22m [2m(+48ms)[22m 
-[2m10:13:31[22m   [34m├─[39m [2m/checkout/index.html[22m [2m(+53ms)[22m 
-[2m10:13:31[22m   [34m├─[39m [2m/forgot-password/index.html[22m [2m(+49ms)[22m 
-[2m10:13:31[22m   [34m├─[39m [2m/login/index.html[22m [2m(+46ms)[22m 
-[2m10:13:31[22m   [34m├─[39m [2m/register/index.html[22m [2m(+44ms)[22m 
-[2m10:13:31[22m   [34m├─[39m [2m/reset-password/index.html[22m [2m(+43ms)[22m 
-[2m10:13:31[22m   [34m├─[39m [2m/shop/category/celular/index.html[22m [2m(+60ms)[22m 
-[2m10:13:31[22m   [34m├─[39m [2m/shop/category/hormona-de-crecimiento/index.html[22m [2m(+54ms)[22m 
-[2m10:13:31[22m   [34m├─[39m [2m/shop/category/insumos/index.html[22m [2m(+52ms)[22m 
-[2m10:13:31[22m   [34m├─[39m [2m/shop/category/metabolico/index.html[22m [2m(+68ms)[22m 
-[2m10:13:32[22m   [34m├─[39m [2m/shop/category/neuro/index.html[22m [2m(+52ms)[22m 
-[2m10:13:32[22m   [34m├─[39m [2m/shop/category/piel-y-tejido/index.html[22m [2m(+56ms)[22m 
-[2m10:13:32[22m   [34m├─[39m [2m/shop/product/lemon-bottle/index.html[22m [31m(+741ms)[39m 
-[2m10:13:32[22m   [34m├─[39m [2m/shop/product/cjc-1295-sin-dac/index.html[22m [31m(+503ms)[39m 
-[2m10:13:33[22m   [34m├─[39m [2m/shop/product/ss-31-elamipretide/index.html[22m [31m(+520ms)[39m 
-[2m10:13:33[22m   [34m├─[39m [2m/shop/product/kisspeptin/index.html[22m [31m(+514ms)[39m 
-[2m10:13:34[22m   [34m├─[39m [2m/shop/product/sermorelin/index.html[22m [31m(+506ms)[39m 
-[2m10:13:34[22m   [34m├─[39m [2m/shop/product/thymosin-alpha-1/index.html[22m [31m(+505ms)[39m 
-[2m10:13:35[22m   [34m├─[39m [2m/shop/product/ipamorelin/index.html[22m [31m(+695ms)[39m 
-[2m10:13:36[22m   [34m├─[39m [2m/shop/product/epital-n/index.html[22m [31m(+692ms)[39m 
-[2m10:13:36[22m   [34m├─[39m [2m/shop/product/dsip/index.html[22m [31m(+507ms)[39m 
-[2m10:13:37[22m   [34m├─[39m [2m/shop/product/cagrilintida/index.html[22m [31m(+518ms)[39m 
-[2m10:13:37[22m   [34m├─[39m [2m/shop/product/pt-141/index.html[22m [31m(+713ms)[39m 
-[2m10:13:38[22m   [34m├─[39m [2m/shop/product/wolverine-bpc-157-tb-500/index.html[22m [31m(+1.05s)[39m 
-[2m10:13:39[22m   [34m├─[39m [2m/shop/product/selank/index.html[22m [31m(+725ms)[39m 
-[2m10:13:40[22m   [34m├─[39m [2m/shop/product/glow/index.html[22m [31m(+712ms)[39m 
-[2m10:13:41[22m   [34m├─[39m [2m/shop/product/melanotan-2/index.html[22m [31m(+726ms)[39m 
-[2m10:13:41[22m   [34m├─[39m [2m/shop/product/glutati-n/index.html[22m [31m(+724ms)[39m 
-[2m10:13:42[22m   [34m├─[39m [2m/shop/product/semax/index.html[22m [31m(+735ms)[39m 
-[2m10:13:43[22m   [34m├─[39m [2m/shop/product/klow/index.html[22m [31m(+725ms)[39m 
-[2m10:13:43[22m   [34m├─[39m [2m/shop/product/kpv/index.html[22m [31m(+737ms)[39m 
-[2m10:13:44[22m   [34m├─[39m [2m/shop/product/agua-bacteriost-tica-hospira/index.html[22m [31m(+517ms)[39m 
-[2m10:13:45[22m   [34m├─[39m [2m/shop/product/agua-bacteriost-tica/index.html[22m [31m(+534ms)[39m 
-[2m10:13:45[22m   [34m├─[39m [2m/shop/product/cjc-1295-ipamorelin/index.html[22m [31m(+725ms)[39m 
-[2m10:13:46[22m   [34m├─[39m [2m/shop/product/nad/index.html[22m [31m(+766ms)[39m 
-[2m10:13:47[22m   [34m├─[39m [2m/shop/product/mots-c/index.html[22m [31m(+513ms)[39m 
-[2m10:13:47[22m   [34m├─[39m [2m/shop/product/tesamorelin/index.html[22m [31m(+745ms)[39m 
-[2m10:13:48[22m   [34m├─[39m [2m/shop/product/ghk-cu/index.html[22m [31m(+723ms)[39m 
-[2m10:13:49[22m   [34m├─[39m [2m/shop/product/semaglutida/index.html[22m [31m(+539ms)[39m 
-[2m10:13:49[22m   [34m├─[39m [2m/shop/product/tirzepatida/index.html[22m [31m(+715ms)[39m 
-[2m10:13:50[22m   [34m├─[39m [2m/shop/product/retatrutida/index.html[22m [31m(+713ms)[39m 
-[2m10:13:51[22m   [34m├─[39m [2m/shop/index.html[22m [2m(+84ms)[22m 
-[2m10:13:51[22m [32m✓ Completed in 28.11s.
+[2m17:06:00[22m   [34m├─[39m [2m/404.html[22m [2m(+87ms)[22m 
+[2m17:06:00[22m   [34m├─[39m [2m/account/addresses/index.html[22m [2m(+63ms)[22m 
+[2m17:06:00[22m   [34m├─[39m [2m/account/orders/index.html[22m [2m(+52ms)[22m 
+[2m17:06:00[22m   [34m├─[39m [2m/account/settings/index.html[22m [2m(+57ms)[22m 
+[2m17:06:00[22m   [34m├─[39m [2m/account/index.html[22m [2m(+62ms)[22m 
+[2m17:06:00[22m   [34m├─[39m [2m/cart/index.html[22m [2m(+54ms)[22m 
+[2m17:06:00[22m   [34m├─[39m [2m/checkout/index.html[22m [2m(+55ms)[22m 
+[2m17:06:00[22m   [34m├─[39m [2m/forgot-password/index.html[22m [2m(+49ms)[22m 
+[2m17:06:00[22m   [34m├─[39m [2m/login/index.html[22m [2m(+55ms)[22m 
+[2m17:06:00[22m   [34m├─[39m [2m/register/index.html[22m [2m(+52ms)[22m 
+[2m17:06:00[22m   [34m├─[39m [2m/reset-password/index.html[22m [2m(+48ms)[22m 
+[2m17:06:00[22m   [34m├─[39m [2m/shop/category/celular/index.html[22m [2m(+68ms)[22m 
+[2m17:06:00[22m   [34m├─[39m [2m/shop/category/hormona-de-crecimiento/index.html[22m [2m(+62ms)[22m 
+[2m17:06:00[22m   [34m├─[39m [2m/shop/category/insumos/index.html[22m [2m(+56ms)[22m 
+[2m17:06:00[22m   [34m├─[39m [2m/shop/category/metabolico/index.html[22m [2m(+62ms)[22m 
+[2m17:06:00[22m   [34m├─[39m [2m/shop/category/neuro/index.html[22m [2m(+56ms)[22m 
+[2m17:06:01[22m   [34m├─[39m [2m/shop/category/piel-y-tejido/index.html[22m [2m(+59ms)[22m 
+[2m17:06:01[22m   [34m├─[39m [2m/shop/product/lemon-bottle/index.html[22m [31m(+762ms)[39m 
+[2m17:06:01[22m   [34m├─[39m [2m/shop/product/cjc-1295-sin-dac/index.html[22m [31m(+546ms)[39m 
+[2m17:06:02[22m   [34m├─[39m [2m/shop/product/ss-31-elamipretide/index.html[22m [31m(+528ms)[39m 
+[2m17:06:02[22m   [34m├─[39m [2m/shop/product/kisspeptin/index.html[22m [31m(+542ms)[39m 
+[2m17:06:03[22m   [34m├─[39m [2m/shop/product/sermorelin/index.html[22m [31m(+537ms)[39m 
+[2m17:06:03[22m   [34m├─[39m [2m/shop/product/thymosin-alpha-1/index.html[22m [31m(+540ms)[39m 
+[2m17:06:04[22m   [34m├─[39m [2m/shop/product/ipamorelin/index.html[22m [31m(+722ms)[39m 
+[2m17:06:05[22m   [34m├─[39m [2m/shop/product/epital-n/index.html[22m [31m(+731ms)[39m 
+[2m17:06:05[22m   [34m├─[39m [2m/shop/product/dsip/index.html[22m [31m(+533ms)[39m 
+[2m17:06:06[22m   [34m├─[39m [2m/shop/product/cagrilintida/index.html[22m [31m(+527ms)[39m 
+[2m17:06:07[22m   [34m├─[39m [2m/shop/product/pt-141/index.html[22m [31m(+741ms)[39m 
+[2m17:06:07[22m   [34m├─[39m [2m/shop/product/wolverine-bpc-157-tb-500/index.html[22m [31m(+728ms)[39m 
+[2m17:06:08[22m   [34m├─[39m [2m/shop/product/selank/index.html[22m [31m(+544ms)[39m 
+[2m17:06:09[22m   [34m├─[39m [2m/shop/product/glow/index.html[22m [31m(+747ms)[39m 
+[2m17:06:09[22m   [34m├─[39m [2m/shop/product/melanotan-2/index.html[22m [31m(+546ms)[39m 
+[2m17:06:10[22m   [34m├─[39m [2m/shop/product/glutati-n/index.html[22m [31m(+536ms)[39m 
+[2m17:06:10[22m   [34m├─[39m [2m/shop/product/semax/index.html[22m [31m(+548ms)[39m 
+[2m17:06:11[22m   [34m├─[39m [2m/shop/product/klow/index.html[22m [31m(+742ms)[39m 
+[2m17:06:12[22m   [34m├─[39m [2m/shop/product/kpv/index.html[22m [31m(+753ms)[39m 
+[2m17:06:12[22m   [34m├─[39m [2m/shop/product/agua-bacteriost-tica-hospira/index.html[22m [31m(+534ms)[39m 
+[2m17:06:13[22m   [34m├─[39m [2m/shop/product/agua-bacteriost-tica/index.html[22m [31m(+546ms)[39m 
+[2m17:06:14[22m   [34m├─[39m [2m/shop/product/cjc-1295-ipamorelin/index.html[22m [31m(+763ms)[39m 
+[2m17:06:14[22m   [34m├─[39m [2m/shop/product/nad/index.html[22m [31m(+759ms)[39m 
+[2m17:06:15[22m   [34m├─[39m [2m/shop/product/mots-c/index.html[22m [31m(+549ms)[39m 
+[2m17:06:16[22m   [34m├─[39m [2m/shop/product/tesamorelin/index.html[22m [31m(+749ms)[39m 
+[2m17:06:16[22m   [34m├─[39m [2m/shop/product/ghk-cu/index.html[22m [31m(+545ms)[39m 
+[2m17:06:17[22m   [34m├─[39m [2m/shop/product/semaglutida/index.html[22m [31m(+552ms)[39m 
+[2m17:06:17[22m   [34m├─[39m [2m/shop/product/tirzepatida/index.html[22m [31m(+751ms)[39m 
+[2m17:06:18[22m   [34m├─[39m [2m/shop/product/retatrutida/index.html[22m [31m(+778ms)[39m 
+[2m17:06:19[22m   [34m├─[39m [2m/shop/index.html[22m [2m(+88ms)[22m 
+[2m17:06:19[22m [32m✓ Completed in 27.66s.
 [39m
-[2m10:13:51[22m [34m[build][39m Rearranging server assets...
-[2m10:13:51[22m [34m[build][39m [32m✓ Completed in 38.09s.[39m
-[2m10:13:51[22m [34m[@astrojs/cloudflare][39m Injected immutable Cache-Control for /_astro/* into _headers.
-[2m10:13:51[22m [34m[@astrojs/sitemap][39m `sitemap-index.xml` created at `dist\client`
-[2m10:13:52[22m [34m[build][39m Server built in [1m45.77s[22m
-[2m10:13:52[22m [34m[build][39m [1mComplete![22m
+[2m17:06:19[22m [34m[build][39m Rearranging server assets...
+[2m17:06:19[22m [34m[build][39m [32m✓ Completed in 38.32s.[39m
+[2m17:06:19[22m [34m[@astrojs/cloudflare][39m Injected immutable Cache-Control for /_astro/* into _headers.
+[2m17:06:20[22m [34m[@astrojs/sitemap][39m `sitemap-index.xml` created at `dist\client`
+[2m17:06:20[22m [34m[build][39m Server built in [1m43.96s[22m
+[2m17:06:20[22m [34m[build][39m [1mComplete![22m

@@ -2,7 +2,7 @@ import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import react from '@astrojs/react';
-import vercel from '@astrojs/vercel';
+import cloudflare from '@astrojs/cloudflare';
 import tailwindcss from '@tailwindcss/vite';
 
 // PhantomWP dev tools (Vite plugins for the IDE inspector).
@@ -16,8 +16,9 @@ try {
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://ve-peptidosplus-com.codigo6.workers.dev',
   output: 'server',
-  adapter: vercel(),
+  adapter: cloudflare({ imageService: 'compile' }),
   integrations: [mdx(), sitemap(), react()],
   image: {
     service: { entrypoint: 'astro/assets/services/sharp' },

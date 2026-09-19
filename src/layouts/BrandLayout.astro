@@ -94,6 +94,34 @@ const robotsContent = robots.length ? robots.join(', ') : 'index, follow';
     <slot name="head" />
   </head>
 
+  <style is:global>
+    /* Reveal-on-scroll: paired with public/behaviors.js (IntersectionObserver
+       adds .is-visible). Global because markers live in slotted page markup. */
+    .reveal,
+    [data-reveal],
+    [class*="animate-fade"],
+    [class*="animate-slide"] {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: opacity, transform;
+    }
+    .reveal.is-visible,
+    [data-reveal].is-visible,
+    [class*="animate-fade"].is-visible,
+    [class*="animate-slide"].is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .reveal, [data-reveal], [class*="animate-fade"], [class*="animate-slide"] {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+
   <body class="font-poppins antialiased">
     <!-- ======================= HEADER (marka) ======================= -->
     <header class="pp-nav" role="banner">
@@ -184,5 +212,36 @@ const robotsContent = robots.length ? robots.join(', ') : 'index, follow';
     {import.meta.env.DEV && (
       <script is:inline src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     )}
+
+    <!-- Re-captura los marcadores .reveal tras la hidratación de Astro:
+         behaviors.js corre con defer antes de que el DOM astral se pinte,
+         así que se re-observan los elementos que añade el template. -->
+    <script is:inline>
+      (function () {
+        'use strict';
+        var bringToLife = function () {
+          var els = document.querySelectorAll('[data-reveal], .reveal, [class*="animate-fade"], [class*="animate-slide"]');
+          if (!els.length || !('IntersectionObserver' in window)) return;
+          var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+              if (!e.isIntersecting) return;
+              e.target.classList.add('is-visible');
+              e.target.style.opacity = '';
+              e.target.style.transform = '';
+              io.unobserve(e.target);
+            });
+          }, { rootMargin: '0px 0px -10% 0px', threshold: 0.08 });
+          els.forEach(function (el) { io.observe(el); });
+        };
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', bringToLife);
+        } else {
+          bringToLife();
+        }
+        document.addEventListener('astro:page-load', bringToLife);
+        document.addEventListener('astro:after-swap', bringToLife);
+        window.addEventListener('resize', bringToLife);
+      })();
+    </script>
   </body>
 </html>

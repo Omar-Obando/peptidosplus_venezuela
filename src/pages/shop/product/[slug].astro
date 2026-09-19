@@ -109,7 +109,7 @@ function normalizeContent(html: string): string {
     <script type="application/ld+json" set:html={jsonLdString} />
     <main id="main-content">
         <!-- Breadcrumb -->
-        <div class="bg-surface border-b border-outline">
+        <div class="reveal bg-surface border-b border-outline">
             <Section padding="none" class="py-4">
                 <nav>
                     <ol class="flex items-center gap-2 text-sm">
@@ -134,7 +134,7 @@ function normalizeContent(html: string): string {
         </div>
 
         <!-- Product Section -->
-        <Section padding="lg">
+        <Section padding="lg" class="reveal">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
                 <!-- Product Images -->
                 <div class="space-y-4">

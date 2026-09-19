@@ -5,7 +5,8 @@ import { fileURLToPath } from 'node:url';
 
 // scripts/ -> project root (one level up)
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const src = path.join(root, '../peptidosplus-sitio-2026-09-11/peptidosplus-sitio/assets/datos/productos.js');
+// Catalog lives one level above the project root (sibling of ve.peptidosplus.com-main)
+const src = path.join(root, '../../peptidosplus-sitio-2026-09-11/peptidosplus-sitio/assets/datos/productos.js');
 const out = path.join(root, 'src/lib/product-image-map.json');
 
 const raw = fs.readFileSync(src, 'utf8');

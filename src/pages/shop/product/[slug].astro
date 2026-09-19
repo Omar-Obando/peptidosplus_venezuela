@@ -90,6 +90,18 @@ const jsonLdString = JSON.stringify(jsonLd);
 const variationsString = JSON.stringify(variations);
 const pageDescription = stripHtml(product.short_description || product.description).slice(0, 160);
 const pageImage = product.images?.[0]?.src || '';
+
+// Normalize CMS content: relative asset URLs + product .html links -> app routes.
+function normalizeContent(html: string): string {
+  if (!html) return html;
+  return html
+    .replace(/(src|href)="assets\//gi, '$1="/assets/')
+    .replace(/href="producto-([a-z0-9-]+)\.html(#coa)?"/gi, (_m, slug: string, hash: string) => `/shop/product/${slug}${hash || ''}`)
+    .replace(/href="store\.html(\?[^"]*)?"/gi, (_m, q: string) => `/shop${q || ''}`)
+    .replace(/href="articulos\.html"/gi, '/blog')
+    .replace(/href="articulo-([a-z0-9-]+)\.html"/gi, (_m, slug: string) => `/blog/${slug}`)
+    .replace(/(src|href)="(?:\.\.\/)+assets\//gi, '$1="/assets/');
+}
 ---
 
 <BaseLayout title={product.name} description={pageDescription} image={pageImage}>
@@ -304,7 +316,7 @@ const pageImage = product.images?.[0]?.src || '';
                     
                     <!-- Short Description -->
                     {product.short_description && (
-                        <div class="prose prose-sm text-content-light mb-8 leading-relaxed" set:html={product.short_description} />
+                        <div class="prose prose-sm text-content-light mb-8 leading-relaxed" set:html={normalizeContent(product.short_description)} />
                     )}
                     
                     <!-- Add to Cart -->
@@ -392,7 +404,7 @@ const pageImage = product.images?.[0]?.src || '';
                 </div>
                 
                 <div class="p-8 lg:p-10">
-                    <div id="tab-description" class="prose max-w-none" set:html={product.description} />
+                    <div id="tab-description" class="prose max-w-none" set:html={normalizeContent(product.description)} />
                     <div id="tab-additional" class="hidden">
                         {product.attributes && product.attributes.length > 0 ? (
                             <table class="w-full">

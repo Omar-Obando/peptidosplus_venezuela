@@ -127,6 +127,14 @@ const detectCountry = Astro.request.headers.get('CF-IPCountry') || '';
   </style>
 
   <body class="font-poppins antialiased">
+    <!-- ======================= BANNER PAÍS (geo-detect) ======================= -->
+    <GeoCountryBanner
+      detectCountry={detectCountry}
+      currentCountry="VE"
+      otherSiteUrl="https://ni.peptidosplus.com"
+      otherLabel="Nicaragua"
+    />
+
     <!-- ======================= HEADER (marka) ======================= -->
     <header class="pp-nav" role="banner">
       <nav class="pp-nav-in" aria-label="Navegación principal">

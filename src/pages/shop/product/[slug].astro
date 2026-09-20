@@ -1,0 +1,6 @@
+---
+// Alias: /shop/product/[slug] → /tienda/producto/[slug]
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect('/tienda', 308);
+return Astro.redirect(`/tienda/producto/${slug}`, 308);
+---

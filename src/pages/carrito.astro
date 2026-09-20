@@ -9,14 +9,14 @@ export const prerender = true;
 ---
 
 <BaseLayout title="Carrito de compras" description="Revisa tu carrito de compras en Peptidos Plus." canonicalUrl="/carrito">
-  <slot name="head">
+  <Fragment slot="head">
     <script type="application/ld+json" is:inline set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'WebPage',
       name: 'Carrito de compras',
       url: 'https://ve.peptidosplus.com/carrito',
     })} />
-  </slot>
+  </Fragment>
 
     <main id="main-content">
         <!-- Header -->

@@ -187,7 +187,7 @@ export const GET: APIRoute = async ({ request }) => {
     const wcOrderKey = url.searchParams.get('wc_order_key') || '';
     
     if (!token || !wcOrderId) {
-        return Response.redirect(`${SITE_URL}/checkout?error=missing_params`, 302);
+        return Response.redirect(`${SITE_URL}/finalizar-compra?error=missing_params`, 302);
     }
     
     try {
@@ -195,9 +195,9 @@ export const GET: APIRoute = async ({ request }) => {
         if (result.body.success) {
             return Response.redirect(`${SITE_URL}/order-complete?order_id=${wcOrderId}&order_key=${encodeURIComponent(result.body.order_key || wcOrderKey)}`, 302);
         }
-        return Response.redirect(`${SITE_URL}/checkout?error=${encodeURIComponent(result.body.error || 'capture_failed')}&order_id=${wcOrderId}`, 302);
+        return Response.redirect(`${SITE_URL}/finalizar-compra?error=${encodeURIComponent(result.body.error || 'capture_failed')}&order_id=${wcOrderId}`, 302);
     } catch (error) {
         console.error('PayPal capture error:', error);
-        return Response.redirect(`${SITE_URL}/checkout?error=capture_error&order_id=${wcOrderId}`, 302);
+        return Response.redirect(`${SITE_URL}/finalizar-compra?error=capture_error&order_id=${wcOrderId}`, 302);
     }
 };

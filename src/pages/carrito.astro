@@ -8,7 +8,15 @@ import Truck from '@lucide/astro/icons/truck';
 export const prerender = true;
 ---
 
-<BaseLayout title="Shopping Cart">
+<BaseLayout title="Carrito de compras" description="Revisa tu carrito de compras en Peptidos Plus." canonicalUrl="/carrito">
+  <slot name="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: 'Carrito de compras',
+      url: 'https://ve.peptidosplus.com/carrito',
+    })} />
+  </slot>
 
     <main id="main-content">
         <!-- Header -->
@@ -28,7 +36,7 @@ export const prerender = true;
                 </div>
                 <h2 class="text-2xl font-bold text-content mb-2">Your cart is empty</h2>
                 <p class="text-content-lighter mb-8 max-w-sm mx-auto">Looks like you haven't added any products yet. Browse our collection and find something you love.</p>
-                <a href="/shop" class="group inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
+                <a href="/tienda" class="group inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
                     <ArrowLeft class="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                     Continue Shopping
                 </a>
@@ -78,7 +86,7 @@ export const prerender = true;
                             <div id="applied-coupons" class="mt-3 flex flex-wrap gap-2"></div>
                         </div>
 
-                        <a href="/shop" class="group inline-flex items-center gap-2 mt-6 text-primary font-medium hover:gap-3 transition-all cursor-pointer">
+                        <a href="/tienda" class="group inline-flex items-center gap-2 mt-6 text-primary font-medium hover:gap-3 transition-all cursor-pointer">
                             <ArrowLeft class="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                             Continue Shopping
                         </a>
@@ -116,7 +124,7 @@ export const prerender = true;
                             </div>
                             
                             <a 
-                                href="/checkout" 
+                                href="/finalizar-compra" 
                                 id="checkout-btn"
                                 class="block w-full bg-gradient-to-r from-primary to-primary-dark text-white text-center px-6 py-4 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer"
                             >

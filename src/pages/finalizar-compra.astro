@@ -10,7 +10,15 @@ export const prerender = true;
 const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
 ---
 
-<BaseLayout title="Checkout">
+<BaseLayout title="Finalizar compra" description="Finaliza tu compra en Peptidos Plus de forma segura." canonicalUrl="/finalizar-compra">
+  <slot name="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: 'Finalizar compra',
+      url: 'https://ve.peptidosplus.com/finalizar-compra',
+    })} />
+  </slot>
 
     <main id="main-content">
         <!-- Header -->
@@ -47,7 +55,7 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
                 </div>
                 <h2 class="text-2xl font-bold text-content mb-2">Your cart is empty</h2>
                 <p class="text-content-lighter mb-8">Add some products to checkout.</p>
-                <a href="/shop" class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
+                <a href="/tienda" class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
                     Browse Products
                 </a>
             </div>
@@ -95,7 +103,7 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
                     <div class="mt-6 text-center space-y-2">
                         <a href="/forgot-password" class="text-sm text-primary hover:underline cursor-pointer">Forgot your password?</a>
                         <p class="text-sm text-content-lighter">
-                            Don't have an account? <a href="/register?redirect=/checkout" class="text-primary hover:underline cursor-pointer">Create one</a>
+                            Don't have an account? <a href="/register?redirect=/finalizar-compra" class="text-primary hover:underline cursor-pointer">Create one</a>
                         </p>
                     </div>
                 </div>
@@ -474,7 +482,7 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
             const token = getToken();
             if (token) headers['Authorization'] = `Bearer ${token}`;
             
-            const res = await fetch('/api/checkout/config', { headers });
+            const res = await fetch('/api/finalizar-compra/config', { headers });
             if (!res.ok) throw new Error('Failed to load config');
             
             const data = await res.json();

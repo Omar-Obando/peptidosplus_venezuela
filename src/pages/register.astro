@@ -151,7 +151,7 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
     initAuth();
     
     if ($isLoggedIn.get()) {
-        window.location.href = '/account';
+        window.location.href = '/cuenta';
     }
     
     // Turnstile setup
@@ -230,7 +230,7 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
             });
             
             if (result.success) {
-                window.location.href = '/account';
+                window.location.href = '/cuenta';
             } else {
                 showError(result.error || 'Registration failed. Please try again.');
                 setLoading(false);

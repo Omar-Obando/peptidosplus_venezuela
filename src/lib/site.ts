@@ -32,7 +32,7 @@ export const SITE = {
  */
 export const NAV_MAIN = [
   { label: 'Inicio', href: '/' },
-  { label: 'Tienda', href: '/shop' },
+  { label: 'Tienda', href: '/tienda' },
   { label: 'Blog', href: '/blog' },
   { label: 'Certificados (COA)', href: '/certificados' },
   { label: 'Contacto', href: '/contacto' },
@@ -56,7 +56,7 @@ export const FOOTER_LEGAL = [
 ] as const;
 
 export const FOOTER_ABOUT = [
-  { label: 'Preguntas Frecuentes', href: '/faq' },
+  { label: 'Preguntas Frecuentes', href: '/preguntas-frecuentes' },
   { label: 'Blog', href: '/blog' },
   { label: 'Certificados (COA)', href: '/certificados' },
   { label: 'Contacto', href: '/contacto' },

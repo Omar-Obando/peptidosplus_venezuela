@@ -68,7 +68,7 @@ const attributesJson = JSON.stringify((product.attributes || []).reduce((acc, at
     data-date={product.date_created}
     data-attributes={attributesJson}
 >
-    <a href={`/shop/product/${product.slug}`} class="block cursor-pointer">
+    <a href={`/tienda/producto/${product.slug}`} class="block cursor-pointer">
         <!-- Image with Astro optimization -->
         <div class="relative aspect-square overflow-hidden bg-surface-alt">
             {localImageSrc ? (
@@ -162,7 +162,7 @@ const attributesJson = JSON.stringify((product.attributes || []).reduce((acc, at
         )}
         
         <!-- Name -->
-        <a href={`/shop/product/${product.slug}`} class="cursor-pointer">
+        <a href={`/tienda/producto/${product.slug}`} class="cursor-pointer">
             <h3 class="font-semibold text-content group-hover:text-primary transition-colors line-clamp-2 mb-2">
                 {product.name}
             </h3>
@@ -183,7 +183,7 @@ const attributesJson = JSON.stringify((product.attributes || []).reduce((acc, at
         <!-- Add to Cart Button -->
         {hasVariationOptions ? (
             <a
-                href={`/shop/product/${product.slug}`}
+                href={`/tienda/producto/${product.slug}`}
                 class={`block w-full py-2.5 rounded-lg font-medium text-sm text-center transition-colors cursor-pointer no-underline ${
                     inStock
                         ? 'bg-primary text-white hover:bg-primary-dark'

@@ -119,7 +119,7 @@ export const POST: APIRoute = async ({ request }) => {
                     landing_page: 'NO_PREFERENCE',
                     user_action: 'PAY_NOW',
                     return_url: `${SITE_URL}/api/payments/paypal/capture?wc_order_id=${order.id}&wc_order_key=${encodeURIComponent(order.order_key)}`,
-                    cancel_url: `${SITE_URL}/checkout?cancelled=true&order_id=${order.id}`,
+                    cancel_url: `${SITE_URL}/finalizar-compra?cancelled=true&order_id=${order.id}`,
                 },
             }),
         });

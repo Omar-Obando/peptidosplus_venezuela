@@ -9,13 +9,20 @@ import Settings from '@lucide/astro/icons/settings';
 export const prerender = true;
 ---
 
-<BaseLayout title="My Account">
-
-    <main id="main-content">
+<BaseLayout title="Mi cuenta" description="Tu cuenta en Peptidos Plus: pedidos, direcciones y ajustes." canonicalUrl="/cuenta">
+  <slot name="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: 'Mi cuenta',
+      url: 'https://ve.peptidosplus.com/cuenta',
+    })} />
+  </slot>
+  <main id="main-content">
         <!-- Header -->
         <div class="bg-surface border-b border-outline">
             <Section padding="none" class="py-8">
-                <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-content">My Account</h1>
+                <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-content">Mi cuenta</h1>
             </Section>
         </div>
 
@@ -30,7 +37,7 @@ export const prerender = true;
                     </div>
                     <h2 class="text-2xl font-bold text-content mb-2">Please sign in</h2>
                     <p class="text-content-lighter mb-8">You need to be logged in to view your account.</p>
-                    <a href="/login?redirect=/account" class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
+                    <a href="/login?redirect=/cuenta" class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
                         Sign In
                     </a>
                 </div>
@@ -53,7 +60,7 @@ export const prerender = true;
                     
                     <!-- Quick Links -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <a href="/account/orders" class="bg-surface rounded-2xl border border-outline p-6 hover:border-primary hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group">
+                        <a href="/cuenta/orders" class="bg-surface rounded-2xl border border-outline p-6 hover:border-primary hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group">
                             <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                                 <ClipboardList class="w-6 h-6 text-primary" />
                             </div>
@@ -61,7 +68,7 @@ export const prerender = true;
                             <p class="text-sm text-content-lighter mt-1">View your order history</p>
                         </a>
                         
-                        <a href="/account/addresses" class="bg-surface rounded-2xl border border-outline p-6 hover:border-primary hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group">
+                        <a href="/cuenta/addresses" class="bg-surface rounded-2xl border border-outline p-6 hover:border-primary hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group">
                             <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                                 <MapPin class="w-6 h-6 text-primary" />
                             </div>
@@ -69,7 +76,7 @@ export const prerender = true;
                             <p class="text-sm text-content-lighter mt-1">Manage your addresses</p>
                         </a>
                         
-                        <a href="/account/settings" class="bg-surface rounded-2xl border border-outline p-6 hover:border-primary hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group">
+                        <a href="/cuenta/settings" class="bg-surface rounded-2xl border border-outline p-6 hover:border-primary hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group">
                             <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                                 <Settings class="w-6 h-6 text-primary" />
                             </div>

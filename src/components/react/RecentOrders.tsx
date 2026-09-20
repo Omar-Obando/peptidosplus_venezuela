@@ -132,7 +132,7 @@ export default function RecentOrders({ token: propToken, limit = 5 }: RecentOrde
                 </svg>
                 <p className="text-content-lighter mb-4">You haven't placed any orders yet.</p>
                 <a 
-                    href="/shop" 
+                    href="/tienda" 
                     className="text-primary hover:text-primary-dark font-medium cursor-pointer"
                 >
                     Start shopping
@@ -158,7 +158,7 @@ export default function RecentOrders({ token: propToken, limit = 5 }: RecentOrde
                             <tr key={order.id} className="border-b border-outline last:border-0">
                                 <td className="py-4">
                                     <a 
-                                        href={`/account/orders/${order.id}`}
+                                        href={`/cuenta/orders/${order.id}`}
                                         className="text-primary hover:text-primary-dark font-medium cursor-pointer"
                                     >
                                         #{order.number}
@@ -182,7 +182,7 @@ export default function RecentOrders({ token: propToken, limit = 5 }: RecentOrde
             </div>
             
             <a 
-                href="/account/orders" 
+                href="/cuenta/orders" 
                 className="block text-center text-primary hover:text-primary-dark mt-4 cursor-pointer"
             >
                 View all orders

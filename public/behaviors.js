@@ -546,16 +546,11 @@
   });
   /* 4. El carrito lo lleva carrito.js (estado real, persistencia, cierre). */
 
-  /* 5. Enlaces muertos.
-     Todo lo que apuntaba a rutas de la tienda real (carrito, cuenta, checkout)
-     se neutraliza para que el clon no intente salir a aminoclub.com. */
-  $$('a[href^="/"]').forEach((a) => {
-    const h = a.getAttribute('href');
-    if (h === 'index.html' || h === 'store.html') return;
-    a.setAttribute('data-href-original', h);
-    a.setAttribute('href', '#');
-    a.addEventListener('click', (e) => e.preventDefault());
-  });
+  /* 5. Enlaces muertos — DESACTIVADO en el sitio headless.
+     El original neutralizaba los enlaces internos (href="#" + preventDefault)
+     para que el clon no saliera a aminoclub.com. En Peptidos Plus headless los
+     enlaces reales (/, /tienda, /blog, /certificados, /faq...) son válidos y
+     deben navegar: se omite esta neutralización. */
 })();
 
 /* 3d. Los viales flotantes de los héroes (FAQ, certificados…) perdían el giro.

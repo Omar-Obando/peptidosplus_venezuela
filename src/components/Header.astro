@@ -32,7 +32,7 @@ import User from '@lucide/astro/icons/user';
             <div class="flex items-center gap-2 md:gap-3">
                 <!-- Search Link -->
                 <a 
-                    href="/search"
+                    href="/buscar"
                     class="flex items-center justify-center w-10 h-10 text-content-light hover:text-primary transition-colors cursor-pointer rounded-lg hover:bg-surface-alt"
                     aria-label="Search products"
                 >
@@ -41,7 +41,7 @@ import User from '@lucide/astro/icons/user';
                 
                 <!-- Account Link -->
                 <a 
-                    href="/account"
+                    href="/cuenta"
                     class="hidden md:flex items-center gap-2 px-4 py-2 text-content-light hover:text-primary transition-colors cursor-pointer"
                     id="account-link"
                 >
@@ -114,7 +114,7 @@ import User from '@lucide/astro/icons/user';
             accountText.textContent = isLoggedIn ? 'My Account' : 'Sign In';
         }
         if (accountLink) {
-            accountLink.setAttribute('href', isLoggedIn ? '/account' : '/login');
+            accountLink.setAttribute('href', isLoggedIn ? '/cuenta' : '/login');
         }
     }
     

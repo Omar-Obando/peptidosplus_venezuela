@@ -15,7 +15,7 @@ const orderId = Astro.params.id;
         <div class="bg-surface border-b border-outline">
             <Section padding="none" class="py-8">
                 <div class="flex items-center gap-4">
-                    <a href="/account/orders" class="text-content-lighter hover:text-primary transition-colors cursor-pointer">
+                    <a href="/cuenta/orders" class="text-content-lighter hover:text-primary transition-colors cursor-pointer">
                         <ArrowLeft class="w-5 h-5" />
                     </a>
                     <div>
@@ -30,7 +30,7 @@ const orderId = Astro.params.id;
             <div class="max-w-4xl mx-auto">
                 <div id="not-logged-in" class="hidden text-center py-20 bg-surface rounded-2xl border border-outline">
                     <p class="text-content-lighter mb-4">You need to be logged in to view order details.</p>
-                    <a href={`/login?redirect=/account/orders/${orderId}`} class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
+                    <a href={`/login?redirect=/cuenta/orders/${orderId}`} class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
                         Sign In
                     </a>
                 </div>
@@ -50,7 +50,7 @@ const orderId = Astro.params.id;
                         </div>
                         <h2 class="text-xl font-bold text-content mb-2">Order not found</h2>
                         <p class="text-content-lighter mb-6" id="error-message">This order could not be loaded or does not belong to your account.</p>
-                        <a href="/account/orders" class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
+                        <a href="/cuenta/orders" class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
                             Back to Orders
                         </a>
                     </div>

@@ -14,7 +14,7 @@ import {
     decrementQuantity,
     formatCartPrice,
     type CartItem
-} from '../../lib/cart';
+} from '../../lib/carrito';
 
 export default function CartDrawer() {
     const cart = useStore($cart);
@@ -112,13 +112,13 @@ export default function CartDrawer() {
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                             <a 
-                                href="/cart" 
+                                href="/carrito" 
                                 className="block text-center py-3 border border-outline rounded-lg text-content hover:bg-surface-alt transition-colors cursor-pointer"
                             >
                                 View Cart
                             </a>
                             <a 
-                                href="/checkout" 
+                                href="/finalizar-compra" 
                                 className="block text-center py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors cursor-pointer"
                             >
                                 Checkout

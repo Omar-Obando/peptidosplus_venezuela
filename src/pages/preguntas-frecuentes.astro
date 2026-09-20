@@ -1,0 +1,79 @@
+---
+/**
+ * Preguntas frecuentes — /preguntas-frecuentes
+ *
+ * Página FAQ con contenido curado (mismo texto que public/faq.html) +
+ * FAQPage JSON-LD. El alias /faq → 308 a esta ruta vía middleware.
+ */
+import BrandLayout from '@/layouts/BrandLayout.astro';
+import FAQSchema from '@/components/schema/FAQSchema.astro';
+
+const faqs = [
+  { question: '¿Qué pureza tienen los péptidos?', answer: 'Cada lote se analiza por HPLC en Janoshik Analytical, un laboratorio independiente, y su certificado es público con la pureza exacta. Puedes verificar cada reporte en la página de certificados.' },
+  { question: '¿Cómo almacenar los péptidos?', answer: 'El vial liofilizado se conserva en un lugar fresco y seco, lejos de la luz directa. Reconstituido: refrigerar entre 2 y 8 °C y usar dentro de unos 30 días.' },
+  { question: '¿Cómo reconstituir un péptido?', answer: 'Deja que el vial alcance temperatura ambiente. Inyecta agua bacteriostática lentamente por la pared del vial. Gira suavemente —no agites— hasta disolver completamente.' },
+  { question: '¿Qué incluye el kit de aplicación?', answer: 'Con cada péptido va un kit sin costo: agua bacteriostática de 3 ml, 10 jeringas y 10 toallitas de alcohol. Si compras cinco péptidos, recibes cinco kits.' },
+  { question: '¿Cuánto tarda el envío?', answer: 'El tránsito lo maneja la agencia, no nosotros: depende de MRW o Zoom y de la oficina que elijas. Para saber en qué va tu pedido, escríbenos por WhatsApp con tu número de orden.' },
+  { question: '¿Envían a domicilio?', answer: 'No. Despachamos únicamente a oficinas de MRW o Zoom; en el checkout eliges la oficina donde retiras. El flete se paga al retirar (cobro en destino).' },
+  { question: '¿El empaque es discreto?', answer: 'Sí. Sin indicaciones del contenido en el exterior del paquete.' },
+  { question: '¿Qué pasa si llega dañado?', answer: 'Lo reponemos sin costo, con una condición: graba un video al abrir el paquete —sin cortes, desde que está cerrado— y envíanoslo por WhatsApp dentro de las primeras 48 horas. Sin ese video no podemos aplicar la reposición, así que graba siempre al abrir.' },
+  { question: '¿Cómo puedo pagar?', answer: 'Zelle, Binance Pay (USDT) o Pago Móvil en bolívares. Al finalizar la compra ves los datos, la tasa aplicada y el monto exacto.' },
+  { question: '¿Cuándo se confirma mi pedido?', answer: 'En cuanto verificamos el pago te escribimos por WhatsApp.' },
+  { question: '¿Qué uso tienen estos productos?', answer: 'Exclusivamente investigación científica en entornos controlados. No son medicamentos.' },
+  { question: '¿Es legal comprarlos en Venezuela?', answer: 'Los péptidos de investigación se comercializan como reactivos de grado analítico, una categoría que la normativa sanitaria venezolana vigente exime de registro sanitario, siempre que se destinen a investigación y no a consumo humano ni veterinario. Cada lote incluye su certificado de análisis como respaldo de ese grado analítico.' },
+];
+
+const title = 'Preguntas frecuentes | Peptidos Plus';
+const description = 'Respuestas sobre pureza, reconstitución, envíos, pago y legalidad de los péptidos de investigación de Peptidos Plus.';
+
+const groups = [
+  { id: 'producto', name: 'Producto y calidad', faqs: faqs.slice(0, 4) },
+  { id: 'envios', name: 'Envíos', faqs: faqs.slice(4, 8) },
+  { id: 'pago', name: 'Pago', faqs: faqs.slice(8, 10) },
+  { id: 'legal', name: 'Uso y legalidad', faqs: faqs.slice(10, 12) },
+];
+---
+
+<BrandLayout title={title} rawTitle={title} description={description} canonicalUrl="/preguntas-frecuentes">
+  <slot name="head">
+    <FAQSchema faqs={faqs} />
+  </slot>
+  <main id="main-content">
+    <section class="py-12 lg:py-16 bg-white">
+      <div class="content-container">
+        <div class="max-w-4xl mx-auto">
+          <p class="pp-cejilla font-poppins">Respuestas rápidas</p>
+          <h1 class="pp-h2 mb-4">Preguntas frecuentes</h1>
+          <p class="text-gray-600 text-lg mb-12">Lo esencial sobre péptidos de investigación, pedidos, envíos y pago. Si no está aquí, escríbenos.</p>
+
+          {groups.map((g) => (
+            <div class="mb-12 last:mb-0" id={g.id} style="scroll-margin-top: 96px;">
+              <h2 class="text-2xl font-semibold text-black mb-6">{g.name}</h2>
+              <div class="space-y-4">
+                {g.faqs.map((f) => (
+                  <details class="group bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                    <summary class="flex items-center justify-between cursor-pointer px-6 py-5 text-left font-medium text-black hover:bg-gray-50 transition-colors list-none">
+                      <span>{f.question}</span>
+                      <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform flex-shrink-0 ml-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="px-6 pb-5">
+                      <p class="text-gray-600 leading-relaxed">{f.answer}</p>
+                    </div>
+                  </details>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          <div class="max-w-2xl mx-auto mt-16 text-center">
+            <div class="bg-white rounded-3xl p-8 lg:p-10 shadow-sm border border-gray-100">
+              <h3 class="text-xl lg:text-2xl font-semibold text-black mb-3">¿Tienes otra pregunta?</h3>
+              <p class="text-gray-600 mb-6">Te atendemos por WhatsApp de lunes a viernes, de 9:00 am a 6:00 pm.</p>
+              <a href="https://wa.me/15806436837" class="inline-flex items-center justify-center gap-2 h-11 px-6 bg-black hover:bg-black/90 text-white font-medium rounded-full transition-colors" target="_blank" rel="noopener noreferrer">Consultar por WhatsApp</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</BrandLayout>

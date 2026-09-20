@@ -69,7 +69,7 @@ export default function ProductCard({
 
     return (
         <a 
-            href={`/shop/product/${product.slug}`}
+            href={`/tienda/producto/${product.slug}`}
             className="group block bg-surface rounded-2xl border border-outline overflow-hidden hover:border-primary/50 hover:shadow-lg transition-all duration-300"
         >
             {/* Image Container */}

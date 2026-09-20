@@ -98,7 +98,7 @@ export const POST: APIRoute = async ({ request }) => {
                 wc_order_key: order.order_key,
             },
             success_url: `${SITE_URL}/order-complete?order_id=${order.id}&order_key=${encodeURIComponent(order.order_key)}&session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${SITE_URL}/checkout?cancelled=true&order_id=${order.id}`,
+            cancel_url: `${SITE_URL}/finalizar-compra?cancelled=true&order_id=${order.id}`,
         });
         
         return new Response(

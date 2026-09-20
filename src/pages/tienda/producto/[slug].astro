@@ -96,8 +96,8 @@ function normalizeContent(html: string): string {
   if (!html) return html;
   return html
     .replace(/(src|href)="assets\//gi, '$1="/assets/')
-    .replace(/href="producto-([a-z0-9-]+)\.html(#coa)?"/gi, (_m, slug: string, hash: string) => `/shop/product/${slug}${hash || ''}`)
-    .replace(/href="store\.html(\?[^"]*)?"/gi, (_m, q: string) => `/shop${q || ''}`)
+    .replace(/href="producto-([a-z0-9-]+)\.html(#coa)?"/gi, (_m, slug: string, hash: string) => `/tienda/producto/${slug}${hash || ''}`)
+    .replace(/href="store\.html(\?[^"]*)?"/gi, (_m, q: string) => `/tienda${q || ''}`)
     .replace(/href="articulos\.html"/gi, '/blog')
     .replace(/href="articulo-([a-z0-9-]+)\.html"/gi, (_m, slug: string) => `/blog/${slug}`)
     .replace(/(src|href)="(?:\.\.\/)+assets\//gi, '$1="/assets/');
@@ -115,12 +115,12 @@ function normalizeContent(html: string): string {
                     <ol class="flex items-center gap-2 text-sm">
                         <li><a href="/" class="text-content-lighter hover:text-primary transition-colors cursor-pointer">Home</a></li>
                         <li class="text-content-lighter">/</li>
-                        <li><a href="/shop" class="text-content-lighter hover:text-primary transition-colors cursor-pointer">Shop</a></li>
+                        <li><a href="/tienda" class="text-content-lighter hover:text-primary transition-colors cursor-pointer">Shop</a></li>
                         {product.categories?.[0] && (
                             <>
                                 <li class="text-content-lighter">/</li>
                                 <li>
-                                    <a href={`/shop/category/${product.categories[0].slug}`} class="text-content-lighter hover:text-primary transition-colors cursor-pointer">
+                                    <a href={`/tienda/categoria/${product.categories[0].slug}`} class="text-content-lighter hover:text-primary transition-colors cursor-pointer">
                                         {product.categories[0].name}
                                     </a>
                                 </li>
@@ -233,7 +233,7 @@ function normalizeContent(html: string): string {
                         <div class="flex flex-wrap gap-2 mb-4">
                             {product.categories.map(cat => (
                                 <a 
-                                    href={`/shop/category/${cat.slug}`}
+                                    href={`/tienda/categoria/${cat.slug}`}
                                     class="text-xs font-semibold px-3 py-1.5 bg-primary/10 text-primary rounded-full hover:bg-primary/20 transition-colors cursor-pointer tracking-wide uppercase"
                                 >
                                     {cat.name}
@@ -366,7 +366,7 @@ function normalizeContent(html: string): string {
                                 <span class="font-medium text-content">Tags:</span>{' '}
                                 {product.tags.map((tag, i) => (
                                     <span>
-                                        <a href={`/shop/tag/${tag.slug}`} class="hover:text-primary transition-colors cursor-pointer">{tag.name}</a>
+                                        <a href={`/tienda/tag/${tag.slug}`} class="hover:text-primary transition-colors cursor-pointer">{tag.name}</a>
                                         {i < product.tags.length - 1 ? ', ' : ''}
                                     </span>
                                 ))}
@@ -510,7 +510,7 @@ function normalizeContent(html: string): string {
                         <span class="text-sm font-semibold text-primary tracking-wide uppercase">You may also like</span>
                         <h2 class="text-3xl sm:text-4xl font-black tracking-tight text-content mt-2">Related Products</h2>
                     </div>
-                    <a href="/shop" class="group hidden sm:inline-flex items-center gap-2 text-primary font-medium hover:gap-3 transition-all cursor-pointer">
+                    <a href="/tienda" class="group hidden sm:inline-flex items-center gap-2 text-primary font-medium hover:gap-3 transition-all cursor-pointer">
                         View all
                         <ArrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </a>

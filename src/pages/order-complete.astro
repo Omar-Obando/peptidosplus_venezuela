@@ -41,12 +41,12 @@ const orderId = Astro.url.searchParams.get('order_id');
                         </p>
                         
                         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                            <a href="/shop" class="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-3.5 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
+                            <a href="/tienda" class="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-3.5 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
                                 Continue Shopping
                                 <ArrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                             </a>
                             {orderId && (
-                                <a href={`/account/orders/${orderId}`} class="inline-flex items-center justify-center gap-2 bg-surface border border-outline text-content px-8 py-3.5 rounded-xl font-semibold hover:border-primary hover:text-primary transition-all cursor-pointer">
+                                <a href={`/cuenta/orders/${orderId}`} class="inline-flex items-center justify-center gap-2 bg-surface border border-outline text-content px-8 py-3.5 rounded-xl font-semibold hover:border-primary hover:text-primary transition-all cursor-pointer">
                                     View Order
                                 </a>
                             )}
@@ -67,7 +67,7 @@ const orderId = Astro.url.searchParams.get('order_id');
                         </p>
                         
                         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                            <a href="/shop" class="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-3.5 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
+                            <a href="/tienda" class="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-3.5 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
                                 Continue Shopping
                                 <ArrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                             </a>

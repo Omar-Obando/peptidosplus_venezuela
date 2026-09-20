@@ -28,7 +28,7 @@ if (!category) {
 }
 
 if (!category) {
-    return Astro.redirect('/shop');
+    return Astro.redirect('/tienda');
 }
 
 const products = await getLocalProductsByCategory(slug);
@@ -61,7 +61,7 @@ const filterAttributes = Array.from(attributeMap.entries()).map(([name, values])
                         <ol class="flex items-center justify-center gap-2 text-sm text-content-light">
                             <li><a href="/" class="hover:text-primary transition-colors cursor-pointer">Home</a></li>
                             <li class="text-content-lighter">/</li>
-                            <li><a href="/shop" class="hover:text-primary transition-colors cursor-pointer">Shop</a></li>
+                            <li><a href="/tienda" class="hover:text-primary transition-colors cursor-pointer">Shop</a></li>
                             <li class="text-content-lighter">/</li>
                             <li class="text-content font-medium">{category.name}</li>
                         </ol>
@@ -86,7 +86,7 @@ const filterAttributes = Array.from(attributeMap.entries()).map(([name, values])
                         <ul class="space-y-1">
                             <li>
                                 <a 
-                                    href="/shop" 
+                                    href="/tienda" 
                                     class="flex items-center justify-between px-3 py-2.5 rounded-xl text-content hover:bg-surface-alt transition-colors cursor-pointer"
                                 >
                                     <span>All Products</span>
@@ -95,7 +95,7 @@ const filterAttributes = Array.from(attributeMap.entries()).map(([name, values])
                             {visibleCategories.map(cat => (
                                 <li>
                                     <a 
-                                        href={`/shop/category/${cat.slug}`}
+                                        href={`/tienda/categoria/${cat.slug}`}
                                         class={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-all cursor-pointer ${
                                             cat.slug === slug 
                                                 ? 'bg-primary text-white font-medium shadow-lg shadow-primary/20' 
@@ -236,7 +236,7 @@ const filterAttributes = Array.from(attributeMap.entries()).map(([name, values])
                             </div>
                             <h2 class="text-2xl font-bold text-content mb-2">No products found</h2>
                             <p class="text-content-lighter mb-6">There are no products in this category yet.</p>
-                            <a href="/shop" class="group inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-medium hover:bg-primary-dark transition-colors cursor-pointer">
+                            <a href="/tienda" class="group inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-medium hover:bg-primary-dark transition-colors cursor-pointer">
                                 <ArrowLeft class="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                                 Browse All Products
                             </a>

@@ -65,14 +65,14 @@
         <p class="text-xs text-content-lighter mb-4">Shipping and taxes calculated at checkout</p>
         <div class="space-y-3">
             <a 
-                href="/checkout" 
+                href="/finalizar-compra" 
                 id="cart-drawer-checkout"
                 class="block w-full bg-primary text-white text-center py-3 rounded-lg font-semibold hover:bg-primary-dark transition-colors cursor-pointer"
             >
                 Checkout
             </a>
             <a 
-                href="/cart" 
+                href="/carrito" 
                 class="block w-full bg-surface border border-outline text-content text-center py-3 rounded-lg font-medium hover:bg-surface-alt transition-colors cursor-pointer"
             >
                 View Cart
@@ -92,7 +92,7 @@
         incrementQuantity,
         decrementQuantity,
         formatCartPrice,
-    } from '../../lib/cart';
+    } from '../../lib/carrito';
     
     // Initialize cart
     initCart();
@@ -253,7 +253,7 @@
     // Close drawer on shop button click
     shopBtn?.addEventListener('click', () => {
         closeCartDrawer();
-        window.location.href = '/shop';
+        window.location.href = '/tienda';
     });
     
     // Close on escape key

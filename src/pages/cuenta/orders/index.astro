@@ -13,7 +13,7 @@ export const prerender = true;
         <div class="bg-surface border-b border-outline">
             <Section padding="none" class="py-8">
                 <div class="flex items-center gap-4">
-                    <a href="/account" class="text-content-lighter hover:text-primary transition-colors cursor-pointer">
+                    <a href="/cuenta" class="text-content-lighter hover:text-primary transition-colors cursor-pointer">
                         <ArrowLeft class="w-5 h-5" />
                     </a>
                     <div>
@@ -28,7 +28,7 @@ export const prerender = true;
             <div class="max-w-4xl mx-auto">
                 <div id="not-logged-in" class="hidden text-center py-20 bg-surface rounded-2xl border border-outline">
                     <p class="text-content-lighter mb-4">You need to be logged in to view your orders.</p>
-                    <a href="/login?redirect=/account/orders" class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
+                    <a href="/login?redirect=/cuenta/orders" class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
                         Sign In
                     </a>
                 </div>
@@ -48,7 +48,7 @@ export const prerender = true;
                         </div>
                         <h2 class="text-xl font-bold text-content mb-2">No orders yet</h2>
                         <p class="text-content-lighter mb-6">Start shopping to see your orders here.</p>
-                        <a href="/shop" class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
+                        <a href="/tienda" class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
                             Browse Shop
                         </a>
                     </div>
@@ -130,7 +130,7 @@ export const prerender = true;
                     const orderTotal = escapeHtml(order.total);
                     const itemCount = order.line_items?.length || 0;
                     return `
-                    <a href="/account/orders/${orderId}" class="block bg-surface rounded-2xl border border-outline p-6 hover:border-primary/30 transition-colors cursor-pointer">
+                    <a href="/cuenta/orders/${orderId}" class="block bg-surface rounded-2xl border border-outline p-6 hover:border-primary/30 transition-colors cursor-pointer">
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                             <div class="space-y-1">
                                 <div class="flex items-center gap-3">

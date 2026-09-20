@@ -568,7 +568,7 @@ const query = Astro.url.searchParams.get('q') || '';
 const results = query ? await searchPosts(query) : [];
 ---
 
-<form action="/search" method="get">
+<form action="/buscar" method="get">
   <input type="text" name="q" value={query} placeholder="Search posts..." />
   <button type="submit">Search</button>
 </form>

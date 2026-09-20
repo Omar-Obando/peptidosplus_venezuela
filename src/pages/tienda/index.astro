@@ -6,11 +6,13 @@
  * Elementos del original: banner verde "3 productos nuevos", chips de
  * categorías, buscador, tarjetas bg-neutral-100 rounded-[24px] con
  * pp-coa-pill en-tarjeta y botones "Ver detalles"/"Añadir". Datos del CMS.
+ * Ruta canónica: /tienda (antes /shop).
  */
 import BrandLayout from '@/layouts/BrandLayout.astro';
 import { getLocalProducts, getLocalVisibleCategories } from '../../lib/local-product-data';
 import { formatPrice, isInStock } from '../../lib/woocommerce';
 import { getPublicProductImageUrl } from '../../lib/product-media';
+import { SITE } from '@/lib/site';
 
 export const prerender = true;
 
@@ -37,9 +39,25 @@ const categoryChips = categories.filter((c: any) => c.parent === 0 && c.count > 
 
 const title = 'Catálogo de péptidos de investigación | Peptidos Plus';
 const description = 'Péptidos de investigación con certificado de análisis en cada lote. Catálogo completo de Peptidos Plus Venezuela.';
+
+const itemListLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Catálogo de péptidos de investigación',
+  itemListElement: items.map((p, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    url: `${SITE.url}/tienda/producto/${p.slug}`,
+    name: p.name,
+  })),
+};
+// ItemList schema: listado completo de productos del catálogo.
 ---
 
-<BrandLayout title={title} rawTitle={title} description={description} canonicalUrl={`/shop`}>
+<BrandLayout title={title} rawTitle={title} description={description} canonicalUrl={`/tienda`}>
+  <slot name="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(itemListLd)} />
+  </slot>
   <main id="main-content">
     <!-- Banner "3 productos nuevos" (marca original) -->
     <div class="relative isolate w-full overflow-hidden border-b-2 border-[#E9C46A] bg-gradient-to-r from-[#0B5B45] via-[#16A672] to-[#0B5B45] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]">
@@ -47,7 +65,7 @@ const description = 'Péptidos de investigación con certificado de análisis en
       <div class="relative mx-auto flex max-w-[1500px] items-center justify-center gap-3 px-4 py-2.5 text-center text-sm sm:text-[15px]">
         <span aria-hidden="true">✨</span>
         <p><b>3 productos nuevos</b><span aria-hidden="true"> ● </span>Lemon Bottle, Cagrilintida y Kisspeptin</p>
-        <a href="/shop" class="ml-2 inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold hover:bg-white/25 transition-colors">Ver productos
+        <a href="/tienda" class="ml-2 inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold hover:bg-white/25 transition-colors">Ver productos
           <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
         </a>
       </div>
@@ -89,17 +107,17 @@ const description = 'Péptidos de investigación con certificado de análisis en
             <article class="group h-full" data-pp-nombre={p.name.toLowerCase()} data-pp-cat={p.catSlug}>
               <div class="bg-neutral-100 rounded-[20px] lg:rounded-[24px] overflow-hidden h-full flex flex-col border border-black/[0.08] transition-shadow duration-200 hover:shadow-[0_14px_32px_-14px_rgba(19,19,21,0.22)]">
                 <div class="relative aspect-[4/5] overflow-hidden">
-                  <a class="block absolute inset-0" href={`/shop/product/${p.slug}`}>
+                  <a class="block absolute inset-0" href={`/tienda/producto/${p.slug}`}>
                     <img alt={p.name} loading="lazy" decoding="async" class="object-cover object-[80%_center] transition-transform duration-300 group-hover:scale-105" sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" src={p.img} />
                   </a>
                   {p.inStock ? (
-                    <a class="pp-coa-pill en-tarjeta" data-pp-coa-abrir={p.slug} href={`/shop/product/${p.slug}#coa`} aria-label={`Ver el certificado de análisis de ${p.name}`}><i aria-hidden="true"></i>Certificado</a>
+                    <a class="pp-coa-pill en-tarjeta" data-pp-coa-abrir={p.slug} href={`/tienda/producto/${p.slug}#coa`} aria-label={`Ver el certificado de análisis de ${p.name}`}><i aria-hidden="true"></i>Certificado</a>
                   ) : (
                     <span class="absolute top-3 left-3 text-xs font-medium bg-black/70 text-white px-3 py-1.5 rounded-full">Agotado</span>
                   )}
                 </div>
                 <div class="p-3 lg:p-4 flex flex-col flex-grow bg-white border-t border-black/[0.05] rounded-b-[20px] lg:rounded-b-[24px]">
-                  <a class="hover:opacity-80 transition-opacity min-w-0" href={`/shop/product/${p.slug}`}>
+                  <a class="hover:opacity-80 transition-opacity min-w-0" href={`/tienda/producto/${p.slug}`}>
                     <h3 class="font-semibold text-[15px] lg:text-lg text-brand-black leading-tight line-clamp-1">{p.name}</h3>
                     <p class="text-gray-500 text-[11px] lg:text-xs mt-0.5 line-clamp-1">{p.sub}</p>
                   </a>
@@ -108,9 +126,9 @@ const description = 'Péptidos de investigación con certificado de análisis en
                     <span class="font-poppins font-semibold text-[17px] lg:text-xl text-brand-black leading-tight">{p.price}</span>
                   </div>
                   <div class="mt-auto pt-2.5 flex gap-1.5">
-                    <a href={`/shop/product/${p.slug}`} class="flex-1 h-9 lg:h-10 rounded-full border border-black/15 text-xs lg:text-sm font-medium text-black/70 hover:border-black hover:text-black transition-colors flex items-center justify-center">Ver detalles</a>
+                    <a href={`/tienda/producto/${p.slug}`} class="flex-1 h-9 lg:h-10 rounded-full border border-black/15 text-xs lg:text-sm font-medium text-black/70 hover:border-black hover:text-black transition-colors flex items-center justify-center">Ver detalles</a>
                     {p.inStock && (
-                      <a href={`/shop/product/${p.slug}`} class="w-full h-9 lg:h-10 px-3 rounded-full font-medium text-xs lg:text-sm leading-none flex items-center justify-center gap-1.5 transition-colors bg-brand-black text-white hover:bg-gray-800" aria-label={`Añadir ${p.name} al carrito`}>
+                      <a href={`/tienda/producto/${p.slug}`} class="w-full h-9 lg:h-10 px-3 rounded-full font-medium text-xs lg:text-sm leading-none flex items-center justify-center gap-1.5 transition-colors bg-brand-black text-white hover:bg-gray-800" aria-label={`Añadir ${p.name} al carrito`}>
                         <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 4h14"></path><circle cx="9" cy="20" r="1"></circle><circle cx="18" cy="20" r="1"></circle></svg>
                         Añadir
                       </a>

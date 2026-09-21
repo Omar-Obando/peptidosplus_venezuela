@@ -145,13 +145,16 @@ if (presentations.length === 0) {
         .map((f: string) => {
             const mm = f.match(/(\d+(?:\.\d+)?)(mg|ml)\.webp$/i);
             if (!mm) return null;
+            const num = parseFloat(mm[1]);
+            const unit = mm[2].toLowerCase();
             return {
-                label: `${parseFloat(mm[1])}${mm[2].toUpperCase()}`,
-                dosis: `${parseFloat(mm[1])} ${mm[2].toLowerCase()}`,
-                num: parseFloat(mm[1]),
-                unit: mm[2].toLowerCase(),
+                label: `${num}${unit.toUpperCase()}`,
+                dosis: `${num} ${unit}`,
+                num,
+                unit,
                 price: basePrice,
-                vial: `/assets/viales-ficha/${f}`,
+                // La URL usa la capitalización original del baseName (p.ej. Retatrutida-10mg.webp)
+                vial: `/assets/viales-ficha/${baseName}-${num}${unit}.webp`,
             };
         })
         .filter(Boolean) as PresInfo[];

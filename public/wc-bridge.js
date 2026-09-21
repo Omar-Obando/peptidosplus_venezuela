@@ -31,9 +31,10 @@
     }
     function writeItems(items) {
         try { localStorage.setItem(CLAVE, JSON.stringify(items)); } catch (e) { /* noop */ }
-        // Reflejar también en phantomwp_cart para las páginas Astro (cart/checkout)
+        // Reflejar también en phantomwp_cart para las páginas Astro (cart/checkout).
+        // cart.ts espera {items:[...]}, así que se envuelve en esa forma.
         try {
-            localStorage.setItem(WC_KEY, JSON.stringify(items.map(function (it) {
+            localStorage.setItem(WC_KEY, JSON.stringify({ items: items.map(function (it) {
                 return {
                     id: Number(it.id) || it.id,
                     variation_id: it.dosis ? Number(it.variation_id) : undefined,
@@ -44,7 +45,7 @@
                     sku: it.sku || '',
                     attributes: it.dosis ? { dosis: it.dosis } : undefined,
                 };
-            })));
+            }) }));
             window.dispatchEvent(new CustomEvent('pp-cart-sync'));
         } catch (e) { /* noop */ }
     }
@@ -87,7 +88,7 @@
                     if (found) id = encodeURIComponent(found.pagina || '');
                 }
                 var items = readItems();
-                items.push({ id: id, nombre: name, cantidad: 1, precio: precio, img: '', dosis: dosis });
+                items.push({ id: id, nombre: name, cant: 1, precio: precio, img: '', dosis: dosis });
                 writeItems(items);
                 // Abrir drawer original (carrito.js escucha este input/key)
                 document.querySelector('[data-pp-carrito-abrir]')?.click();

@@ -123,6 +123,10 @@ function normalizeContent(html: string): string {
     .replace(/<footer[\s\S]*?<\/footer>/gi, '')
     .replace(/<canvas[^>]*>[\s\S]*?<\/canvas>/gi, '')
     .replace(/<(div|section)\s[^>]*class="[^"]*(?:grid|aspect-\[|min-h-|bg-gradient|pp-hero|data-pp-|bg-\[|flex-col lg:grid)[^"]*"[^>]*>[\s\S]*?<\/(?:div|section)>/gi, '')
+    // Quita el hero/CTA del clon contenido en la descripcion ("Todos los pepidos...
+    // certificado de cada lote" + "Ver catalogo") sin importar en que spans anide.
+    .replace(/<div[^>]*>[\s\S]*?Todos los p[ée]ptidos de investigaci[óo]n[\s\S]*?certificado de cada lote[\s\S]*?<\/div>/gi, '')
+    .replace(/<div[^>]*>[\s\S]*?Ver cat[áa]logo[\s\S]*?<\/div>/gi, '')
     .replace(/\sdata-pp-[a-z-]+(?:="[^"]*")?/gi, '');
   return out;
 }

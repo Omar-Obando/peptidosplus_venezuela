@@ -1,12 +1,10 @@
-/* Checkout del clon — el mismo flujo que la tienda real (PeptidosPlus-Web-azul,
- * src/app/checkout/CheckoutClient.tsx): Datos → Envío (solo oficinas Zoom, con
- * cobro en destino) → Pago (Zelle · Binance Pay · Pago Móvil con CÉNTIMOS
- * ÚNICOS por orden) → Listo. Aquí, sobre la carcasa visual de aminoclub.
+/* Checkout con pedido por WhatsApp (Peptidos Plus).
  *
- * Es un prototipo: no hay servidor. La orden se guarda en el navegador
- * (localStorage pp_clon_pedidos) y la verificación del pago se simula, igual
- * que en el prototipo del Next.js. Los datos de pago son DE EJEMPLO hasta que
- * el dueño confirme cuáles van públicos (misma constante que en la web real).
+ * Mismo flujo visual del original: Datos → Envío (oficinas Zoom) → Pago
+ * (método) → Listo. Pero en vez de guardar en localStorage simulado, al
+ * confirmar se abre WhatsApp (wa.me/<NUM>) con la orden completa para que
+ * el negocio la procese. Datos mínimos: nombre, WhatsApp, oficina de envío,
+ * método de pago (Zelle / Binance Pay / Pago Móvil).
  */
 (() => {
   'use strict';
@@ -19,32 +17,24 @@
   const bsFmt = (n) => 'Bs ' + n.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
+  const WA_NUMERO = '15806436837';
   const PAGOS = {
     zelle: { nombre: 'Zelle', moneda: 'USD', nota: 'Verificación manual, en minutos' },
     binance: { nombre: 'Binance Pay', moneda: 'USDT', nota: 'Confirmación rápida' },
     movil: { nombre: 'Pago Móvil', moneda: 'Bs', nota: 'A tasa USDT del día' },
   };
-  // Datos de ejemplo hasta que el dueño confirme cuáles van públicos
-  const DATOS = {
-    zelle: { correo: 'pagos@ejemplo.com', titular: 'Nombre del titular' },
-    binance: { payId: '000 000 000', usuario: 'PeptidosPlus' },
-    movil: { banco: 'Banco (0000)', rif: 'J-00000000-0', tel: '0000-000.00.00' },
-  };
-  const CLAVE_PEDIDOS = 'pp_clon_pedidos';
 
   /* ---------- estado ---------- */
   let pantalla = 'datos';                    // datos | envio | pago | listo | vacio
   let metodo = 'movil';
   const datos = { nombre: '', telefono: '', correo: '', notas: '' };
   const envio = { transporte: 'zoom', estado: '', ciudad: '', oficina: null };
-  let orden = { id: '', centimos: 0 };
-  let tasa = null;                           // { tasa, fecha } USDT de referencia (dolarapi, serie paralelo)
-  let referencia = '';
-  let verificando = false;
+  let orden = { id: '' };
+  let tasa = null;
   let filtro = '';
   let OFICINAS = [];
 
-  fetch('assets/datos/zoom-oficinas.json').then((r) => r.json()).then((j) => { OFICINAS = Array.isArray(j) ? j : []; if (pantalla === 'envio') pintar(); }).catch(() => { OFICINAS = []; });
+  fetch('/assets/datos/zoom-oficinas.json').then((r) => r.json()).then((j) => { OFICINAS = Array.isArray(j) ? j : []; if (pantalla === 'envio') pintar(); }).catch(() => { OFICINAS = []; });
   fetch('https://ve.dolarapi.com/v1/dolares/paralelo').then((r) => r.json()).then((d) => { const t = Number(d.promedio); if (t > 0) { tasa = { tasa: t, fecha: String(d.fechaActualizacion || '').slice(0, 10) }; pintar(); } }).catch(() => { tasa = null; });
 
   const estados = () => Array.from(new Set(OFICINAS.map((o) => o.estado))).sort((a, b) => a.localeCompare(b, 'es'));
@@ -55,44 +45,53 @@
   const items = () => C.items();
   const total = () => C.total();
   const totalBruto = () => items().reduce((s, i) => s + i.precio * i.cant, 0);
-  // Un solo descuento en todo el sitio: la escalera por cantidad de viales.
-  // Los códigos promocionales se retiraron el 2026-09-09.
   const dto = () => (C.descuento ? C.descuento() : 0);
   const detalleDto = () => (C.descuentoPorCantidad ? C.descuentoPorCantidad() : null);
-  const bs = () => (tasa ? Math.round(total() * tasa.tasa) + orden.centimos / 100 : null);
-
-  const pedidos = () => { try { return JSON.parse(localStorage.getItem(CLAVE_PEDIDOS) || '[]'); } catch (e) { return []; } };
-  const centimosLibres = () => {
-    const usados = new Set(pedidos().filter((p) => p.estado === 'pendiente' || p.estado === 'revisando').map((p) => p.centimos));
-    let c = 1 + Math.floor(Math.random() * 99), v = 0;
-    while (usados.has(c) && v++ < 99) c = 1 + (c % 99);
-    return c;
-  };
+  const bs = () => (tasa ? Math.round(total() * tasa.tasa) : null);
 
   /* ---------- acciones ---------- */
   const ir = (p) => { pantalla = p; window.scrollTo(0, 0); pintar(); };
   const irAPago = () => {
     if (!envio.oficina) return;
-    orden = { id: 'ORD-' + String(Math.floor(100000 + Math.random() * 899999)), centimos: centimosLibres() };
+    orden = { id: 'ORD-' + String(Math.floor(100000 + Math.random() * 899999)) };
     ir('pago');
   };
+
+  // Enviar pedido por WhatsApp
   const confirmar = () => {
-    if (referencia.trim().length < 6 || verificando) return;
-    verificando = true; pintar();
-    setTimeout(() => {
-      const p = {
-        id: orden.id, creado: new Date().toISOString(), estado: 'revisando', metodo: metodo === 'movil' ? 'pagomovil' : metodo,
-        nombre: datos.nombre.trim(), telefono: datos.telefono.trim(), correo: datos.correo.trim() || null, notas: datos.notas.trim() || null,
-        lineas: items().map((i) => ({ slug: i.id, nombre: i.nombre, dosis: i.dosis, precio: i.precio, cant: i.cant })),
-        envio: { transporte: envio.transporte, estado: envio.estado, ciudad: envio.ciudad, oficina: envio.oficina ? envio.oficina.nombre : '' },
-        descuento: detalleDto() ? { tipo: 'cantidad', desde: detalleDto().desde, pct: detalleDto().pct, monto: dto() } : null,
-        totalUsd: total(), tasaUsdt: tasa ? tasa.tasa : null, centimos: orden.centimos, totalBs: bs(), referencia: referencia.trim(), verificadoEn: null, pruebaPago: null,
-      };
-      try { const l = pedidos(); l.push(p); localStorage.setItem(CLAVE_PEDIDOS, JSON.stringify(l)); } catch (e) { /* nada */ }
-      verificando = false;
-      C.vaciar();
-      ir('listo');
-    }, 2200);
+    const lineas = items().map((i) =>
+      '• ' + i.nombre + (i.dosis ? ' (' + i.dosis.toUpperCase() + ')' : '') + ' ×' + i.cant + ' = ' + usd(i.precio * i.cant)
+    ).join('\n');
+    const dtoL = detalleDto() ? '  Descuento por cantidad (−' + detalleDto().pct + ' %): −' + usd(dto()) + '\n' : '';
+    const msg = [
+      '🛒 *NUEVO PEDIDO — Peptidos Plus*',
+      '',
+      '*Orden:* ' + orden.id,
+      '*Nombre:* ' + (datos.nombre.trim() || '(sin nombre)'),
+      '*WhatsApp:* ' + datos.telefono.trim(),
+      (datos.correo.trim() ? '*Correo:* ' + datos.correo.trim() + '\n' : ''),
+      (datos.notas.trim() ? '*Notas:* ' + datos.notas.trim() + '\n' : ''),
+      '──────────────',
+      '*Productos:*',
+      lineas,
+      '',
+      dtoL,
+      '*Total: ' + usd(total()) + '*',
+      (metodo === 'movil' && bs() !== null ? '  ≈ ' + bsFmt(bs()) + '\n' : ''),
+      '──────────────',
+      '*Envío:* Zoom',
+      '*Estado:* ' + envio.estado,
+      '*Ciudad:* ' + envio.ciudad,
+      '*Oficina:* ' + (envio.oficina ? envio.oficina.nombre + ' — ' + envio.oficina.direccion : '(sin oficina)'),
+      '',
+      '*Método de pago:* ' + (PAGOS[metodo] ? PAGOS[metodo].nombre + ' (' + PAGOS[metodo].moneda + ')' : metodo),
+      '',
+      'Gracias, quedo atento(a) a la confirmación.',
+    ].filter(Boolean).join('\n');
+    const url = 'https://wa.me/' + WA_NUMERO + '?text=' + encodeURIComponent(msg);
+    window.open(url, '_blank', 'noopener');
+    C.vaciar();
+    ir('listo');
   };
 
   /* ---------- pintado ---------- */
@@ -103,7 +102,7 @@
 
   function pantallaDatos() {
     const faltan = !datos.nombre.trim() || !telefonoValido();
-    return '<h1 class="co-h1">Tus datos</h1><p class="co-sub">Para confirmarte el pago y coordinar el retiro.</p>' +
+    return '<h1 class="co-h1">Tus datos</h1><p class="co-sub">Para coordinar el envío y confirmarte.</p>' +
       '<div class="co-campos">' +
       '<div>' + campo('Nombre y apellido *', 'nombre', datos.nombre) + '</div>' +
       '<div>' + campo('Teléfono (WhatsApp) *', 'telefono', datos.telefono, { ph: '0412-000.00.00' }) + '<p class="co-gris co-nota" data-aviso-telefono style="display:' + (datos.telefono.trim() && !telefonoValido() ? 'block' : 'none') + '">Escribe el número completo (al menos 7 dígitos).</p>' + '</div>' +
@@ -131,36 +130,23 @@
         (!ofs.length ? '<p class="co-gris co-nota">No hay oficinas Zoom con cobro en destino en esta ciudad. Prueba con otra cercana o escríbenos por WhatsApp.</p>' :
           '<div class="co-oficinas">' + visibles.map((o, i) => '<button type="button" class="co-oficina' + (envio.oficina && envio.oficina.nombre === o.nombre ? ' on' : '') + '" data-accion="oficina" data-i="' + i + '">' + palomita(envio.oficina && envio.oficina.nombre === o.nombre) + '<span><b>' + esc(o.nombre) + '</b><small>' + esc(o.direccion) + '</small>' + (o.telefono ? '<em>Tel: ' + esc(o.telefono) + '</em>' : '') + '</span></button>').join('') + (!visibles.length ? '<p class="co-gris co-nota">Ninguna oficina coincide con “' + esc(filtro) + '”.</p>' : '') + '</div>') : '') +
       '<p class="co-gris co-pie">Los envíos van <b>solo a oficinas</b> de Zoom o MRW, no a domicilios. El flete se paga al retirar (cobro en destino).</p>' +
-      '<div class="co-acciones"><button type="button" class="co-volver" data-accion="a-datos">← Volver a mis datos</button><button type="button" class="co-btn" data-accion="a-pago"' + (envio.oficina ? '' : ' disabled') + '>Continuar al pago</button></div>';
+      '<div class="co-acciones"><button type="button" class="co-volver" data-accion="a-datos">← Volver a mis datos</button><button type="button" class="co-btn" data-accion="a-pago"' + (envio.oficina ? '' : ' disabled') + '>Continuar</button></div>';
   }
 
-  function copiable(etq, valor) { return '<div class="co-copiable"><div><p class="co-copiable-etq">' + etq + '</p><p class="co-copiable-val">' + esc(valor) + '</p></div><button type="button" class="co-copiar" data-accion="copiar" data-valor="' + esc(valor) + '">Copiar</button></div>'; }
-
   function pantallaPago() {
-    const t = total(), b = bs();
     const filas = Object.keys(PAGOS).map((k) => {
       const on = metodo === k;
-      let detalle = '';
-      if (on) {
-        if (k === 'zelle') detalle = copiable('Enviar al correo', DATOS.zelle.correo) + '<p class="co-txt">Titular: <b>' + DATOS.zelle.titular + '</b> · Monto exacto: <b>' + usd(t) + '</b></p>';
-        if (k === 'binance') detalle = copiable('Pay ID', DATOS.binance.payId) + '<p class="co-txt">Usuario: <b>' + DATOS.binance.usuario + '</b> · Monto: <b>' + t.toFixed(2) + ' USDT</b></p>';
-        if (k === 'movil') detalle = copiable('Monto exacto en bolívares', b !== null ? b.toLocaleString('es-VE', { minimumFractionDigits: 2 }) : 'Tasa del día pendiente') + '<p class="co-txt">' + DATOS.movil.banco + ' · RIF ' + DATOS.movil.rif + ' · Tel ' + DATOS.movil.tel + '</p><p class="co-gris co-nota">' + (tasa ? 'Tasa USDT de referencia: ' + tasa.tasa.toFixed(2) + ' Bs/$ (' + tasa.fecha.split('-').reverse().join('/') + ').' : 'Tasa del día pendiente.') + ' Los céntimos identifican tu orden: transfiere el monto exacto.</p>';
-        detalle += '<ol class="co-pasos-pago"><li>1. Envía el monto exacto con los datos de arriba.</li><li>2. Escribe abajo la referencia y pulsa “Ya pagué”.</li><li>3. Verificamos el pago y te confirmamos por WhatsApp.</li></ol>' +
-          '<label class="co-etq">' + (k === 'binance' ? 'ID de la orden de Binance' : k === 'zelle' ? 'Número de confirmación' : 'Referencia (últimos 6 dígitos o más)') + '</label>' +
-          '<input class="co-campo" data-campo="referencia" value="' + esc(referencia) + '" placeholder="' + (k === 'movil' ? '004521' : 'P2P4X8K1M9Q2') + '">' +
-          '<button type="button" class="co-btn co-btn-ancho" data-accion="confirmar"' + (referencia.trim().length < 6 || verificando ? ' disabled' : '') + '>' + (verificando ? 'Verificando…' : 'Ya pagué') + '</button>';
-      }
-      return '<div class="co-metodo' + (on ? ' on' : '') + '"><button type="button" class="co-metodo-cab" data-accion="metodo" data-valor="' + k + '">' + palomita(on) + '<span><b>' + PAGOS[k].nombre + '</b><small>' + PAGOS[k].nota + '</small></span><i>' + PAGOS[k].moneda + '</i></button>' + (on ? '<div class="co-metodo-cuerpo">' + detalle + '</div>' : '') + '</div>';
+      return '<div class="co-metodo' + (on ? ' on' : '') + '"><button type="button" class="co-metodo-cab" data-accion="metodo" data-valor="' + k + '">' + palomita(on) + '<span><b>' + PAGOS[k].nombre + '</b><small>' + PAGOS[k].nota + '</small></span><i>' + PAGOS[k].moneda + '</i></button></div>';
     }).join('');
-    return '<h1 class="co-h1">Método de pago</h1><p class="co-sub">Elige cómo prefieres pagar tu pedido.</p><div class="co-metodos">' + filas + '</div>' +
-      '<p class="co-gris co-nota">Prototipo: la verificación está simulada y los datos de pago son de ejemplo. En la versión real, Pago Móvil y Binance se confirman solos y Zelle lo revisa una persona.</p>' +
-      '<button type="button" class="co-volver" data-accion="a-envio-atras">← Volver al envío</button>';
+    return '<h1 class="co-h1">Método de pago</h1><p class="co-sub">Elige cómo prefieres pagar. El pedido se te envía por WhatsApp.</p><div class="co-metodos">' + filas + '</div>' +
+      '<p class="co-gris co-nota">Confirmaremos tu pago por WhatsApp al recibir tu orden.</p>' +
+      '<div class="co-acciones"><button type="button" class="co-volver" data-accion="a-envio-atras">← Volver al envío</button><button type="button" class="co-btn" data-accion="confirmar">Enviar pedido por WhatsApp</button></div>';
   }
 
   function pantallaListo() {
-    return '<div class="co-listo"><h1 class="co-h1">Pedido confirmado</h1>' +
-      '<p class="co-txt">Orden <b>' + esc(orden.id) + '</b> a nombre de <b>' + esc(datos.nombre) + '</b>. Retiras en <b>' + (envio.oficina ? 'Zoom ' + esc(envio.oficina.nombre) + ', ' + esc(envio.ciudad) : 'la oficina elegida') + '</b>.</p>' +
-      '<p class="co-gris">Te confirmamos el pago por WhatsApp al ' + esc(datos.telefono) + '. Para saber en qué va tu pedido, escríbenos con tu número de orden.</p>' +
+    return '<div class="co-listo"><h1 class="co-h1">Pedido enviado</h1>' +
+      '<p class="co-txt">Orden <b>' + esc(orden.id) + '</b> a nombre de <b>' + esc(datos.nombre) + '</b>. Se abrió WhatsApp con tu pedido: envíalo para confirmar la compra.</p>' +
+      '<p class="co-gris">Retiras en ' + (envio.oficina ? '<b>Zoom ' + esc(envio.oficina.nombre) + ', ' + esc(envio.ciudad) + '</b>' : 'la oficina elegida') + '.</p>' +
       '<a class="co-btn" href="store.html">Seguir comprando</a></div>';
   }
 
@@ -202,7 +188,6 @@
   raiz.addEventListener('input', (e) => {
     const c = e.target.dataset && e.target.dataset.campo; if (!c) return;
     if (c in datos) { datos[c] = e.target.value; const btn = $('[data-accion="a-envio"]', raiz); if (btn) btn.disabled = !datos.nombre.trim() || !telefonoValido(); const av = $('[data-aviso-telefono]', raiz); if (av) av.style.display = datos.telefono.trim() && !telefonoValido() ? 'block' : 'none'; }
-    else if (c === 'referencia') { referencia = e.target.value; const btn = $('[data-accion="confirmar"]', raiz); if (btn) btn.disabled = referencia.trim().length < 6 || verificando; }
     else if (c === 'filtro') { filtro = e.target.value; pintar(); }
   });
   raiz.addEventListener('change', (e) => {
@@ -220,10 +205,9 @@
     else if (a === 'transporte') { envio.transporte = b.dataset.valor; envio.oficina = null; pintar(); }
     else if (a === 'oficina') { const ofs = oficinasDe(envio.estado, envio.ciudad); const vis = filtro.trim() ? ofs.filter((o) => (o.nombre + ' ' + o.direccion).toLowerCase().includes(filtro.toLowerCase().trim())) : ofs; envio.oficina = vis[Number(b.dataset.i)] || null; pintar(); }
     else if (a === 'metodo') { metodo = b.dataset.valor; pintar(); }
-    else if (a === 'copiar') { try { navigator.clipboard.writeText(b.dataset.valor); } catch (x) { /* sin permiso */ } b.textContent = 'Copiado'; setTimeout(() => { b.textContent = 'Copiar'; }, 1600); }
     else if (a === 'confirmar') confirmar();
   });
 
-  window.ppCheckout = { estado: () => ({ pantalla, metodo, datos, envio, orden, referencia, tasa }), pedidos };
+  window.ppCheckout = { estado: () => ({ pantalla, metodo, datos, envio, orden, referencia: '', tasa }), pedidos: () => [] };
   pintar();
 })();

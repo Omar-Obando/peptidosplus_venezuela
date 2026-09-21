@@ -1,21 +1,26 @@
 ---
-import { Image } from 'astro:assets';
+/**
+ * Ficha de producto — diseño de la marca original (producto-retatrutida.html)
+ * con datos de WooCommerce headless.
+ *
+ * - Grid 2 columnas: vial (assets/viales-ficha/<Nombre>-<mg>.webp si existe)
+ *   | info (h1, precio "Desde $X", stock, Presentación, Cantidad, packs
+ *   "Llévate más y ahorra", Añadir al carrito navy, WhatsApp, COA).
+ * - Debajo: "Se piden juntos" (carousel related), Descripción /
+ *   Información adicional (contenido limpiado por normalizeContent),
+ *   "Cada lote verificado por laboratorio independiente".
+ * - JSON-LD Product + BreadcrumbList.
+ */
+import BrandLayout from '@/layouts/BrandLayout.astro';
 import { getLocalProducts, getLocalProduct, getLocalRelatedProducts, getLocalProductVariations } from '../../../lib/local-product-data';
-import { formatPrice, isInStock, getDiscountPercentage, stripHtml } from '../../../lib/woocommerce';
-import { getLocalProductImageUrl } from '../../../lib/product-media';
+import { formatPrice, isInStock, stripHtml } from '../../../lib/woocommerce';
+import { getPublicProductImageUrl } from '../../../lib/product-media';
 import { storeConfig } from '../../../config/store';
-import BaseLayout from '@/layouts/BaseLayout.astro';
-import Section from '@/components/Section.astro';
-import ProductCard from '@/components/shop/ProductCard.astro';
-import AddToCartButton from '@/components/shop/AddToCartButton.astro';
-import ArrowRight from '@lucide/astro/icons/arrow-right';
+import { SITE } from '@/lib/site';
+import { readdirSync } from 'node:fs';
+import imageMap from '../../../lib/product-image-map.json';
 
 export const prerender = true;
-
-const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
-// Review submission requires Turnstile (the API route rejects it otherwise),
-// so only render the form when both keys are configured.
-const reviewSubmissionEnabled = !!turnstileSiteKey && !!import.meta.env.TURNSTILE_SECRET_KEY;
 
 export async function getStaticPaths() {
     const products = await getLocalProducts();
@@ -31,35 +36,163 @@ if (!product) {
     return Astro.redirect('/404');
 }
 
-const relatedProducts = await getLocalRelatedProducts(product, 4);
-const isVariable = product.type === 'variable';
-const variations = isVariable ? await getLocalProductVariations(product.id) : [];
-const mainImage = product.images?.[0];
-const originalMainUrl = mainImage?.src || mainImage?.thumbnail || '';
-const mainImageUrl = getLocalProductImageUrl(originalMainUrl);
-const isLocalImage = mainImageUrl && mainImageUrl.startsWith('/src/media/');
-const hasValidMainImage = mainImageUrl && (mainImageUrl.startsWith('/src/media/') || mainImageUrl.startsWith('http://') || mainImageUrl.startsWith('https://'));
+const relatedProducts = await getLocalRelatedProducts(product, 12);
+const variations = product.type === 'variable' ? await getLocalProductVariations(product.id) : [];
 const inStock = isInStock(product);
-const discount = getDiscountPercentage(product);
+const stockLabel = inStock
+    ? (product.is_on_backorder ? 'Pedido pendiente' : 'En stock')
+    : 'Agotado';
 
-const productImages = import.meta.glob('/src/media/products/*', { eager: true });
-
-function getImageSrc(url: string) {
-    const localUrl = getLocalProductImageUrl(url);
-    if (localUrl && localUrl.startsWith('/src/media/')) {
-        const imageModule = productImages[localUrl];
-        return imageModule?.default;
+// ---------------------------------------------------------------------------
+// Presentaciones (mg) + vial por presentación
+// ---------------------------------------------------------------------------
+const vialesDir = (() => {
+    try {
+        return readdirSync('public/assets/viales-ficha').map(f => f.toLowerCase());
+    } catch {
+        return [];
     }
-    return null;
+})();
+
+// Base name de marca para los viales: del mapa slug->/assets/productos/<Base>-<mg>.webp
+function vialBaseName(slugName: string, name: string): string {
+    const fromMap = (imageMap as Record<string, string>)[slugName];
+    if (fromMap) {
+        const base = fromMap.split('/').pop() || '';
+        return base.replace(/-(?:\d+(?:\.\d+)?(?:mg|ml))$/i, '');
+    }
+    return String(name || '').trim().replace(/\s+/g, '-');
 }
 
-const mainImageSrc = getImageSrc(originalMainUrl);
+interface PresInfo {
+    label: string;     // "5MG" / "10ML"
+    dosis: string;     // "5 mg"
+    num: number;
+    unit: string;      // mg | ml
+    price: number;     // USD
+    vial: string | null;
+}
 
+function parseDosis(option: string): { num: number; unit: string } | null {
+    const m = String(option || '').trim().toLowerCase().match(/^([\d.,]+)\s*(mg|ml|mcg)?$/);
+    if (!m) return null;
+    const num = parseFloat(m[1].replace(',', '.'));
+    if (isNaN(num)) return null;
+    return { num, unit: m[2] || 'mg' };
+}
+
+const baseName = vialBaseName(product.slug, product.name);
+
+// Precios por presentación desde las variaciones (REST ya devuelve USD)
+const presentations: PresInfo[] = [];
+if (variations.length > 0) {
+    for (const v of variations) {
+        const option = (v.attributes || []).map((a: any) => a.option).find((o: any) => parseDosis(o));
+        if (!option) continue;
+        const parsed = parseDosis(option)!;
+        const price = parseFloat(v.price || '');
+        if (isNaN(price)) continue;
+        const vial = vialesDir.includes(`${baseName}-${parsed.num}${parsed.unit}.webp`.toLowerCase())
+            ? `/assets/viales-ficha/${baseName}-${parsed.num}${parsed.unit}.webp`
+            : null;
+        presentations.push({
+            label: `${parsed.num}${parsed.unit.toUpperCase()}`,
+            dosis: `${parsed.num} ${parsed.unit}`,
+            num: parsed.num,
+            unit: parsed.unit,
+            price,
+            vial,
+        });
+    }
+}
+// Si no hay variaciones, intenta la mg del nombre del producto
+if (presentations.length === 0) {
+    const m = String(product.name || '').match(/(\d+(?:\.\d+)?)\s*(mg|ml|mcg)/i);
+    if (m) {
+        const num = parseFloat(m[1]);
+        const unit = m[2].toLowerCase() === 'mcg' ? 'mg' : m[2].toLowerCase();
+        const price = parseFloat(product.price || '0');
+        presentations.push({
+            label: `${num}${unit.toUpperCase()}`,
+            dosis: `${num} ${unit}`,
+            num,
+            unit,
+            price: isNaN(price) ? 0 : price,
+            vial: vialesDir.includes(`${baseName}-${num}${unit}.webp`.toLowerCase())
+                ? `/assets/viales-ficha/${baseName}-${num}${unit}.webp`
+                : null,
+        });
+    }
+}
+
+// Presentación seleccionada por defecto: la que coincide con la mg del nombre
+const nameMg = (String(product.name || '').match(/(\d+(?:\.\d+)?)/) || [])[1];
+const nameMgIdx = nameMg ? presentations.findIndex(p => String(p.num) === nameMg) : -1;
+const defaultIdx = nameMgIdx >= 0 ? nameMgIdx : 0;
+const selectedPres = presentations.length > 0 ? presentations[defaultIdx] : null;
+const defaultPrice = selectedPres ? selectedPres.price : parseFloat(product.price || '0');
+
+// Imagen principal: vial de la presentación seleccionada, o fallback images[0]
+const defaultVial = selectedPres?.vial
+    || getPublicProductImageUrl(product.images?.[0]?.src || null, product.slug, product.name)
+    || product.images?.[0]?.src
+    || '';
+
+// ---------------------------------------------------------------------------
+// Certificado Janoshik (enlaces dentro de la descripción/meta)
+// ---------------------------------------------------------------------------
+const janoshikMatch = String(product.description || '').match(/https:\/\/janoshik\.com\/tests\/[A-Za-z0-9_-]+/i);
+const janoshikUrl = janoshikMatch ? janoshikMatch[0] : null;
+const coaHref = janoshikUrl || `/tienda/producto/${product.slug}#coa`;
+
+// ---------------------------------------------------------------------------
+// normalizeContent: limpia el HTML de layout del clon (hero/grid/nav/footer)
+// y deja solo el contenido real (p/h2/ul/table) en la descripción.
+// ---------------------------------------------------------------------------
+function normalizeContent(html: string): string {
+  if (!html) return html;
+  let out = html
+    .replace(/(src|href)="assets\//gi, '$1="/assets/')
+    .replace(/href="producto-([a-z0-9-]+)\.html(#coa)?"/gi, (_m, s: string, h: string) => `/tienda/producto/${s}${h || ''}`)
+    .replace(/href="store\.html(\?[^"]*)?"/gi, (_m, q: string) => `/tienda${q || ''}`)
+    .replace(/href="articulos\.html"/gi, '/blog')
+    .replace(/href="articulo-([a-z0-9-]+)\.html"/gi, (_m, s: string) => `/blog/${s}`)
+    .replace(/(src|href)="(?:\.\.\/)+assets\//gi, '$1="/assets/');
+  // Quitar bloques de layout del clon: scripts, estilos, nav, header, footer, canvas
+  out = out
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<nav[\s\S]*?<\/nav>/gi, '')
+    .replace(/<header[\s\S]*?<\/header>/gi, '')
+    .replace(/<footer[\s\S]*?<\/footer>/gi, '')
+    .replace(/<canvas[^>]*>[\s\S]*?<\/canvas>/gi, '')
+    .replace(/\sstyle="[^"]*"/gi, '')
+  // Wrappers de grid/hero/fixed solo decorativos
+  out = out
+    .replace(/<(div|section)\s[^>]*class="[^"]*(?:grid|aspect-\[|min-h-|bg-gradient|pp-hero|data-pp-|bg-\[|flex-col lg:grid|fixed|sticky|pp-menu|pp-nav|pp-carrito|pp-coa-busca)[^"]*"[^>]*>[\s\S]*?<\/(?:div|section)>/gi, '')
+  // Hero/CTA del clon contenido en la descripción
+    .replace(/<div[^>]*>[\s\S]*?Todos los p[ée]ptidos de investigaci[óo]n[\s\S]*?certificado de cada lote[\s\S]*?<\/div>/gi, '')
+    .replace(/<div[^>]*>[\s\S]*?Ver cat[áa]logo[\s\S]*?<\/div>/gi, '')
+    .replace(/<section[^>]*>[\s\S]*?Ver cat[áa]logo[\s\S]*?<\/section>/gi, '')
+    .replace(/<(?:div|section|main)[^>]*>[\s\S]*?Encuentra el certificado de tu p[ée]ptido[\s\S]*?<\/(?:div|section|main)>/gi, '')
+    .replace(/\sdata-pp-[a-z-]+(?:="[^"]*")?/gi, '')
+    .replace(/\s(?:loading|decoding|fetchpriority|sizes|srcset|width|height)="[^"]*"/gi, '')
+    .replace(/\s(?:aria-hidden|tabindex|role)="[^"]*"/gi, '');
+  return out;
+}
+
+const cleanDescription = normalizeContent(product.description || '');
+
+// ---------------------------------------------------------------------------
+// JSON-LD
+// ---------------------------------------------------------------------------
 const stockUrlMap: Record<string, string> = {
     instock: 'https://schema.org/InStock',
     outofstock: 'https://schema.org/OutOfStock',
     onbackorder: 'https://schema.org/BackOrder',
 };
+const currency = product.prices?.currency_code || storeConfig.currency;
+const jsonLdPrice = product.on_sale && product.sale_price ? parseFloat(product.sale_price) : parseFloat(String(product.price || '0'));
 const jsonLd: Record<string, any> = {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -70,811 +203,416 @@ const jsonLd: Record<string, any> = {
     offers: {
         '@type': 'Offer',
         url: Astro.url.href,
-        priceCurrency: storeConfig.currency,
-        price: product.on_sale && product.sale_price ? product.sale_price : product.price,
+        priceCurrency: currency,
+        price: isNaN(jsonLdPrice) ? 0 : jsonLdPrice,
         availability: stockUrlMap[product.stock_status] || 'https://schema.org/InStock',
         itemCondition: 'https://schema.org/NewCondition',
     },
 };
-if (product.rating_count && parseInt(String(product.rating_count)) > 0) {
-    jsonLd.aggregateRating = {
-        '@type': 'AggregateRating',
-        ratingValue: product.average_rating,
-        reviewCount: product.rating_count,
-    };
-}
 if (product.categories?.[0]) {
     jsonLd.category = product.categories[0].name;
 }
+const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Inicio', item: `${SITE.url}/` },
+        { '@type': 'ListItem', position: 2, name: 'Tienda', item: `${SITE.url}/tienda` },
+        ...(product.categories?.[0]
+            ? [{ '@type': 'ListItem', position: 3, name: product.categories[0].name, item: `${SITE.url}/tienda/categoria/${product.categories[0].slug}` }]
+            : []),
+        { '@type': 'ListItem', position: product.categories?.[0] ? 4 : 3, name: product.name, item: Astro.url.href },
+    ],
+};
 const jsonLdString = JSON.stringify(jsonLd);
-const variationsString = JSON.stringify(variations);
-const pageDescription = stripHtml(product.short_description || product.description).slice(0, 160);
-const pageImage = product.images?.[0]?.src || '';
+const breadcrumbLdString = JSON.stringify(breadcrumbLd);
 
-// Normalize CMS content: relative asset URLs + product .html links -> app routes.
-// Tambien limpia el HTML de layout del clon antiguo (hero/grid/nav/footer de
-// la descripcion importada) para que la descripcion muestre solo contenido.
-function normalizeContent(html: string): string {
-  if (!html) return html;
-  let out = html
-    .replace(/(src|href)="assets\//gi, '$1="/assets/')
-    .replace(/href="producto-([a-z0-9-]+)\.html(#coa)?"/gi, (_m, slug: string, hash: string) => `/tienda/producto/${slug}${hash || ''}`)
-    .replace(/href="store\.html(\?[^"]*)?"/gi, (_m, q: string) => `/tienda${q || ''}`)
-    .replace(/href="articulos\.html"/gi, '/blog')
-    .replace(/href="articulo-([a-z0-9-]+)\.html"/gi, (_m, slug: string) => `/blog/${slug}`)
-    .replace(/(src|href)="(?:\.\.\/)+assets\//gi, '$1="/assets/');
-  // Quitar bloques de layout del clon: scripts, estilos, nav, header, footer,
-  // canvas/banner, y wrappers de grid/hero que solo mueven el diseno.
-  out = out
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/<style[\s\S]*?<\/style>/gi, '')
-    .replace(/<nav[\s\S]*?<\/nav>/gi, '')
-    .replace(/<header[\s\S]*?<\/header>/gi, '')
-    .replace(/<footer[\s\S]*?<\/footer>/gi, '')
-    .replace(/<canvas[^>]*>[\s\S]*?<\/canvas>/gi, '')
-  // Limpiar el HTML de layout del clon: eliminar <div>/<section> contenedores
-  // que solo dan diseno (grid, aspect, min-h, bg-gradient, data-pp-*) dejando
-  // el contenido real (<p>, <h2>, <ul>, <table>) y los certificados (pp-coa).
-  out = out
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/<style[\s\S]*?<\/style>/gi, '')
-    .replace(/<nav[\s\S]*?<\/nav>/gi, '')
-    .replace(/<header[\s\S]*?<\/header>/gi, '')
-    .replace(/<footer[\s\S]*?<\/footer>/gi, '')
-    .replace(/<canvas[^>]*>[\s\S]*?<\/canvas>/gi, '')
-    .replace(/<(div|section)\s[^>]*class="[^"]*(?:grid|aspect-\[|min-h-|bg-gradient|pp-hero|data-pp-|bg-\[|flex-col lg:grid)[^"]*"[^>]*>[\s\S]*?<\/(?:div|section)>/gi, '')
-    // Quita el hero/CTA del clon contenido en la descripcion ("Todos los pepidos...
-    // certificado de cada lote" + "Ver catalogo") sin importar en que spans anide.
-    .replace(/<div[^>]*>[\s\S]*?Todos los p[ée]ptidos de investigaci[óo]n[\s\S]*?certificado de cada lote[\s\S]*?<\/div>/gi, '')
-    .replace(/<div[^>]*>[\s\S]*?Ver cat[áa]logo[\s\S]*?<\/div>/gi, '')
-    .replace(/\sdata-pp-[a-z-]+(?:="[^"]*")?/gi, '');
-  return out;
-}
+const pageDescription = stripHtml(product.short_description || product.description).slice(0, 160);
+const pageImage = defaultVial || product.images?.[0]?.src || '';
+
+// Script JSON para el cliente: presentaciones
+const presJson = JSON.stringify(presentations.map((p: any) => ({
+    label: p.label,
+    dosis: p.dosis,
+    price: p.price,
+    vial: p.vial,
+})));
 ---
 
-<BaseLayout title={product.name} description={pageDescription} image={pageImage}>
+<BrandLayout title={`${product.name} | Peptidos Plus`} description={pageDescription} image={pageImage}>
+  <slot name="head">
+    <script type="application/ld+json" is:inline set:html={jsonLdString} />
+    <script type="application/ld+json" is:inline set:html={breadcrumbLdString} />
+  </slot>
+  <main id="main-content" class="bg-white">
+    <!-- Breadcrumb -->
+    <nav aria-label="Migas de pan" class="border-b border-black/[0.06] bg-[#fbfbfc]">
+      <div class="content-container py-3">
+        <ol class="flex flex-wrap items-center gap-1.5 text-[12px] text-black/45">
+          <li><a href="/" class="hover:text-black transition-colors">Inicio</a></li>
+          <li aria-hidden="true">/</li>
+          <li><a href="/tienda" class="hover:text-black transition-colors">Tienda</a></li>
+          {product.categories?.[0] && (
+            <>
+              <li aria-hidden="true">/</li>
+              <li><a href={`/tienda/categoria/${product.categories[0].slug}`} class="hover:text-black transition-colors">{product.categories[0].name}</a></li>
+            </>
+          )}
+          <li aria-hidden="true">/</li>
+          <li class="text-black font-medium" aria-current="page">{product.name}</li>
+        </ol>
+      </div>
+    </nav>
 
-    <script type="application/ld+json" set:html={jsonLdString} />
-    <main id="main-content">
-        <!-- Breadcrumb -->
-        <div class="reveal bg-surface border-b border-outline">
-            <Section padding="none" class="py-4">
-                <nav>
-                    <ol class="flex items-center gap-2 text-sm">
-                        <li><a href="/" class="text-content-lighter hover:text-primary transition-colors cursor-pointer">Home</a></li>
-                        <li class="text-content-lighter">/</li>
-                        <li><a href="/tienda" class="text-content-lighter hover:text-primary transition-colors cursor-pointer">Shop</a></li>
-                        {product.categories?.[0] && (
-                            <>
-                                <li class="text-content-lighter">/</li>
-                                <li>
-                                    <a href={`/tienda/categoria/${product.categories[0].slug}`} class="text-content-lighter hover:text-primary transition-colors cursor-pointer">
-                                        {product.categories[0].name}
-                                    </a>
-                                </li>
-                            </>
-                        )}
-                        <li class="text-content-lighter">/</li>
-                        <li class="text-content font-medium">{product.name}</li>
-                    </ol>
-                </nav>
-            </Section>
-        </div>
+    <!-- ============ FICHA: grid 2 columnas ============ -->
+    <section class="py-6 lg:py-8">
+      <div class="content-container">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5">
 
-        <!-- Product Section -->
-        <Section padding="lg" class="reveal">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-                <!-- Product Images -->
-                <div class="space-y-4">
-                    <div class="relative bg-surface-alt rounded-2xl overflow-hidden border border-outline">
-                        {discount && (
-                            <span class="absolute top-4 left-4 z-10 px-3 py-1.5 bg-error text-white text-sm font-bold rounded-xl shadow-lg">
-                                -{discount}%
-                            </span>
-                        )}
-                        
-                        {mainImageSrc ? (
-                            <div class="aspect-square">
-                                <Image 
-                                    id="main-product-image"
-                                    src={mainImageSrc}
-                                    alt={mainImage?.alt || product.name}
-                                    width={800}
-                                    height={800}
-                                    format="webp"
-                                    quality={85}
-                                    class="w-full h-full object-cover"
-                                    loading="eager"
-                                    data-original-src={originalMainUrl}
-                                />
-                            </div>
-                        ) : hasValidMainImage ? (
-                            <div class="aspect-square">
-                                <img 
-                                    id="main-product-image"
-                                    src={mainImageUrl} 
-                                    alt={mainImage?.alt || product.name}
-                                    width="800"
-                                    height="800"
-                                    class="w-full h-full object-cover"
-                                    loading="eager"
-                                    decoding="async"
-                                />
-                            </div>
-                        ) : (
-                            <div class="aspect-square flex items-center justify-center">
-                                <svg class="w-32 h-32 text-content-lighter" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                            </div>
-                        )}
-                    </div>
-                    
-                    <!-- Image Thumbnails -->
-                    {product.images && product.images.length > 1 && (
-                        <div class="flex gap-3 overflow-x-auto pb-2">
-                            {product.images.map((image, index) => {
-                                const thumbUrl = image.thumbnail || image.src || '';
-                                const fullUrl = image.src || '';
-                                const localThumbUrl = getLocalProductImageUrl(thumbUrl);
-                                const thumbImageSrc = getImageSrc(thumbUrl);
-                                const hasValidThumb = localThumbUrl && (localThumbUrl.startsWith('/src/media/') || localThumbUrl.startsWith('http://') || localThumbUrl.startsWith('https://'));
-                                return hasValidThumb ? (
-                                    <button 
-                                        class={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 cursor-pointer transition-all hover:scale-105 ${index === 0 ? 'border-primary ring-2 ring-primary/20' : 'border-outline hover:border-primary-light'}`}
-                                        data-image-thumbnail={fullUrl}
-                                        data-local-src={localThumbUrl}
-                                    >
-                                        {thumbImageSrc ? (
-                                            <Image 
-                                                src={thumbImageSrc}
-                                                alt={image.alt || `${product.name} - Image ${index + 1}`}
-                                                width={80}
-                                                height={80}
-                                                format="webp"
-                                                quality={70}
-                                                class="w-full h-full object-cover"
-                                                loading="lazy"
-                                            />
-                                        ) : (
-                                            <img 
-                                                src={localThumbUrl} 
-                                                alt={image.alt || `${product.name} - Image ${index + 1}`}
-                                                width="80"
-                                                height="80"
-                                                class="w-full h-full object-cover"
-                                                loading="lazy"
-                                                decoding="async"
-                                            />
-                                        )}
-                                    </button>
-                                ) : null;
-                            })}
-                        </div>
-                    )}
-                </div>
-                
-                <!-- Product Info -->
-                <div class="flex flex-col">
-                    <!-- Categories -->
-                    {product.categories && product.categories.length > 0 && (
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            {product.categories.map(cat => (
-                                <a 
-                                    href={`/tienda/categoria/${cat.slug}`}
-                                    class="text-xs font-semibold px-3 py-1.5 bg-primary/10 text-primary rounded-full hover:bg-primary/20 transition-colors cursor-pointer tracking-wide uppercase"
-                                >
-                                    {cat.name}
-                                </a>
-                            ))}
-                        </div>
-                    )}
-                    
-                    <h1 class="text-3xl lg:text-4xl font-black tracking-tight text-content mb-4">{product.name}</h1>
-                    
-                    <!-- Rating -->
-                    {product.average_rating && parseFloat(product.average_rating) > 0 && (
-                        <div class="flex items-center gap-2 mb-6">
-                            <div class="flex">
-                                {[1, 2, 3, 4, 5].map(star => (
-                                    <svg 
-                                        class={`w-5 h-5 ${star <= Math.round(parseFloat(product.average_rating)) ? 'text-warning' : 'text-outline'}`}
-                                        fill="currentColor" 
-                                        viewBox="0 0 20 20"
-                                    >
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                    </svg>
-                                ))}
-                            </div>
-                            <span class="text-content-light text-sm">
-                                {product.average_rating} ({product.rating_count} reviews)
-                            </span>
-                        </div>
-                    )}
-                    
-                    <!-- Price -->
-                    <div class="flex items-baseline gap-3 mb-6">
-                        <span class="text-4xl font-black text-content">
-                            {formatPrice(product)}
-                        </span>
-                        {product.on_sale && product.regular_price && (
-                            <span class="text-lg text-content-lighter line-through">
-                                {formatPrice(product.regular_price, product)}
-                            </span>
-                        )}
-                    </div>
-                    
-                    <!-- Stock Status -->
-                    <div class="mb-6 flex flex-col gap-2">
-                        {inStock ? (
-                            <>
-                                {product.is_on_backorder ? (
-                                    <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-warning/10 text-warning rounded-full text-sm font-medium w-fit">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                        Available on backorder
-                                    </span>
-                                ) : (
-                                    <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-success/10 text-success rounded-full text-sm font-medium w-fit">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                        </svg>
-                                        In Stock
-                                    </span>
-                                )}
-                                {product.low_stock_remaining !== null && product.low_stock_remaining !== undefined && (
-                                    <span class="inline-flex items-center gap-1.5 text-warning text-sm font-medium">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                        </svg>
-                                        Only {product.low_stock_remaining} left in stock
-                                    </span>
-                                )}
-                            </>
-                        ) : (
-                            <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-error/10 text-error rounded-full text-sm font-medium w-fit">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                                Out of Stock
-                            </span>
-                        )}
-                    </div>
-                    
-                    <!-- Short Description -->
-                    {product.short_description && (
-                        <div class="prose prose-sm text-content-light mb-8 leading-relaxed" set:html={normalizeContent(product.short_description)} />
-                    )}
-                    
-                    <!-- Add to Cart -->
-                    <div class="bg-surface-alt rounded-2xl p-6 border border-outline mb-8">
-                        {isVariable && variations.length > 0 && (
-                            <>
-                                <script type="application/json" id="product-variations" set:html={variationsString} />
-                                <div id="variation-picker" class="space-y-4 mb-6">
-                                    {product.attributes?.filter(attr => attr.has_variations).map(attr => (
-                                        <div>
-                                            <label class="block text-sm font-semibold text-content mb-1.5">{attr.name}</label>
-                                            <select 
-                                                class="w-full px-4 py-2.5 bg-surface border border-outline rounded-lg text-content focus:ring-2 focus:ring-primary focus:border-primary cursor-pointer"
-                                                data-variation-attr={attr.name}
-                                            >
-                                                <option value="">Choose {attr.name}...</option>
-                                                {attr.terms.map(term => (
-                                                    <option value={term.name}>{term.name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    ))}
-                                </div>
-                                <div id="variation-price" class="hidden mb-4">
-                                    <span class="text-2xl font-black text-content" id="variation-price-value"></span>
-                                    <span class="text-sm text-content-lighter line-through ml-2 hidden" id="variation-regular-price"></span>
-                                </div>
-                                <div id="variation-stock" class="hidden mb-4"></div>
-                            </>
-                        )}
-                        <AddToCartButton 
-                            product={product}
-                            showQuantity={true}
-                            size="large"
-                            maxQuantity={product.low_stock_remaining ?? undefined}
-                            soldIndividually={product.sold_individually ?? false}
-                        />
-                    </div>
-                    
-                    <!-- SKU & Meta -->
-                    <div class="pt-6 border-t border-outline space-y-2 text-sm text-content-lighter">
-                        {product.sku && (
-                            <p><span class="font-medium text-content">SKU:</span> {product.sku}</p>
-                        )}
-                        {product.tags && product.tags.length > 0 && (
-                            <p>
-                                <span class="font-medium text-content">Tags:</span>{' '}
-                                {product.tags.map((tag, i) => (
-                                    <span>
-                                        <a href={`/tienda/tag/${tag.slug}`} class="hover:text-primary transition-colors cursor-pointer">{tag.name}</a>
-                                        {i < product.tags.length - 1 ? ', ' : ''}
-                                    </span>
-                                ))}
-                            </p>
-                        )}
-                    </div>
-                </div>
+          <!-- IZQUIERDA: vial -->
+          <div class="relative overflow-hidden bg-[#f8f8f8] border border-[#e8e8e8] rounded-[20px] lg:rounded-[24px] p-6 lg:p-8 flex items-center justify-center min-h-[300px] lg:min-h-[450px]">
+            <div aria-hidden="true" class="absolute inset-0" style="background: radial-gradient(62% 48% at 50% 56%, rgba(233, 252, 230, 0.95), rgba(248, 248, 248, 0) 72%);"></div>
+            {defaultVial ? (
+              <img id="pp-vial-img" loading="eager" fetchpriority="high" alt={product.name} width="300" height="400" decoding="async"
+                class="relative w-auto max-h-[260px] lg:max-h-[380px] object-contain drop-shadow-[0_18px_28px_rgba(19,19,21,0.10)]"
+                src={defaultVial} style="color: transparent;" />
+            ) : (
+              <div class="relative w-40 h-40 rounded-full bg-neutral-100 flex items-center justify-center">
+                <span class="text-black/30 font-semibold">{product.name}</span>
+              </div>
+            )}
+            <a class="pp-coa-pill" href={coaHref} target={janoshikUrl ? "_blank" : undefined} rel={janoshikUrl ? "noopener noreferrer" : undefined}
+               aria-label={`Ver el certificado de análisis de ${product.name}`}><i aria-hidden="true"></i>Certificado</a>
+          </div>
+
+          <!-- DERECHA: info -->
+          <div class="flex flex-col bg-white border border-[#e8e8e8] rounded-[20px] lg:rounded-[24px] p-5 lg:p-7">
+            <p class="font-poppins text-[11px] font-semibold uppercase tracking-[0.18em] text-black/45 mb-2">
+              {product.categories?.[0]?.name || 'Investigación'}
+            </p>
+            <h1 class="text-3xl lg:text-5xl font-bold text-brand-black leading-[1] mb-2">{product.name}</h1>
+
+            <div class="flex flex-wrap items-center gap-2 mb-4">
+              {inStock ? (
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-brand-mint text-brand-black border border-brand-mint">
+                  <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                  {stockLabel}
+                </span>
+              ) : (
+                <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-red-50 text-red-600 border border-red-200">Agotado</span>
+              )}
+              {selectedPres && (
+                <span class="px-2.5 py-1 border border-black/10 rounded-full text-[11px] text-black/50 font-poppins">{selectedPres.dosis}</span>
+              )}
+              <span class="px-2.5 py-1 border border-black/10 rounded-full text-[11px] text-black/50 font-poppins">Kit de aplicación incluido</span>
             </div>
-        </Section>
-        
-        <!-- Product Description Tabs -->
-        <Section bg="surface-alt" padding="lg">
-            <div class="bg-surface rounded-2xl border border-outline overflow-hidden">
-                <div class="border-b border-outline">
-                    <nav class="flex gap-0">
-                        <button 
-                            class="px-8 py-4 font-semibold text-primary border-b-2 border-primary cursor-pointer transition-colors"
-                            data-tab="description"
-                        >
-                            Description
-                        </button>
-                        <button 
-                            class="px-8 py-4 font-semibold text-content-lighter hover:text-content border-b-2 border-transparent cursor-pointer transition-colors"
-                            data-tab="additional"
-                        >
-                            Additional Information
-                        </button>
-                        <button 
-                            class="px-8 py-4 font-semibold text-content-lighter hover:text-content border-b-2 border-transparent cursor-pointer transition-colors"
-                            data-tab="reviews"
-                        >
-                            Reviews ({product.rating_count || 0})
-                        </button>
-                    </nav>
-                </div>
-                
-                <div class="p-8 lg:p-10">
-                    <div id="tab-description" class="prose max-w-none" set:html={normalizeContent(product.description)} />
-                    <div id="tab-additional" class="hidden">
-                        {product.attributes && product.attributes.length > 0 ? (
-                            <table class="w-full">
-                                <tbody>
-                                    {product.attributes.map(attr => (
-                                        <tr class="border-b border-outline last:border-0">
-                                            <th class="py-4 pr-4 text-left font-semibold text-content w-1/3">{attr.name}</th>
-                                            <td class="py-4 text-content-light">{attr.terms.map(t => t.name).join(', ')}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        ) : (
-                            <p class="text-content-lighter">No additional information available.</p>
-                        )}
-                    </div>
-                    <div id="tab-reviews" class="hidden" data-product-id={product.id}>
-                        <div class="mb-8">
-                            <div class="flex items-center gap-4 mb-6">
-                                <div class="flex items-center gap-1">
-                                    {[1, 2, 3, 4, 5].map(star => (
-                                        <svg 
-                                            class={`w-6 h-6 ${star <= Math.round(parseFloat(product.average_rating || '0')) ? 'text-warning' : 'text-outline'}`}
-                                            fill="currentColor" 
-                                            viewBox="0 0 20 20"
-                                        >
-                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                        </svg>
-                                    ))}
-                                </div>
-                                <span class="text-lg font-semibold text-content">{product.average_rating || '0'} out of 5</span>
-                                <span class="text-content-lighter">({product.rating_count || 0} reviews)</span>
-                            </div>
-                        </div>
-                        
-                        <div id="reviews-list" class="space-y-6 mb-10">
-                            <div class="flex items-center justify-center py-8">
-                                <svg class="animate-spin h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        
-                        {reviewSubmissionEnabled && (
-                        <div class="border-t border-outline pt-8">
-                            <h3 class="text-xl font-bold text-content mb-6">Write a Review</h3>
-                            <form id="review-form" class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-content mb-2">Your Rating</label>
-                                    <div class="flex gap-1" id="star-rating-input">
-                                        {[1, 2, 3, 4, 5].map(star => (
-                                            <button 
-                                                type="button" 
-                                                class="text-outline hover:text-warning transition-colors cursor-pointer" 
-                                                data-star-value={star}
-                                            >
-                                                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                                </svg>
-                                            </button>
-                                        ))}
-                                    </div>
-                                    <input type="hidden" id="review-rating" value="0" />
-                                </div>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="review-name" class="block text-sm font-medium text-content mb-1">Name</label>
-                                        <input type="text" id="review-name" required class="w-full px-4 py-2.5 bg-surface-alt border border-outline rounded-lg text-content focus:ring-2 focus:ring-primary focus:border-primary" />
-                                    </div>
-                                    <div>
-                                        <label for="review-email" class="block text-sm font-medium text-content mb-1">Email</label>
-                                        <input type="email" id="review-email" required class="w-full px-4 py-2.5 bg-surface-alt border border-outline rounded-lg text-content focus:ring-2 focus:ring-primary focus:border-primary" />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label for="review-text" class="block text-sm font-medium text-content mb-1">Your Review</label>
-                                    <textarea id="review-text" rows="4" required class="w-full px-4 py-2.5 bg-surface-alt border border-outline rounded-lg text-content focus:ring-2 focus:ring-primary focus:border-primary resize-y"></textarea>
-                                </div>
-                                {turnstileSiteKey && (
-                                    <div id="review-turnstile" data-turnstile-site-key={turnstileSiteKey}></div>
-                                )}
-                                <div id="review-message" class="hidden text-sm"></div>
-                                <button 
-                                    type="submit" 
-                                    class="px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    Submit Review
-                                </button>
-                            </form>
-                        </div>
-                        )}
-                    </div>
-                </div>
+
+            <div class="flex items-baseline gap-2 mb-5">
+              <span class="text-gray-500 text-xs">Desde</span>
+              <span id="pp-precio" class="text-3xl lg:text-4xl font-bold text-brand-black font-poppins tabular-nums" data-pp-precio>{formatPrice(defaultPrice)}</span>
             </div>
-        </Section>
-        
-        <!-- Related Products -->
-        {relatedProducts.length > 0 && (
-            <Section padding="lg">
-                <div class="flex items-end justify-between mb-12">
-                    <div>
-                        <span class="text-sm font-semibold text-primary tracking-wide uppercase">You may also like</span>
-                        <h2 class="text-3xl sm:text-4xl font-black tracking-tight text-content mt-2">Related Products</h2>
-                    </div>
-                    <a href="/tienda" class="group hidden sm:inline-flex items-center gap-2 text-primary font-medium hover:gap-3 transition-all cursor-pointer">
-                        View all
-                        <ArrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </a>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-                    {relatedProducts.map(related => (
-                        <ProductCard product={related} />
+
+            <p class="text-sm text-[#666] leading-relaxed mb-5">{stripHtml(product.short_description || '').slice(0, 220)}</p>
+
+            <!-- Presentación + Cantidad -->
+            <div class="border-t border-black/[0.06] pt-5">
+              {presentations.length > 0 && (
+                <div class="flex items-center gap-2 mb-4 flex-wrap">
+                  <span class="font-poppins text-[11px] font-semibold uppercase tracking-[0.14em] text-black/45 w-20 shrink-0">Presentación</span>
+                  <div class="flex gap-2 flex-wrap" id="pp-pres-group" data-pp-pres-group>
+                    {presentations.map((p, i) => (
+                      <button type="button" data-pp-pres data-dosis={p.dosis} data-precio={String(p.price)} data-vial={p.vial || ''}
+                        class={`px-4 py-2 rounded-lg text-sm font-medium transition-all border relative cursor-pointer ${i === defaultIdx ? 'bg-brand-black text-white border-brand-black' : 'bg-white text-[#555] border-[#e0e0e0] hover:border-[#999]'}`}
+                        aria-pressed={i === defaultIdx ? 'true' : 'false'} aria-label={`${product.name} de ${p.dosis}`}>{p.label}</button>
                     ))}
+                  </div>
                 </div>
-            </Section>
-        )}
-    </main>
+              )}
 
-</BaseLayout>
+              <div class="flex items-center justify-between gap-3 mb-4 flex-wrap">
+                <div class="flex items-center gap-3">
+                  <span class="font-poppins text-[11px] font-semibold uppercase tracking-[0.14em] text-black/45">Cantidad</span>
+                  <div class="flex items-center border border-[#e0e0e0] rounded-full">
+                    <button type="button" class="w-9 h-9 flex items-center justify-center text-[#555] hover:text-black transition-colors cursor-pointer" aria-label="Disminuir cantidad" data-pp-qty-minus>
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"></path></svg>
+                    </button>
+                    <span class="w-8 text-center text-sm font-medium text-black font-poppins" data-pp-qty>1</span>
+                    <button type="button" class="w-9 h-9 flex items-center justify-center text-[#555] hover:text-black transition-colors cursor-pointer" aria-label="Aumentar cantidad" data-pp-qty-plus>
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
+                    </button>
+                  </div>
+                </div>
+                <span class="text-sm text-brand-black font-semibold" data-pp-total></span>
+              </div>
+
+              <!-- Packs: Llévate más y ahorra -->
+              <div class="mb-4">
+                <span class="text-xs font-semibold text-[#555] uppercase tracking-wide">Llévate más y ahorra</span>
+                <div class="flex gap-2 mt-2 overflow-x-auto pb-1" id="pp-packs" data-pp-packs>
+                  {[
+                    { count: 1, dto: 0, badge: null as string | null },
+                    { count: 3, dto: 5, badge: 'EL MÁS PEDIDO' },
+                    { count: 6, dto: 8, badge: 'MEJOR PRECIO' },
+                    { count: 10, dto: 12, badge: 'MÁXIMO DTO.' },
+                  ].map(pack => (
+                    <button type="button" data-pp-pack data-count={pack.count} data-dto={pack.dto}
+                      class={`relative flex items-center gap-2 px-3 py-2 rounded-lg border transition-all flex-shrink-0 lg:flex-1 lg:min-w-0 lg:justify-center lg:px-2 cursor-pointer ${pack.dto === 0 ? 'border-brand-mint bg-brand-mint/40' : 'border-gray-200 hover:border-gray-300 bg-white'}`}
+                      aria-pressed={pack.dto === 0 ? 'true' : 'false'}>
+                      {pack.badge && (
+                        <span class={`absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 text-[8px] font-semibold text-white rounded whitespace-nowrap ${pack.badge === 'MÁXIMO DTO.' ? 'bg-brand-black' : pack.badge === 'MEJOR PRECIO' ? 'bg-amber-500' : 'bg-teal-600'}`}>{pack.badge}</span>
+                      )}
+                      <span class="flex flex-col items-start">
+                        <span class="font-medium text-xs">{pack.count} {pack.count === 1 ? 'VIAL' : 'VIALES'}</span>
+                        {pack.dto > 0 && <span class="text-[10px] font-bold text-brand-black">{pack.dto} % DTO.</span>}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <!-- Añadir al carrito + certificado -->
+              <div class="flex items-center gap-3 mt-auto">
+                <a class="h-12 px-5 border border-[#e0e0e0] rounded-full text-sm font-medium text-[#555] hover:border-[#999] transition-colors inline-flex items-center justify-center" href={coaHref} target={janoshikUrl ? "_blank" : undefined} rel={janoshikUrl ? "noopener noreferrer" : undefined} aria-label={`Ver certificado de análisis de ${product.name}`}>Certificado</a>
+                <button type="button" data-pp-anadir data-pp-unitario={String(defaultPrice)}
+                  class="flex-1 text-sm font-medium h-12 px-6 rounded-full transition-all inline-flex items-center justify-center gap-2 bg-brand-black text-white hover:bg-gray-800 cursor-pointer">
+                  <span data-pp-anadir-text>Añadir al carrito · {formatPrice(defaultPrice)}</span>
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                </button>
+              </div>
+
+              <a class="font-poppins w-full mt-3 h-11 inline-flex items-center justify-center gap-2 rounded-full border border-brand-black text-sm font-semibold text-brand-black hover:bg-brand-black hover:text-white transition-colors"
+                 href={`https://wa.me/15806436837?text=${encodeURIComponent(`Hola Peptidos Plus, tengo una pregunta sobre ${product.name}.`)}`} target="_blank" rel="noopener noreferrer" data-pp-asesor>
+                <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 shrink-0" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"></path></svg>
+                ¿Dudas? Habla con un asesor por WhatsApp
+              </a>
+
+              <div class="mt-3 rounded-xl border border-black/[0.07] bg-[#fbfbfc] divide-y divide-black/[0.05]">
+                <div class="flex items-start gap-3 px-4 py-2.5 bg-brand-mint/40 rounded-t-xl">
+                  <span class="mt-0.5 shrink-0 text-brand-black" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg></span>
+                  <span class="min-w-0"><span class="block text-[13px] font-medium leading-tight text-brand-black">Retiro en oficina MRW o Zoom</span><span class="block text-[11px] text-[#8a8f98] leading-tight mt-0.5">Eliges la agencia al finalizar la compra</span></span>
+                </div>
+                <div class="flex items-start gap-3 px-4 py-2.5">
+                  <span class="mt-0.5 shrink-0 text-brand-black" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg></span>
+                  <span class="min-w-0"><span class="block text-[13px] font-medium leading-tight text-brand-black">Kit de aplicación incluido</span><span class="block text-[11px] text-[#8a8f98] leading-tight mt-0.5">Con cada péptido va agua bacteriostática de 3 ml, 10 jeringas y 10 toallitas de alcohol. Sin costo.</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SE PIDEN JUNTOS ============ -->
+    {relatedProducts.length > 0 && (
+      <section class="py-6 lg:py-8 bg-white">
+        <div class="content-container mb-4 lg:mb-6">
+          <p class="font-poppins text-[11px] font-semibold uppercase tracking-[0.18em] text-black/45 mb-1.5">Lleva más y ahorra más</p>
+          <h2 class="font-semibold text-xl sm:text-2xl text-brand-black leading-tight">Se piden <em class="font-fraunces italic font-medium">juntos</em></h2>
+        </div>
+        <div class="px-4 sm:px-6">
+          <div class="overflow-x-auto pb-2">
+            <div class="flex gap-3 lg:gap-4 px-1" data-pp-relacionados>
+              {relatedProducts.map(rel => {
+                const relImg = getPublicProductImageUrl(rel.images?.[0]?.src || null, rel.slug, rel.name) || '';
+                return (
+                  <div class="flex-none w-[180px] sm:w-[200px]">
+                    <div class="group h-full">
+                      <div class="bg-neutral-100 rounded-[16px] lg:rounded-[20px] overflow-hidden h-full flex flex-col border border-black/[0.08] transition-all duration-200 hover:shadow-[0_12px_28px_-12px_rgba(19,19,21,0.18)]">
+                        <div class="relative aspect-square overflow-hidden bg-neutral-100">
+                          <a class="block absolute inset-0" aria-label={`Ver ${rel.name}`} href={`/tienda/producto/${rel.slug}`}>
+                            {relImg ? (
+                              <img alt={rel.name} loading="lazy" decoding="async" class="object-cover object-[90%_center] transition-transform duration-300 group-hover:scale-105" src={relImg} />
+                            ) : (
+                              <span class="absolute inset-0 flex items-center justify-center text-black/30 text-xs font-semibold p-2 text-center">{rel.name}</span>
+                            )}
+                          </a>
+                        </div>
+                        <div class="p-3 flex flex-col flex-grow bg-white border-t border-black/[0.05] rounded-b-[16px]">
+                          <a class="hover:opacity-80 transition-opacity" href={`/tienda/producto/${rel.slug}`}>
+                            <h3 class="font-semibold text-sm lg:text-base text-brand-black leading-tight mb-1 line-clamp-1">{rel.name}</h3>
+                          </a>
+                          <div class="flex items-baseline gap-1 mt-1">
+                            <span class="text-gray-500 text-[10px]">Desde</span>
+                            <span class="font-semibold text-base text-brand-black">{formatPrice(rel)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- ============ DESCRIPCIÓN / INFORMACIÓN ADICIONAL ============ -->
+    <section class="py-10 lg:py-14">
+      <div class="content-container">
+        <div class="rounded-[24px] bg-[#f6f7f9] px-4 sm:px-8 lg:px-12 py-8 lg:py-10">
+          <div class="flex flex-col sm:flex-row gap-2 border-b border-black/[0.06] mb-6">
+            <button type="button" data-pp-tab="descripcion" class="px-5 py-3 text-sm font-semibold rounded-t-lg transition-colors bg-white text-brand-black border border-black/10 border-b-0 cursor-pointer" aria-selected="true">Descripción</button>
+            <button type="button" data-pp-tab="adicional" class="px-5 py-3 text-sm font-semibold rounded-t-lg transition-colors text-black/50 hover:text-black cursor-pointer" aria-selected="false">Información adicional</button>
+          </div>
+
+          <div id="pp-tab-descripcion" class="prose prose-sm max-w-none text-[15px] leading-relaxed text-[#3a3a3a]" set:html={cleanDescription || '<p>Sin descripción disponible.</p>'} />
+
+          <div id="pp-tab-adicional" class="hidden">
+            {product.attributes && product.attributes.length > 0 ? (
+              <table class="w-full text-sm">
+                <tbody>
+                  {product.attributes.map(attr => (
+                    <tr class="border-b border-black/[0.06] last:border-0">
+                      <th class="py-3 pr-4 text-left font-semibold text-brand-black w-1/3">{attr.name}</th>
+                      <td class="py-3 text-black/60">{attr.terms.map(t => t.name).join(', ')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p class="text-black/50">No hay información adicional disponible.</p>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CADA LOTE VERIFICADO ============ -->
+    <section id="coa" class="py-10 lg:py-14 scroll-mt-24">
+      <div class="content-container">
+        <div class="rounded-[24px] bg-[#f6f7f9] px-4 sm:px-8 lg:px-12 py-10 lg:py-14 text-center">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand-black font-poppins">Resultados verificados</p>
+          <h2 class="mt-3 text-[28px] leading-[1.1] sm:text-4xl font-bold tracking-tight text-brand-black font-poppins text-balance">Cada lote, verificado por laboratorio independiente.</h2>
+          <p class="mt-4 text-sm sm:text-base text-[#5a5a5a] leading-relaxed max-w-2xl mx-auto">Cada lote se analiza en un laboratorio independiente (Janoshik Analytical) antes de despacharse. El certificado del lote de tu vial es público y se verifica en el portal del laboratorio.</p>
+          <a href={coaHref} target={janoshikUrl ? "_blank" : undefined} rel={janoshikUrl ? "noopener noreferrer" : undefined} class="inline-flex items-center gap-2 mt-6 h-11 px-6 rounded-full bg-brand-black text-white text-sm font-medium hover:bg-gray-800 transition-colors">Ver certificado de análisis
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"></path></svg>
+          </a>
+          <p class="mt-4 text-xs text-black/40">Conoce todos los certificados publicados en <a href="/certificados" class="text-brand-black underline underline-offset-2 hover:opacity-70">Certificados →</a></p>
+        </div>
+      </div>
+    </section>
+  </main>
+</BrandLayout>
+
+<script type="application/json" id="product-presentations" set:html={presJson} />
+<script type="application/json" id="product-slate" set:html={JSON.stringify({ id: product.id, name: product.name, sku: product.sku || '', slug: product.slug })} />
 
 <script>
-    import { formatStorePrice } from '../../../config/store';
+  import { addToCart, openCartDrawer } from '../../../lib/cart';
 
-    document.addEventListener('DOMContentLoaded', () => {
-        // Turnstile for review form
-        let reviewTurnstileToken = '';
-        const reviewTurnstileContainer = document.getElementById('review-turnstile');
-        const reviewTurnstileSiteKey = reviewTurnstileContainer?.dataset.turnstileSiteKey;
-        if (reviewTurnstileSiteKey && reviewTurnstileContainer) {
-            const script = document.createElement('script');
-            script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onReviewTurnstileLoad';
-            script.async = true;
-            (window as any).onReviewTurnstileLoad = () => {
-                (window as any).turnstile.render(reviewTurnstileContainer, {
-                    sitekey: reviewTurnstileSiteKey,
-                    callback: (token: string) => { reviewTurnstileToken = token; },
-                    'expired-callback': () => { reviewTurnstileToken = ''; },
-                    'error-callback': () => { reviewTurnstileToken = ''; },
-                    theme: 'auto',
-                    size: 'flexible',
-                });
-            };
-            document.head.appendChild(script);
-        }
-        
-        const mainImage = document.getElementById('main-product-image') as HTMLImageElement;
-        const thumbnails = document.querySelectorAll('[data-image-thumbnail]');
-        
-        thumbnails.forEach(thumb => {
-            thumb.addEventListener('click', () => {
-                const src = (thumb as HTMLElement).dataset.imageThumbnail;
-                if (mainImage && src) {
-                    mainImage.src = src;
-                    thumbnails.forEach(t => {
-                        t.classList.remove('border-primary', 'ring-2', 'ring-primary/20');
-                        t.classList.add('border-outline');
-                    });
-                    thumb.classList.remove('border-outline');
-                    thumb.classList.add('border-primary', 'ring-2', 'ring-primary/20');
-                }
-            });
-        });
-        
-        const tabButtons = document.querySelectorAll('[data-tab]');
-        const tabDescription = document.getElementById('tab-description');
-        const tabAdditional = document.getElementById('tab-additional');
-        const tabReviews = document.getElementById('tab-reviews');
-        const allTabs = [tabDescription, tabAdditional, tabReviews];
-        let reviewsLoaded = false;
-        
-        tabButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const tab = (button as HTMLElement).dataset.tab;
-                
-                tabButtons.forEach(btn => {
-                    btn.classList.remove('text-primary', 'border-primary');
-                    btn.classList.add('text-content-lighter', 'border-transparent');
-                });
-                button.classList.remove('text-content-lighter', 'border-transparent');
-                button.classList.add('text-primary', 'border-primary');
-                
-                allTabs.forEach(t => t?.classList.add('hidden'));
-                if (tab === 'description') tabDescription?.classList.remove('hidden');
-                else if (tab === 'additional') tabAdditional?.classList.remove('hidden');
-                else if (tab === 'reviews') {
-                    tabReviews?.classList.remove('hidden');
-                    if (!reviewsLoaded) loadReviews();
-                }
-            });
-        });
-        
-        function renderStars(rating: number, size = 'w-4 h-4') {
-            return [1, 2, 3, 4, 5].map(s =>
-                `<svg class="${size} ${s <= rating ? 'text-warning' : 'text-outline'}" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>`
-            ).join('');
-        }
+  document.addEventListener('DOMContentLoaded', () => {
+    const slugEl = document.getElementById('product-slate');
+    let slate = { id: 0, name: '', sku: '', slug: '' };
+    try { slate = JSON.parse(slugEl?.textContent || '') || slate; } catch {}
 
-        function escapeHtml(value: unknown): string {
-            return String(value ?? '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-        }
-        
-        async function loadReviews() {
-            const productId = tabReviews?.dataset.productId;
-            if (!productId) return;
-            const reviewsList = document.getElementById('reviews-list');
-            if (!reviewsList) return;
-            
-            try {
-                const res = await fetch(`/api/reviews?product_id=${productId}`);
-                const data = await res.json();
-                
-                if (data.success && data.reviews.length > 0) {
-                    reviewsList.innerHTML = data.reviews.map((r: any) => {
-                        const date = new Date(r.date_created).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-                        const reviewer = escapeHtml(r.reviewer);
-                        const reviewerInitial = escapeHtml(String(r.reviewer || '?').charAt(0).toUpperCase() || '?');
-                        const review = escapeHtml(r.review);
-                        return `<div class="border-b border-outline pb-6 last:border-0">
-                            <div class="flex items-center justify-between mb-2">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">${reviewerInitial}</div>
-                                    <div>
-                                        <span class="font-semibold text-content">${reviewer}</span>
-                                        ${r.verified ? '<span class="ml-2 text-xs bg-success/10 text-success px-2 py-0.5 rounded-full font-medium">Verified Purchase</span>' : ''}
-                                    </div>
-                                </div>
-                                <span class="text-xs text-content-lighter">${date}</span>
-                            </div>
-                            <div class="flex mb-2">${renderStars(r.rating)}</div>
-                            <div class="text-content-light text-sm leading-relaxed">${review}</div>
-                        </div>`;
-                    }).join('');
-                } else {
-                    reviewsList.innerHTML = '<p class="text-content-lighter text-center py-8">No reviews yet. Be the first to review this product!</p>';
-                }
-                reviewsLoaded = true;
-            } catch {
-                reviewsList.innerHTML = '<p class="text-content-lighter text-center py-8">Failed to load reviews.</p>';
-            }
-        }
-        
-        // Star rating input
-        let selectedRating = 0;
-        const starButtons = document.querySelectorAll('#star-rating-input button');
-        const ratingInput = document.getElementById('review-rating') as HTMLInputElement;
-        
-        starButtons.forEach(btn => {
-            btn.addEventListener('mouseenter', () => {
-                const val = parseInt((btn as HTMLElement).dataset.starValue || '0');
-                starButtons.forEach((b, i) => {
-                    b.classList.toggle('text-warning', i < val);
-                    b.classList.toggle('text-outline', i >= val);
-                });
-            });
-            btn.addEventListener('click', () => {
-                selectedRating = parseInt((btn as HTMLElement).dataset.starValue || '0');
-                if (ratingInput) ratingInput.value = String(selectedRating);
-                starButtons.forEach((b, i) => {
-                    b.classList.toggle('text-warning', i < selectedRating);
-                    b.classList.toggle('text-outline', i >= selectedRating);
-                });
-            });
+    const presJsonEl = document.getElementById('product-presentations');
+    let presList: Array<{ label: string; dosis: string; price: number; vial: string | null }> = [];
+    try { presList = JSON.parse(presJsonEl?.textContent || '[]') || []; } catch {}
+
+    const priceEl = document.getElementById('pp-precio');
+    const totalEl = document.querySelector('[data-pp-total]');
+    const qtyEl = document.querySelector('[data-pp-qty]') as HTMLElement | null;
+    const mainImg = document.getElementById('pp-vial-img') as HTMLImageElement | null;
+    const atcBtn = document.querySelector('[data-pp-anadir]') as HTMLElement | null;
+    const atcText = document.querySelector('[data-pp-anadir-text]') as HTMLElement | null;
+    const presButtons = Array.from(document.querySelectorAll<HTMLElement>('[data-pp-pres]'));
+    const packButtons = Array.from(document.querySelectorAll<HTMLElement>('[data-pp-pack]'));
+
+    let unitPrice = parseFloat(atcBtn?.dataset.ppUnitario || '0') || 0;
+    let qty = 1;
+    let packCount = 1;
+    let packDto = 0;
+
+    const fmt = (n: number) => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    function render() {
+      const total = unitPrice * (1 - packDto / 100) * qty * packCount;
+      if (priceEl) priceEl.textContent = fmt(total);
+      if (totalEl) totalEl.textContent = (qty > 1 || packCount > 1) ? `Total: ${fmt(total)}` : '';
+      if (atcText) atcText.textContent = `Añadir al carrito · ${fmt(total)}`;
+      if (atcBtn) atcBtn.dataset.ppTotal = String(Math.round(total * 100) / 100);
+    }
+
+    presButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        presButtons.forEach(b => {
+          b.className = 'px-4 py-2 rounded-lg text-sm font-medium transition-all border relative cursor-pointer bg-white text-[#555] border-[#e0e0e0] hover:border-[#999]';
+          b.setAttribute('aria-pressed', 'false');
         });
-        
-        document.getElementById('star-rating-input')?.addEventListener('mouseleave', () => {
-            starButtons.forEach((b, i) => {
-                b.classList.toggle('text-warning', i < selectedRating);
-                b.classList.toggle('text-outline', i >= selectedRating);
-            });
-        });
-        
-        // Review form submission
-        const reviewForm = document.getElementById('review-form') as HTMLFormElement;
-        reviewForm?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const msgEl = document.getElementById('review-message');
-            const submitBtn = reviewForm.querySelector('button[type="submit"]') as HTMLButtonElement;
-            
-            const rating = parseInt(ratingInput?.value || '0');
-            if (rating < 1) {
-                if (msgEl) { msgEl.textContent = 'Please select a rating.'; msgEl.className = 'text-sm text-error'; msgEl.classList.remove('hidden'); }
-                return;
-            }
-            
-            const name = (document.getElementById('review-name') as HTMLInputElement)?.value;
-            const email = (document.getElementById('review-email') as HTMLInputElement)?.value;
-            const text = (document.getElementById('review-text') as HTMLTextAreaElement)?.value;
-            
-            if (!name || !email || !text) return;
-            
-            if (reviewTurnstileSiteKey && !reviewTurnstileToken) {
-                if (msgEl) { msgEl.textContent = 'Please complete the security verification.'; msgEl.className = 'text-sm text-error'; msgEl.classList.remove('hidden'); }
-                return;
-            }
-            
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Submitting...';
-            
-            try {
-                const productId = tabReviews?.dataset.productId;
-                const res = await fetch('/api/reviews/submit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ product_id: Number(productId), rating, review: text, reviewer: name, reviewer_email: email, turnstile_token: reviewTurnstileToken }),
-                });
-                const data = await res.json();
-                
-                if (data.success) {
-                    if (msgEl) { msgEl.textContent = 'Review submitted successfully! It may take a moment to appear.'; msgEl.className = 'text-sm text-success'; msgEl.classList.remove('hidden'); }
-                    reviewForm.reset();
-                    selectedRating = 0;
-                    starButtons.forEach(b => { b.classList.remove('text-warning'); b.classList.add('text-outline'); });
-                    if (ratingInput) ratingInput.value = '0';
-                    reviewsLoaded = false;
-                    loadReviews();
-                } else {
-                    if (msgEl) { msgEl.textContent = data.error || 'Failed to submit review.'; msgEl.className = 'text-sm text-error'; msgEl.classList.remove('hidden'); }
-                }
-            } catch {
-                if (msgEl) { msgEl.textContent = 'Failed to submit review.'; msgEl.className = 'text-sm text-error'; msgEl.classList.remove('hidden'); }
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Submit Review';
-                if (reviewTurnstileSiteKey && (window as any).turnstile) {
-                    reviewTurnstileToken = '';
-                    (window as any).turnstile.reset(reviewTurnstileContainer);
-                }
-            }
-        });
-        
-        // Variable product picker
-        const variationsEl = document.getElementById('product-variations');
-        if (variationsEl) {
-            const variations: any[] = JSON.parse(variationsEl.textContent || '[]');
-            const attrSelects = document.querySelectorAll('[data-variation-attr]') as NodeListOf<HTMLSelectElement>;
-            const variationPriceContainer = document.getElementById('variation-price');
-            const variationPriceValue = document.getElementById('variation-price-value');
-            const variationRegularPrice = document.getElementById('variation-regular-price');
-            const variationStock = document.getElementById('variation-stock');
-            const addToCartWrapper = document.querySelector('[data-add-to-cart-wrapper]');
-            const addToCartBtn = addToCartWrapper?.querySelector('button[data-product-id]') as HTMLButtonElement | null;
-            
-            if (addToCartBtn) {
-                addToCartBtn.disabled = true;
-                const btnText = addToCartBtn.querySelector('[data-btn-text]');
-                if (btnText) btnText.textContent = 'Select options';
-            }
-            
-            function findMatchingVariation(): any | null {
-                const selected: Record<string, string> = {};
-                attrSelects.forEach(sel => {
-                    const name = sel.dataset.variationAttr || '';
-                    if (sel.value) selected[name] = sel.value;
-                });
-                
-                if (Object.keys(selected).length !== attrSelects.length) return null;
-                
-                return variations.find(v => {
-                    return v.attributes.every((attr: any) => {
-                        if (!attr.option || attr.option === '') return true;
-                        return selected[attr.name] === attr.option;
-                    });
-                }) || null;
-            }
-            
-            function formatPriceSimple(price: string): string {
-                const num = parseFloat(price);
-                return isNaN(num) ? price : formatStorePrice(num);
-            }
-            
-            function updateVariationDisplay() {
-                const variation = findMatchingVariation();
-                
-                if (variation) {
-                    if (variationPriceContainer && variationPriceValue) {
-                        variationPriceValue.textContent = formatPriceSimple(variation.price);
-                        variationPriceContainer.classList.remove('hidden');
-                        
-                        if (variationRegularPrice && variation.on_sale && variation.regular_price) {
-                            variationRegularPrice.textContent = formatPriceSimple(variation.regular_price);
-                            variationRegularPrice.classList.remove('hidden');
-                        } else if (variationRegularPrice) {
-                            variationRegularPrice.classList.add('hidden');
-                        }
-                    }
-                    
-                    if (variationStock) {
-                        const status = variation.stock_status;
-                        if (status === 'outofstock') {
-                            variationStock.innerHTML = '<span class="inline-flex items-center gap-2 px-3 py-1.5 bg-error/10 text-error rounded-full text-sm font-medium">Out of Stock</span>';
-                            variationStock.classList.remove('hidden');
-                        } else if (status === 'onbackorder') {
-                            variationStock.innerHTML = '<span class="inline-flex items-center gap-2 px-3 py-1.5 bg-warning/10 text-warning rounded-full text-sm font-medium">Available on backorder</span>';
-                            variationStock.classList.remove('hidden');
-                        } else if (variation.stock_quantity !== null && variation.stock_quantity <= 5) {
-                            variationStock.innerHTML = `<span class="inline-flex items-center gap-2 px-3 py-1.5 bg-warning/10 text-warning rounded-full text-sm font-medium">Only ${variation.stock_quantity} left</span>`;
-                            variationStock.classList.remove('hidden');
-                        } else {
-                            variationStock.classList.add('hidden');
-                        }
-                    }
-                    
-                    if (variation.image?.src && mainImage) {
-                        mainImage.src = variation.image.src;
-                    }
-                    
-                    if (addToCartBtn) {
-                        const inStock = variation.stock_status !== 'outofstock' && variation.purchasable;
-                        addToCartBtn.disabled = !inStock;
-                        addToCartBtn.dataset.productPrice = variation.price;
-                        if (variation.image?.src) {
-                            addToCartBtn.dataset.productImage = variation.image.src;
-                        }
-                        addToCartBtn.dataset.variationId = String(variation.id);
-                        const attrs: Record<string, string> = {};
-                        attrSelects.forEach(sel => {
-                            if (sel.value) attrs[sel.dataset.variationAttr || ''] = sel.value;
-                        });
-                        addToCartBtn.dataset.variationAttributes = JSON.stringify(attrs);
-                        const btnText = addToCartBtn.querySelector('[data-btn-text]');
-                        if (btnText) btnText.textContent = inStock ? 'Add to Cart' : 'Out of Stock';
-                    }
-                } else {
-                    variationPriceContainer?.classList.add('hidden');
-                    variationStock?.classList.add('hidden');
-                    if (addToCartBtn) {
-                        addToCartBtn.disabled = true;
-                        const btnText = addToCartBtn.querySelector('[data-btn-text]');
-                        if (btnText) btnText.textContent = 'Select options';
-                        delete addToCartBtn.dataset.variationId;
-                        delete addToCartBtn.dataset.variationAttributes;
-                    }
-                }
-            }
-            
-            attrSelects.forEach(sel => sel.addEventListener('change', updateVariationDisplay));
+        btn.className = 'px-4 py-2 rounded-lg text-sm font-medium transition-all border relative cursor-pointer bg-brand-black text-white border-brand-black';
+        btn.setAttribute('aria-pressed', 'true');
+        const p = parseFloat(btn.dataset.precio || '0');
+        if (!isNaN(p)) {
+          unitPrice = p;
+          if (atcBtn) atcBtn.dataset.ppUnitario = String(p);
         }
+        const vial = btn.dataset.vial;
+        if (vial && mainImg) mainImg.src = vial;
+        render();
+      });
     });
+
+    packButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        packButtons.forEach(b => {
+          b.className = 'relative flex items-center gap-2 px-3 py-2 rounded-lg border transition-all flex-shrink-0 lg:flex-1 lg:min-w-0 lg:justify-center lg:px-2 cursor-pointer border-gray-200 hover:border-gray-300 bg-white';
+          b.setAttribute('aria-pressed', 'false');
+        });
+        btn.className = 'relative flex items-center gap-2 px-3 py-2 rounded-lg border transition-all flex-shrink-0 lg:flex-1 lg:min-w-0 lg:justify-center lg:px-2 cursor-pointer border-brand-mint bg-brand-mint/40';
+        btn.setAttribute('aria-pressed', 'true');
+        packCount = parseInt(btn.dataset.count || '1') || 1;
+        packDto = parseInt(btn.dataset.dto || '0') || 0;
+        render();
+      });
+    });
+
+    document.querySelector('[data-pp-qty-plus]')?.addEventListener('click', () => {
+      qty = Math.min(qty + 1, 99);
+      if (qtyEl) qtyEl.textContent = String(qty);
+      render();
+    });
+    document.querySelector('[data-pp-qty-minus]')?.addEventListener('click', () => {
+      qty = Math.max(qty - 1, 1);
+      if (qtyEl) qtyEl.textContent = String(qty);
+      render();
+    });
+
+    // Añadir al carrito (usando lib/cart + drawer)
+    atcBtn?.addEventListener('click', () => {
+      const price = parseFloat(atcBtn.dataset.ppUnitario || '0') * (1 - packDto / 100);
+      const qtyTotal = packCount * qty;
+      addToCart({
+        id: slate.id,
+        name: slate.name,
+        price: Math.round(price * 100) / 100,
+        quantity: qtyTotal,
+        image: mainImg?.src || '',
+        sku: slate.sku,
+        attributes: packDto > 0 || packCount > 1 ? { pack: `${packCount} viales`, dto: `${packDto}%` } : undefined,
+      });
+      openCartDrawer();
+    });
+
+    // Tabs Descripción / Información adicional
+    const tabs = Array.from(document.querySelectorAll<HTMLElement>('[data-pp-tab]'));
+    const panelDesc = document.getElementById('pp-tab-descripcion');
+    const panelAdd = document.getElementById('pp-tab-adicional');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const target = tab.dataset.ppTab;
+        tabs.forEach(t => {
+          const active = t === tab;
+          t.className = active
+            ? 'px-5 py-3 text-sm font-semibold rounded-t-lg transition-colors bg-white text-brand-black border border-black/10 border-b-0 cursor-pointer'
+            : 'px-5 py-3 text-sm font-semibold rounded-t-lg transition-colors text-black/50 hover:text-black cursor-pointer';
+          t.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+        panelDesc?.classList.toggle('hidden', target !== 'descripcion');
+        panelAdd?.classList.toggle('hidden', target !== 'adicional');
+      });
+    });
+
+    render();
+  });
 </script>

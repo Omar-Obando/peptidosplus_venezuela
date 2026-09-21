@@ -46,6 +46,9 @@ const tags = getPostTags(post) || [];
 const cat = firstCategory(post);
 const featuredImage = postImage(post) || '';
 
+// Autor de marca: el blog lo escribe Peptidos Plus Venezuela (no el usuario de WP).
+const BRAND_AUTHOR = 'Peptidos Plus Venezuela';
+
 const bodyHtml = applyExternalLinkPolicy(
   addHeadingIds(rewriteContentUrls(sanitizePostContent(post?.content?.rendered || '')))
 );
@@ -69,8 +72,8 @@ const articleLd = {
   headline: title,
   description,
   ...(featuredImage ? { image: featuredImage } : {}),
-  author: { '@type': 'Person', name: author?.name || SITE.name },
-  publisher: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+  author: { '@type': 'Organization', name: BRAND_AUTHOR, url: SITE.url },
+  publisher: { '@type': 'Organization', name: BRAND_AUTHOR, url: SITE.url },
   datePublished: post.date,
   dateModified: post.modified || post.date,
   mainEntityOfPage: canonicalUrl,
@@ -96,7 +99,7 @@ const articleLd = {
         </p>
         <h1 class="pg-h1">{title}</h1>
         <p class="pg-sub">{description}</p>
-        <p class="pg-gris">{author?.name || 'Equipo Peptidos Plus'} · Solo para investigación</p>
+        <p class="pg-gris">{BRAND_AUTHOR} · Solo para investigación</p>
       </header>
 
       {headings.length > 0 && <TableOfContents headings={headings} readingTime={readingTime} />}
@@ -112,14 +115,10 @@ const articleLd = {
       )}
 
       <div class="pg-autor">
-        {author?.avatar_urls?.['96'] ? (
-          <img src={author.avatar_urls['96']} alt={author.name} class="pg-autor-avatar" />
-        ) : (
-          <span class="pg-autor-inicial">{author?.name?.charAt(0) || 'P'}</span>
-        )}
+        <img src="/assets/marca/peptidosplus-logo-navy.svg" alt="Peptidos Plus Venezuela" class="pg-autor-avatar" style="width:56px;height:56px;object-fit:contain;border-radius:12px;padding:6px;" />
         <div>
           <small>Escrito por</small>
-          <b>{author?.name || SITE.name}</b>
+          <b>Peptidos Plus Venezuela</b>
         </div>
       </div>
 

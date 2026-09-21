@@ -1440,3 +1440,6 @@ html, body { overflow-x: clip; }
   [data-testid="cart-container"] td:first-child { width: 4.5rem; }
   [data-testid="cart-container"] select[data-testid="product-select-button"] { width: 3.5rem; padding-left: .5rem; padding-right: 1.5rem; }
 }
+
+/* Peptidos Plus headless: color navy global para los h1 de articulo (.pg-art sin id). */
+.pg-h1 { color: var(--pp-navy); }

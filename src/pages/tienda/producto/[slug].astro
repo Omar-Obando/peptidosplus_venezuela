@@ -92,15 +92,39 @@ const pageDescription = stripHtml(product.short_description || product.descripti
 const pageImage = product.images?.[0]?.src || '';
 
 // Normalize CMS content: relative asset URLs + product .html links -> app routes.
+// Tambien limpia el HTML de layout del clon antiguo (hero/grid/nav/footer de
+// la descripcion importada) para que la descripcion muestre solo contenido.
 function normalizeContent(html: string): string {
   if (!html) return html;
-  return html
+  let out = html
     .replace(/(src|href)="assets\//gi, '$1="/assets/')
     .replace(/href="producto-([a-z0-9-]+)\.html(#coa)?"/gi, (_m, slug: string, hash: string) => `/tienda/producto/${slug}${hash || ''}`)
     .replace(/href="store\.html(\?[^"]*)?"/gi, (_m, q: string) => `/tienda${q || ''}`)
     .replace(/href="articulos\.html"/gi, '/blog')
     .replace(/href="articulo-([a-z0-9-]+)\.html"/gi, (_m, slug: string) => `/blog/${slug}`)
     .replace(/(src|href)="(?:\.\.\/)+assets\//gi, '$1="/assets/');
+  // Quitar bloques de layout del clon: scripts, estilos, nav, header, footer,
+  // canvas/banner, y wrappers de grid/hero que solo mueven el diseno.
+  out = out
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<nav[\s\S]*?<\/nav>/gi, '')
+    .replace(/<header[\s\S]*?<\/header>/gi, '')
+    .replace(/<footer[\s\S]*?<\/footer>/gi, '')
+    .replace(/<canvas[^>]*>[\s\S]*?<\/canvas>/gi, '')
+  // Limpiar el HTML de layout del clon: eliminar <div>/<section> contenedores
+  // que solo dan diseno (grid, aspect, min-h, bg-gradient, data-pp-*) dejando
+  // el contenido real (<p>, <h2>, <ul>, <table>) y los certificados (pp-coa).
+  out = out
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<nav[\s\S]*?<\/nav>/gi, '')
+    .replace(/<header[\s\S]*?<\/header>/gi, '')
+    .replace(/<footer[\s\S]*?<\/footer>/gi, '')
+    .replace(/<canvas[^>]*>[\s\S]*?<\/canvas>/gi, '')
+    .replace(/<(div|section)\s[^>]*class="[^"]*(?:grid|aspect-\[|min-h-|bg-gradient|pp-hero|data-pp-|bg-\[|flex-col lg:grid)[^"]*"[^>]*>[\s\S]*?<\/(?:div|section)>/gi, '')
+    .replace(/\sdata-pp-[a-z-]+(?:="[^"]*")?/gi, '');
+  return out;
 }
 ---
 

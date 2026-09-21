@@ -99,6 +99,15 @@ const detectCountry = Astro.request.headers.get('CF-IPCountry') || '';
   </head>
 
   <style is:global>
+    /* Fuentes de marca: el CSS compilado usa var(--font-poppins)/var(--font-anek)
+       que en el original definía Next.js en el body. Aquí las definimos en :root
+       para que TODAS las rutas (no solo home) apliquen Poppins/Anek Telugu. */
+    :root {
+      --font-poppins: "Poppins", "Poppins Fallback", system-ui, sans-serif;
+      --font-anek: "Anek Telugu", "Anek Telugu Fallback", system-ui, sans-serif;
+      --font-roboto: "Roboto", "Roboto Fallback", system-ui, sans-serif;
+    }
+
     /* Reveal-on-scroll: paired with public/behaviors.js (IntersectionObserver
        adds .is-visible). Global because markers live in slotted page markup. */
     .reveal,
@@ -145,7 +154,7 @@ const detectCountry = Astro.request.headers.get('CF-IPCountry') || '';
           <li><a href="/">Inicio</a></li>
           <li><a href="/tienda">Catálogo</a></li>
           <li><a href="/certificados">Certificados</a></li>
-          <li><a href="/blog">Blog</a></li>
+          <li><a href="/blog">Artículos</a></li>
           <li><a href="/preguntas-frecuentes">FAQ</a></li>
         </ul>
         <div class="pp-nav-der">

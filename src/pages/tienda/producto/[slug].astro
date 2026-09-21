@@ -46,20 +46,32 @@ const stockLabel = inStock
 // ---------------------------------------------------------------------------
 // Presentaciones (mg) + vial por presentación
 // ---------------------------------------------------------------------------
-const vialesDir = (() => {
-    try {
-        return readdirSync('public/assets/viales-ficha').map(f => f.toLowerCase());
-    } catch {
-        return [];
-    }
-})();
+// Lista estática de viales disponibles (evita readdirSync en el build de
+// Cloudflare, donde el cwd es dist/ y el path relativo no resuelve).
+const VIALES_ESTATICOS = [
+  'Agua-Bac-10ml.webp','Agua-Bac-30ml.webp','Agua-Bac-3ml.webp',
+  'CJC-1295-+-Ipamorelin-10mg.webp','CJC-1295-ND-5mg.webp',
+  'Cagrilintida-10mg.webp','DSIP-5mg.webp','Epitalón-10mg.webp',
+  'GHK-Cu-100mg.webp','GHK-Cu-50mg.webp','Glow-70mg.webp',
+  'Glutatión-1500mg.webp','Ipamorelin-5mg.webp','KPV-10mg.webp',
+  'Kisspeptin-10mg.webp','Klow-80mg.webp','Lemon-Bottle-10ml.webp',
+  'Melanotan-2-10mg.webp','Mots-c-10mg.webp','Mots-c-40mg.webp',
+  'Nad+-1000mg.webp','Nad+-500mg.webp','PT-141-10mg.webp',
+  'Retatrutida-10mg.webp','Retatrutida-30mg.webp','Retatrutida-5mg.webp',
+  'SS-31-10mg.webp','Selank-10mg.webp','Semaglutida-10mg.webp',
+  'Semax-10mg.webp','Sermorelin-5mg.webp','Tesamorelin-10mg.webp',
+  'Thymosin-a1-10mg.webp','Tirzepatida-10mg.webp','Tirzepatida-30mg.webp',
+  'Tirzepatida-60mg.webp','Wolverine-20mg.webp',
+].map(f => f.toLowerCase());
+const vialesDir = VIALES_ESTATICOS;
 
 // Base name de marca para los viales: del mapa slug->/assets/productos/<Base>-<mg>.webp
 function vialBaseName(slugName: string, name: string): string {
     const fromMap = (imageMap as Record<string, string>)[slugName];
     if (fromMap) {
         const base = fromMap.split('/').pop() || '';
-        return base.replace(/-(?:\d+(?:\.\d+)?(?:mg|ml))$/i, '');
+        // Quita "-5mg", "-10mg" o "-20mg" (con o sin .webp al final)
+        return base.replace(/-(?:\d+(?:\.\d+)?)(?:mg|ml)(?:\.webp)?$/i, '');
     }
     return String(name || '').trim().replace(/\s+/g, '-');
 }
@@ -123,6 +135,38 @@ if (presentations.length === 0) {
                 : null,
         });
     }
+}
+// Último recurso: generar presentaciones desde los viales disponibles en el
+// directorio (p.ej. Retatrutida-5mg/10mg/30mg) con el precio base del producto.
+if (presentations.length === 0) {
+    const basePrice = parseFloat(product.price || '0') || 0;
+    const found = Array.from(vialesDir)
+        .filter((f: string) => f.toLowerCase().startsWith(`${baseName.toLowerCase()}-`))
+        .map((f: string) => {
+            const mm = f.match(/(\d+(?:\.\d+)?)(mg|ml)\.webp$/i);
+            if (!mm) return null;
+            return {
+                label: `${parseFloat(mm[1])}${mm[2].toUpperCase()}`,
+                dosis: `${parseFloat(mm[1])} ${mm[2].toLowerCase()}`,
+                num: parseFloat(mm[1]),
+                unit: mm[2].toLowerCase(),
+                price: basePrice,
+                vial: `/assets/viales-ficha/${f}`,
+            };
+        })
+        .filter(Boolean) as PresInfo[];
+    if (found.length > 0) presentations.push(...found);
+}
+// Asegurar al menos UNA presentación (la del vial base o la imagen del CMS)
+if (presentations.length === 0) {
+    presentations.push({
+        label: baseName.toUpperCase(),
+        dosis: baseName,
+        num: 0,
+        unit: 'mg',
+        price: parseFloat(product.price || '0') || 0,
+        vial: vialesDir.includes(`${baseName}.webp`) ? `/assets/viales-ficha/${baseName}.webp` : null,
+    });
 }
 
 // Presentación seleccionada por defecto: la que coincide con la mg del nombre

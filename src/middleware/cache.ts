@@ -108,15 +108,17 @@ export const onRequest = defineMiddleware(async (context, next) => {
   if (!contentType.includes('text/html')) return response;
 
   // 3. Async write (does not delay the response).
-  // waitUntil está en el ExecutionContext de Cloudflare (locals.cfContext),
-  // NO en locals.waitUntil (en Astro 6.4.8 + @astrojs/cloudflare se pasa
-  // como RenderOption a app.render y no llega al middleware).
+  // waitUntil está en el ExecutionContext de Cloudflare (locals.cfContext);
+  // DEBE llamarse como método del cfContext para conservar el `this`
+  // (llamarla como función suelta lanza 'Illegal invocation').
   try {
     const html = await response.clone().text();
-    const waitUntil = ((context.locals as any)?.cfContext?.waitUntil as ((p: Promise<unknown>) => void) | undefined);
-    console.log('[cache] write key=', key, 'waitUntil=', typeof waitUntil, 'htmlLen=', html.length);
-    if (waitUntil) {
-      waitUntil(kv.put(key, html, { expirationTtl: cfg.ttl }));
+    const cfCtx = (context.locals as any)?.cfContext as
+      | { waitUntil?: (p: Promise<unknown>) => void }
+      | undefined;
+    console.log('[cache] write key=', key, 'cfContext=', !!cfCtx, 'htmlLen=', html.length);
+    if (cfCtx && typeof cfCtx.waitUntil === 'function') {
+      cfCtx.waitUntil(kv.put(key, html, { expirationTtl: cfg.ttl }));
     } else {
       // Fallback: escritura sincrónica best-effort.
       await kv.put(key, html, { expirationTtl: cfg.ttl }).catch((e) => { console.error('[cache] kv.put failed', e); });

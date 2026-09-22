@@ -79,7 +79,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   // KV bindings may not exist in dev/local preview — gracefully skip.
   const kv = getKV();
-  if (!kv) return next();
+  if (!kv) {
+    console.log('[cache] no KV binding — cache skipped', url.pathname);
+    return next();
+  }
 
   const key = `${cfg.keyPrefix}:${buildCacheKey(url.pathname)}`;
 
@@ -111,13 +114,15 @@ export const onRequest = defineMiddleware(async (context, next) => {
   try {
     const html = await response.clone().text();
     const waitUntil = ((context.locals as any)?.cfContext?.waitUntil as ((p: Promise<unknown>) => void) | undefined);
+    console.log('[cache] write key=', key, 'waitUntil=', typeof waitUntil, 'htmlLen=', html.length);
     if (waitUntil) {
       waitUntil(kv.put(key, html, { expirationTtl: cfg.ttl }));
     } else {
       // Fallback: escritura sincrónica best-effort.
-      await kv.put(key, html, { expirationTtl: cfg.ttl }).catch(() => {});
+      await kv.put(key, html, { expirationTtl: cfg.ttl }).catch((e) => { console.error('[cache] kv.put failed', e); });
     }
-  } catch {
+  } catch (e) {
+    console.error('[cache] cache write error', e);
     /* best effort */
   }
 

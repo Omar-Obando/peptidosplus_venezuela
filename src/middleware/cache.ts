@@ -105,9 +105,18 @@ export const onRequest = defineMiddleware(async (context, next) => {
   if (!contentType.includes('text/html')) return response;
 
   // 3. Async write (does not delay the response).
+  // waitUntil está en el ExecutionContext de Cloudflare (locals.cfContext),
+  // NO en locals.waitUntil (en Astro 6.4.8 + @astrojs/cloudflare se pasa
+  // como RenderOption a app.render y no llega al middleware).
   try {
     const html = await response.clone().text();
-    context.locals?.waitUntil?.(kv.put(key, html, { expirationTtl: cfg.ttl }));
+    const waitUntil = ((context.locals as any)?.cfContext?.waitUntil as ((p: Promise<unknown>) => void) | undefined);
+    if (waitUntil) {
+      waitUntil(kv.put(key, html, { expirationTtl: cfg.ttl }));
+    } else {
+      // Fallback: escritura sincrónica best-effort.
+      await kv.put(key, html, { expirationTtl: cfg.ttl }).catch(() => {});
+    }
   } catch {
     /* best effort */
   }

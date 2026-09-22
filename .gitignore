@@ -74,3 +74,6 @@ public/_component-preview.html
 
 # Agent-generated skills (local, not source of truth)
 .claude/
+.build.log
+.tail*.log
+.deploys.json

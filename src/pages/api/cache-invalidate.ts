@@ -1,4 +1,6 @@
 import type { APIRoute } from 'astro';
+import { env } from 'cloudflare:workers';
+import { BUILD_ID } from '../../lib/build-id';
 
 /**
  * POST /api/cache-invalidate — purge KV cache entries when content changes.
@@ -19,9 +21,7 @@ import type { APIRoute } from 'astro';
  * Always also purges home (/) and blog index (/blog) since they aggregate posts.
  */
 
-declare const CACHE: KVNamespace | undefined;
-
-const SECRET = (globalThis as any)?.WEBHOOK_SECRET || (globalThis as any)?.WP_ACCESS_SECRET || '';
+const SECRET = env?.WEBHOOK_SECRET || env?.WP_ACCESS_SECRET || '';
 
 export const POST: APIRoute = async ({ request }) => {
   // Auth check
@@ -34,7 +34,7 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 
-  const kv = (globalThis as any)?.CACHE as KVNamespace | undefined;
+  const kv = env?.CACHE as KVNamespace | undefined;
   if (!kv) {
     return new Response(JSON.stringify({ ok: false, error: 'no-kv' }), {
       status: 503,
@@ -53,17 +53,19 @@ export const POST: APIRoute = async ({ request }) => {
   const slug = typeof body.slug === 'string' ? body.slug : '';
 
   try {
-    // Prefixes that are always purged (aggregation pages).
-    const purgePrefixes = new Set<string>(['page_home', 'page_blog']);
+    // Las claves llevan el ID de build (page_post:v{id}/blog/{slug}), así que
+    // los prefijos de purge lo incluyen; la caché de deploys anteriores
+    // (sin este ID) expira sola por TTL.
+    const purgePrefixes = new Set<string>([`page_home:${BUILD_ID}`, `page_blog:${BUILD_ID}`]);
 
     if (type === 'post' && slug) {
-      purgePrefixes.add(`page_post/blog/${slug}`);
+      purgePrefixes.add(`page_post:${BUILD_ID}/blog/${slug}`);
     } else if (type === 'category') {
-      purgePrefixes.add('page_cat');
+      purgePrefixes.add(`page_cat:${BUILD_ID}`);
     } else if (type === 'tag') {
-      purgePrefixes.add('page_tag');
+      purgePrefixes.add(`page_tag:${BUILD_ID}`);
     } else if (type === 'author') {
-      purgePrefixes.add('page_autor');
+      purgePrefixes.add(`page_autor:${BUILD_ID}`);
     } else if (type === 'all') {
       // For 'all' we iterate everything and clear it.
       let cursor: string | undefined;

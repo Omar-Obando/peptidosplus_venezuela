@@ -1,4 +1,6 @@
 import { defineMiddleware } from 'astro:middleware';
+import { env } from 'cloudflare:workers';
+import { BUILD_ID } from '../lib/build-id';
 
 /**
  * Cloudflare KV Cache Middleware — ISR-like caching for SSR pages.
@@ -50,18 +52,18 @@ function getRouteConfig(pathname: string) {
 }
 
 function buildCacheKey(pathname: string): string {
-  return `page${pathname}`;
+  // Las claves llevan el ID de build: page_post:v{id}/blog/{slug}.
+  // Cada deploy usa claves nuevas; la caché vieja expira sola por TTL.
+  return `${BUILD_ID}${pathname}`;
 }
 
-declare const CACHE: KVNamespace | undefined;
-
 /**
- * Safely resolve the KV binding. In the Worker runtime `CACHE` is a real
- * binding; in prerender/Node contexts the bare `CACHE` identifier must never
- * be evaluated (it throws a ReferenceError), so we only read globalThis.
+ * Safely resolve the KV binding. In the Worker runtime the `CACHE` binding is
+ * exposed through `env` (from 'cloudflare:workers'); in prerender/Node contexts
+ * no binding exists, so `env?.CACHE` may be undefined.
  */
 function getKV(): KVNamespace | undefined {
-  return (globalThis as any)?.CACHE as KVNamespace | undefined;
+  return env?.CACHE as KVNamespace | undefined;
 }
 
 export const onRequest = defineMiddleware(async (context, next) => {

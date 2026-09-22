@@ -1,4 +1,6 @@
 import { defineConfig } from 'astro/config';
+import { execSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import react from '@astrojs/react';
@@ -13,6 +15,24 @@ try {
     ({ devComponentIdPlugin } = await import('./.phantomwp/ide/dev-tools.mjs'));
 } catch {
     devComponentIdPlugin = () => ({ name: 'phantom-dev-tools-noop', apply: 'serve' });
+}
+
+// Build-time cache version: ID único por compilación (git SHA + timestamp).
+// Se incrusta en las claves KV (page_post:v{id}/blog/{slug}) → cada deploy
+// usa claves nuevas y la caché de deploys anteriores expira sola por TTL.
+function computeBuildId() {
+  const fallback = Date.now().toString(36);
+  try {
+    const sha = execSync('git rev-parse --short HEAD', {
+      cwd: fileURLToPath(new URL('.', import.meta.url)),
+      stdio: ['ignore', 'pipe', 'ignore'],
+      encoding: 'utf8',
+    }).trim();
+    if (sha) return `v${sha}-${fallback}`;
+  } catch {
+    /* sin git (build desde zip) → solo timestamp */
+  }
+  return `v${fallback}`;
 }
 
 // https://astro.build/config
@@ -72,6 +92,9 @@ export default defineConfig({
   },
   devToolbar: { enabled: false },
   vite: {
+    define: {
+      __BUILD_ID__: JSON.stringify(computeBuildId()),
+    },
     plugins: [tailwindcss(), devComponentIdPlugin()],
     server: {
       headers: {

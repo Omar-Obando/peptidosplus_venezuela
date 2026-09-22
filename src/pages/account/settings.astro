@@ -1,0 +1,309 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import Section from '@/components/Section.astro';
+import ArrowLeft from '@lucide/astro/icons/arrow-left';
+
+export const prerender = true;
+---
+
+<BaseLayout title="Account Settings">
+    <Header />
+    <main id="main-content">
+        <div class="bg-surface border-b border-outline">
+            <Section padding="none" class="py-8">
+                <div class="flex items-center gap-4">
+                    <a href="/account" class="text-content-lighter hover:text-primary transition-colors cursor-pointer">
+                        <ArrowLeft class="w-5 h-5" />
+                    </a>
+                    <div>
+                        <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-content">Account Settings</h1>
+                        <p class="text-content-lighter mt-1">Update your profile and change your password</p>
+                    </div>
+                </div>
+            </Section>
+        </div>
+
+        <Section padding="lg" bg="surface-alt" size="lg">
+            <div class="max-w-2xl mx-auto">
+                <div id="not-logged-in" class="hidden text-center py-20 bg-surface rounded-2xl border border-outline">
+                    <p class="text-content-lighter mb-4">You need to be logged in to manage your settings.</p>
+                    <a href="/login?redirect=/account/settings" class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
+                        Sign In
+                    </a>
+                </div>
+
+                <div id="settings-content" class="hidden space-y-8">
+                    <div id="loading-state" class="text-center py-16">
+                        <svg class="animate-spin h-8 w-8 mx-auto text-primary mb-4" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <p class="text-content-lighter">Loading settings...</p>
+                    </div>
+
+                    <div id="forms-wrapper" class="hidden space-y-8">
+                        <!-- Profile Section -->
+                        <div class="bg-surface rounded-2xl border border-outline p-6 lg:p-8">
+                            <h2 class="text-lg font-bold text-content mb-6">Profile Information</h2>
+                            <div id="profile-success" class="hidden mb-4 p-4 bg-success/10 text-success rounded-xl text-sm font-medium">
+                                Profile updated successfully.
+                            </div>
+                            <div id="profile-error" class="hidden mb-4 p-4 bg-error/10 text-error rounded-xl text-sm font-medium">
+                                <span id="profile-error-msg">Failed to update profile.</span>
+                            </div>
+                            <form id="profile-form" class="space-y-4">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="first_name" class="block text-sm font-medium text-content mb-1.5">First Name</label>
+                                        <input type="text" id="first_name" name="first_name" class="w-full px-4 py-3 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface" />
+                                    </div>
+                                    <div>
+                                        <label for="last_name" class="block text-sm font-medium text-content mb-1.5">Last Name</label>
+                                        <input type="text" id="last_name" name="last_name" class="w-full px-4 py-3 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="display_email" class="block text-sm font-medium text-content mb-1.5">Email Address</label>
+                                    <input type="email" id="display_email" name="email" disabled class="w-full px-4 py-3 border border-outline rounded-xl bg-surface-alt text-content-lighter cursor-not-allowed" />
+                                    <p class="text-xs text-content-lighter mt-1">Email cannot be changed.</p>
+                                </div>
+                                <div class="flex justify-end pt-2">
+                                    <button
+                                        type="submit"
+                                        id="profile-btn"
+                                        class="bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-2.5 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                                    >
+                                        <span id="profile-btn-text">Save Profile</span>
+                                        <span id="profile-btn-loading" class="hidden">
+                                            <svg class="animate-spin h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                        </span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Password Section -->
+                        <div class="bg-surface rounded-2xl border border-outline p-6 lg:p-8">
+                            <h2 class="text-lg font-bold text-content mb-6">Change Password</h2>
+                            <div id="password-success" class="hidden mb-4 p-4 bg-success/10 text-success rounded-xl text-sm font-medium">
+                                Password updated successfully.
+                            </div>
+                            <div id="password-error" class="hidden mb-4 p-4 bg-error/10 text-error rounded-xl text-sm font-medium">
+                                <span id="password-error-msg">Failed to update password.</span>
+                            </div>
+                            <form id="password-form" class="space-y-4">
+                                <div>
+                                    <label for="current_password" class="block text-sm font-medium text-content mb-1.5">Current Password</label>
+                                    <input type="password" id="current_password" name="current_password" required class="w-full px-4 py-3 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface" autocomplete="current-password" />
+                                </div>
+                                <div>
+                                    <label for="new_password" class="block text-sm font-medium text-content mb-1.5">New Password</label>
+                                    <input type="password" id="new_password" name="new_password" minlength="10" required class="w-full px-4 py-3 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface" placeholder="Minimum 10 characters" autocomplete="new-password" />
+                                </div>
+                                <div>
+                                    <label for="confirm_password" class="block text-sm font-medium text-content mb-1.5">Confirm New Password</label>
+                                    <input type="password" id="confirm_password" name="confirm_password" required class="w-full px-4 py-3 border border-outline rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-content bg-surface" placeholder="Repeat your new password" autocomplete="new-password" />
+                                </div>
+                                <div class="flex justify-end pt-2">
+                                    <button
+                                        type="submit"
+                                        id="password-btn"
+                                        class="bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-2.5 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                                    >
+                                        <span id="password-btn-text">Update Password</span>
+                                        <span id="password-btn-loading" class="hidden">
+                                            <svg class="animate-spin h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                        </span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Section>
+    </main>
+    <Footer />
+</BaseLayout>
+
+<script>
+    import { $isLoggedIn, $user, getToken, initAuth } from '../../lib/auth';
+
+    initAuth();
+
+    const notLoggedIn = document.getElementById('not-logged-in');
+    const settingsContent = document.getElementById('settings-content');
+    const loadingState = document.getElementById('loading-state');
+    const formsWrapper = document.getElementById('forms-wrapper');
+
+    const profileForm = document.getElementById('profile-form') as HTMLFormElement;
+    const passwordForm = document.getElementById('password-form') as HTMLFormElement;
+
+    const profileBtn = document.getElementById('profile-btn') as HTMLButtonElement;
+    const profileBtnText = document.getElementById('profile-btn-text');
+    const profileBtnLoading = document.getElementById('profile-btn-loading');
+    const profileSuccess = document.getElementById('profile-success');
+    const profileError = document.getElementById('profile-error');
+    const profileErrorMsg = document.getElementById('profile-error-msg');
+
+    const passwordBtn = document.getElementById('password-btn') as HTMLButtonElement;
+    const passwordBtnText = document.getElementById('password-btn-text');
+    const passwordBtnLoading = document.getElementById('password-btn-loading');
+    const passwordSuccess = document.getElementById('password-success');
+    const passwordError = document.getElementById('password-error');
+    const passwordErrorMsg = document.getElementById('password-error-msg');
+
+    function setProfileLoading(loading: boolean) {
+        if (profileBtn) profileBtn.disabled = loading;
+        profileBtnText?.classList.toggle('hidden', loading);
+        profileBtnLoading?.classList.toggle('hidden', !loading);
+    }
+
+    function setPasswordLoading(loading: boolean) {
+        if (passwordBtn) passwordBtn.disabled = loading;
+        passwordBtnText?.classList.toggle('hidden', loading);
+        passwordBtnLoading?.classList.toggle('hidden', !loading);
+    }
+
+    async function loadProfile() {
+        const token = getToken();
+        if (!token) return;
+
+        try {
+            const res = await fetch('/api/customer/me', {
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+            const data = await res.json();
+
+            loadingState?.classList.add('hidden');
+            formsWrapper?.classList.remove('hidden');
+
+            if (data.success && data.customer) {
+                const c = data.customer;
+                const firstName = document.getElementById('first_name') as HTMLInputElement;
+                const lastName = document.getElementById('last_name') as HTMLInputElement;
+                const displayEmail = document.getElementById('display_email') as HTMLInputElement;
+
+                if (firstName) firstName.value = c.first_name || '';
+                if (lastName) lastName.value = c.last_name || '';
+                if (displayEmail) displayEmail.value = c.email || '';
+            }
+        } catch {
+            loadingState?.classList.add('hidden');
+            formsWrapper?.classList.remove('hidden');
+        }
+    }
+
+    profileForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        profileSuccess?.classList.add('hidden');
+        profileError?.classList.add('hidden');
+        setProfileLoading(true);
+
+        const token = getToken();
+        if (!token) { setProfileLoading(false); return; }
+
+        const firstName = (document.getElementById('first_name') as HTMLInputElement)?.value;
+        const lastName = (document.getElementById('last_name') as HTMLInputElement)?.value;
+
+        try {
+            const res = await fetch('/api/customer/settings', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ first_name: firstName, last_name: lastName }),
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                profileSuccess?.classList.remove('hidden');
+                setTimeout(() => profileSuccess?.classList.add('hidden'), 3000);
+            } else {
+                if (profileErrorMsg) profileErrorMsg.textContent = data.error || 'Failed to update profile.';
+                profileError?.classList.remove('hidden');
+            }
+        } catch {
+            if (profileErrorMsg) profileErrorMsg.textContent = 'Network error. Please try again.';
+            profileError?.classList.remove('hidden');
+        }
+
+        setProfileLoading(false);
+    });
+
+    passwordForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        passwordSuccess?.classList.add('hidden');
+        passwordError?.classList.add('hidden');
+
+        const newPassword = (document.getElementById('new_password') as HTMLInputElement)?.value;
+        const confirmPassword = (document.getElementById('confirm_password') as HTMLInputElement)?.value;
+        const currentPassword = (document.getElementById('current_password') as HTMLInputElement)?.value;
+
+        if (newPassword !== confirmPassword) {
+            if (passwordErrorMsg) passwordErrorMsg.textContent = 'Passwords do not match.';
+            passwordError?.classList.remove('hidden');
+            return;
+        }
+
+        if (newPassword.length < 10) {
+            if (passwordErrorMsg) passwordErrorMsg.textContent = 'Password must be at least 10 characters.';
+            passwordError?.classList.remove('hidden');
+            return;
+        }
+
+        setPasswordLoading(true);
+
+        const token = getToken();
+        if (!token) { setPasswordLoading(false); return; }
+
+        try {
+            const res = await fetch('/api/customer/settings', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ current_password: currentPassword, password: newPassword }),
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                passwordSuccess?.classList.remove('hidden');
+                (document.getElementById('current_password') as HTMLInputElement).value = '';
+                (document.getElementById('new_password') as HTMLInputElement).value = '';
+                (document.getElementById('confirm_password') as HTMLInputElement).value = '';
+                setTimeout(() => passwordSuccess?.classList.add('hidden'), 3000);
+            } else {
+                if (passwordErrorMsg) passwordErrorMsg.textContent = data.error || 'Failed to update password.';
+                passwordError?.classList.remove('hidden');
+            }
+        } catch {
+            if (passwordErrorMsg) passwordErrorMsg.textContent = 'Network error. Please try again.';
+            passwordError?.classList.remove('hidden');
+        }
+
+        setPasswordLoading(false);
+    });
+
+    function updateUI() {
+        const isLoggedIn = $isLoggedIn.get();
+        if (notLoggedIn) notLoggedIn.classList.toggle('hidden', isLoggedIn);
+        if (settingsContent) settingsContent.classList.toggle('hidden', !isLoggedIn);
+        if (isLoggedIn) loadProfile();
+    }
+
+    $isLoggedIn.subscribe(() => updateUI());
+    updateUI();
+</script>

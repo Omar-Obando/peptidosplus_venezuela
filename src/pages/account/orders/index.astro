@@ -1,0 +1,183 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import Section from '@/components/Section.astro';
+import ArrowLeft from '@lucide/astro/icons/arrow-left';
+import Package from '@lucide/astro/icons/package';
+
+export const prerender = true;
+---
+
+<BaseLayout title="My Orders">
+    <Header />
+    <main id="main-content">
+        <div class="bg-surface border-b border-outline">
+            <Section padding="none" class="py-8">
+                <div class="flex items-center gap-4">
+                    <a href="/account" class="text-content-lighter hover:text-primary transition-colors cursor-pointer">
+                        <ArrowLeft class="w-5 h-5" />
+                    </a>
+                    <div>
+                        <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-content">My Orders</h1>
+                        <p class="text-content-lighter mt-1">View and track your order history</p>
+                    </div>
+                </div>
+            </Section>
+        </div>
+
+        <Section padding="lg" bg="surface-alt" size="lg">
+            <div class="max-w-4xl mx-auto">
+                <div id="not-logged-in" class="hidden text-center py-20 bg-surface rounded-2xl border border-outline">
+                    <p class="text-content-lighter mb-4">You need to be logged in to view your orders.</p>
+                    <a href="/login?redirect=/account/orders" class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
+                        Sign In
+                    </a>
+                </div>
+
+                <div id="orders-content" class="hidden space-y-4">
+                    <div id="loading-state" class="text-center py-16">
+                        <svg class="animate-spin h-8 w-8 mx-auto text-primary mb-4" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <p class="text-content-lighter">Loading orders...</p>
+                    </div>
+
+                    <div id="empty-state" class="hidden text-center py-16 bg-surface rounded-2xl border border-outline">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
+                            <Package class="w-8 h-8 text-primary" />
+                        </div>
+                        <h2 class="text-xl font-bold text-content mb-2">No orders yet</h2>
+                        <p class="text-content-lighter mb-6">Start shopping to see your orders here.</p>
+                        <a href="/shop" class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
+                            Browse Shop
+                        </a>
+                    </div>
+
+                    <div id="orders-list" class="hidden space-y-4"></div>
+                </div>
+            </div>
+        </Section>
+    </main>
+    <Footer />
+</BaseLayout>
+
+<script>
+    import { $isLoggedIn, getToken, initAuth } from '../../../lib/auth';
+    // product-display, not woocommerce: this runs in the browser and must not
+    // pull the server-only API client into the bundle.
+    import { formatPrice } from '../../../lib/product-display';
+
+    initAuth();
+
+    const notLoggedIn = document.getElementById('not-logged-in');
+    const ordersContent = document.getElementById('orders-content');
+    const loadingState = document.getElementById('loading-state');
+    const emptyState = document.getElementById('empty-state');
+    const ordersList = document.getElementById('orders-list');
+
+    const statusColors: Record<string, string> = {
+        'pending': 'bg-yellow-100 text-yellow-800',
+        'processing': 'bg-blue-100 text-blue-800',
+        'on-hold': 'bg-orange-100 text-orange-800',
+        'completed': 'bg-green-100 text-green-800',
+        'cancelled': 'bg-red-100 text-red-800',
+        'refunded': 'bg-gray-100 text-gray-800',
+        'failed': 'bg-red-100 text-red-800',
+    };
+
+    function formatDate(dateStr: string): string {
+        return new Date(dateStr).toLocaleDateString(undefined, {
+            year: 'numeric', month: 'short', day: 'numeric',
+        });
+    }
+
+    function formatStatus(status: string): string {
+        return status.replace(/-/g, ' ').replace(/^\w/, c => c.toUpperCase());
+    }
+
+    function escapeHtml(value: unknown): string {
+        const div = document.createElement('div');
+        div.textContent = String(value ?? '');
+        return div.innerHTML;
+    }
+
+    async function loadOrders() {
+        const token = getToken();
+        if (!token) return;
+
+        try {
+            const res = await fetch('/api/customer/orders', {
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+            const data = await res.json();
+
+            loadingState?.classList.add('hidden');
+
+            if (!data.success || !data.orders || data.orders.length === 0) {
+                emptyState?.classList.remove('hidden');
+                return;
+            }
+
+            ordersList?.classList.remove('hidden');
+
+            if (ordersList) {
+                ordersList.innerHTML = data.orders.map((order: any) => {
+                    const orderId = encodeURIComponent(String(order.id ?? ''));
+                    const orderNumber = escapeHtml(order.number);
+                    const orderStatus = String(order.status || '');
+                    const orderStatusLabel = escapeHtml(formatStatus(orderStatus));
+                    const currencySymbol = escapeHtml(order.currency_symbol || '$');
+                    const orderTotal = escapeHtml(order.total);
+                    const itemCount = order.line_items?.length || 0;
+                    return `
+                    <a href="/account/orders/${orderId}" class="block bg-surface rounded-2xl border border-outline p-6 hover:border-primary/30 transition-colors cursor-pointer">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-3">
+                                    <span class="font-bold text-content">Order #${orderNumber}</span>
+                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[orderStatus] || 'bg-gray-100 text-gray-800'}">
+                                        ${orderStatusLabel}
+                                    </span>
+                                </div>
+                                <p class="text-sm text-content-lighter">${formatDate(order.date_created)}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-content">${currencySymbol}${orderTotal}</p>
+                                <p class="text-xs text-content-lighter">${itemCount} item${itemCount !== 1 ? 's' : ''}</p>
+                            </div>
+                        </div>
+                        ${order.line_items && order.line_items.length > 0 ? `
+                            <div class="mt-4 pt-4 border-t border-outline">
+                                <div class="space-y-2">
+                                    ${order.line_items.slice(0, 4).map((item: any) => `
+                                        <div class="flex items-center justify-between text-sm">
+                                            <span class="text-content">${escapeHtml(item.name)} <span class="text-content-lighter">x${escapeHtml(item.quantity)}</span></span>
+                                            <span class="text-content-lighter">${currencySymbol}${escapeHtml(item.total)}</span>
+                                        </div>
+                                    `).join('')}
+                                    ${order.line_items.length > 4 ? `<p class="text-xs text-content-lighter">+${order.line_items.length - 4} more items</p>` : ''}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </a>
+                `;
+                }).join('');
+            }
+        } catch (error) {
+            loadingState?.classList.add('hidden');
+            emptyState?.classList.remove('hidden');
+        }
+    }
+
+    function updateUI() {
+        const isLoggedIn = $isLoggedIn.get();
+        if (notLoggedIn) notLoggedIn.classList.toggle('hidden', isLoggedIn);
+        if (ordersContent) ordersContent.classList.toggle('hidden', !isLoggedIn);
+        if (isLoggedIn) loadOrders();
+    }
+
+    $isLoggedIn.subscribe(() => updateUI());
+    updateUI();
+</script>

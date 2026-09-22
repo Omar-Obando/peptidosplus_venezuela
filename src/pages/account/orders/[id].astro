@@ -1,0 +1,318 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import Section from '@/components/Section.astro';
+import ArrowLeft from '@lucide/astro/icons/arrow-left';
+import Package from '@lucide/astro/icons/package';
+
+export const prerender = false;
+
+const orderId = Astro.params.id;
+---
+
+<BaseLayout title={`Order #${orderId}`}>
+    <Header />
+    <main id="main-content">
+        <div class="bg-surface border-b border-outline">
+            <Section padding="none" class="py-8">
+                <div class="flex items-center gap-4">
+                    <a href="/account/orders" class="text-content-lighter hover:text-primary transition-colors cursor-pointer">
+                        <ArrowLeft class="w-5 h-5" />
+                    </a>
+                    <div>
+                        <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-content" id="page-title">Order Details</h1>
+                        <p class="text-content-lighter mt-1" id="page-subtitle">Loading order information...</p>
+                    </div>
+                </div>
+            </Section>
+        </div>
+
+        <Section padding="lg" bg="surface-alt" size="lg">
+            <div class="max-w-4xl mx-auto">
+                <div id="not-logged-in" class="hidden text-center py-20 bg-surface rounded-2xl border border-outline">
+                    <p class="text-content-lighter mb-4">You need to be logged in to view order details.</p>
+                    <a href={`/login?redirect=/account/orders/${orderId}`} class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
+                        Sign In
+                    </a>
+                </div>
+
+                <div id="order-content" class="hidden">
+                    <div id="loading-state" class="text-center py-16">
+                        <svg class="animate-spin h-8 w-8 mx-auto text-primary mb-4" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <p class="text-content-lighter">Loading order details...</p>
+                    </div>
+
+                    <div id="error-state" class="hidden text-center py-16 bg-surface rounded-2xl border border-outline">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-error/10 mb-4">
+                            <Package class="w-8 h-8 text-error" />
+                        </div>
+                        <h2 class="text-xl font-bold text-content mb-2">Order not found</h2>
+                        <p class="text-content-lighter mb-6" id="error-message">This order could not be loaded or does not belong to your account.</p>
+                        <a href="/account/orders" class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all cursor-pointer">
+                            Back to Orders
+                        </a>
+                    </div>
+
+                    <div id="order-detail" class="hidden space-y-6">
+                        <div class="bg-surface rounded-2xl border border-outline p-6 lg:p-8">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-6 border-b border-outline">
+                                <div>
+                                    <div class="flex items-center gap-3 mb-1">
+                                        <h2 class="text-xl font-bold text-content" id="order-number"></h2>
+                                        <span id="order-status" class="px-2.5 py-0.5 rounded-full text-xs font-medium"></span>
+                                    </div>
+                                    <p class="text-sm text-content-lighter" id="order-date"></p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-2xl font-black text-content" id="order-total"></p>
+                                    <p class="text-sm text-content-lighter" id="order-payment"></p>
+                                </div>
+                            </div>
+
+                            <div id="bacs-notice" class="hidden mb-6 p-4 bg-warning/10 border border-warning/30 rounded-xl text-sm">
+                                <p class="font-semibold text-content mb-1">Awaiting Bank Transfer</p>
+                                <p class="text-content-light">
+                                    This order is on hold pending your bank transfer. Once the payment is received and confirmed by the store, your order will be processed. Check your email for bank account details.
+                                </p>
+                            </div>
+
+                            <h3 class="font-semibold text-content mb-4">Items</h3>
+                            <div id="order-items" class="space-y-3 mb-6"></div>
+
+                            <div class="border-t border-outline pt-4 space-y-2">
+                                <div class="flex justify-between text-sm" id="subtotal-row">
+                                    <span class="text-content-light">Subtotal</span>
+                                    <span class="text-content" id="order-subtotal"></span>
+                                </div>
+                                <div class="hidden flex justify-between text-sm" id="discount-row">
+                                    <span class="text-content-light">Discount</span>
+                                    <span class="text-content" id="order-discount"></span>
+                                </div>
+                                <div class="flex justify-between text-sm" id="shipping-row">
+                                    <span class="text-content-light">Shipping</span>
+                                    <span class="text-content" id="order-shipping"></span>
+                                </div>
+                                <div class="hidden flex justify-between text-sm" id="tax-row">
+                                    <span class="text-content-light">Tax</span>
+                                    <span class="text-content" id="order-tax"></span>
+                                </div>
+                                <div class="flex justify-between font-bold text-lg pt-2 border-t border-outline">
+                                    <span class="text-content">Total</span>
+                                    <span class="text-content" id="order-total-bottom"></span>
+                                </div>
+                                <p class="hidden text-xs text-content-lighter text-right" id="tax-included-note"></p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-surface rounded-2xl border border-outline p-6">
+                                <h3 class="font-semibold text-content mb-4">Billing Address</h3>
+                                <div id="billing-address" class="text-sm text-content-light space-y-1"></div>
+                            </div>
+                            <div class="bg-surface rounded-2xl border border-outline p-6">
+                                <h3 class="font-semibold text-content mb-4">Shipping Address</h3>
+                                <div id="shipping-address" class="text-sm text-content-light space-y-1"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Section>
+    </main>
+    <Footer />
+</BaseLayout>
+
+<script define:vars={{ orderId }}>
+    window.__orderId = orderId;
+</script>
+
+<script>
+    import { $isLoggedIn, getToken, initAuth } from '../../../lib/auth';
+
+    initAuth();
+
+    const notLoggedIn = document.getElementById('not-logged-in');
+    const orderContent = document.getElementById('order-content');
+    const loadingState = document.getElementById('loading-state');
+    const errorState = document.getElementById('error-state');
+    const orderDetail = document.getElementById('order-detail');
+
+    const statusColors: Record<string, string> = {
+        'pending': 'bg-yellow-100 text-yellow-800',
+        'processing': 'bg-blue-100 text-blue-800',
+        'on-hold': 'bg-orange-100 text-orange-800',
+        'completed': 'bg-green-100 text-green-800',
+        'cancelled': 'bg-red-100 text-red-800',
+        'refunded': 'bg-gray-100 text-gray-800',
+        'failed': 'bg-red-100 text-red-800',
+    };
+
+    function formatDate(dateStr: string): string {
+        return new Date(dateStr).toLocaleDateString(undefined, {
+            year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
+        });
+    }
+
+    function formatStatus(status: string): string {
+        return status.replace(/-/g, ' ').replace(/^\w/, c => c.toUpperCase());
+    }
+
+    function escapeHtml(str: string): string {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function formatAddress(addr: any): string {
+        if (!addr) return '<p class="text-content-lighter">Not provided</p>';
+        const parts = [
+            addr.first_name && addr.last_name ? `<p class="font-medium text-content">${escapeHtml(addr.first_name)} ${escapeHtml(addr.last_name)}</p>` : '',
+            addr.company ? `<p>${escapeHtml(addr.company)}</p>` : '',
+            addr.address_1 ? `<p>${escapeHtml(addr.address_1)}</p>` : '',
+            addr.address_2 ? `<p>${escapeHtml(addr.address_2)}</p>` : '',
+            addr.city || addr.state || addr.postcode ? `<p>${[addr.city, addr.state, addr.postcode].filter(Boolean).map(escapeHtml).join(', ')}</p>` : '',
+            addr.country ? `<p>${escapeHtml(addr.country)}</p>` : '',
+            addr.phone ? `<p class="mt-2">${escapeHtml(addr.phone)}</p>` : '',
+            addr.email ? `<p>${escapeHtml(addr.email)}</p>` : '',
+        ].filter(Boolean);
+        return parts.join('') || '<p class="text-content-lighter">Not provided</p>';
+    }
+
+    const orderId = (window as any).__orderId;
+
+    async function loadOrder() {
+        const token = getToken();
+        if (!token || !orderId) return;
+
+        try {
+            const res = await fetch(`/api/customer/orders/${encodeURIComponent(orderId)}`, {
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+            const data = await res.json();
+
+            loadingState?.classList.add('hidden');
+
+            if (!data.success || !data.order) {
+                errorState?.classList.remove('hidden');
+                return;
+            }
+
+            const order = data.order;
+            orderDetail?.classList.remove('hidden');
+
+            const cs = order.currency_symbol || (order.currency ? order.currency + ' ' : '');
+
+            const pageTitle = document.getElementById('page-title');
+            const pageSubtitle = document.getElementById('page-subtitle');
+            if (pageTitle) pageTitle.textContent = `Order #${order.number}`;
+            if (pageSubtitle) pageSubtitle.textContent = `Placed on ${formatDate(order.date_created)}`;
+
+            const orderNumber = document.getElementById('order-number');
+            const orderStatus = document.getElementById('order-status');
+            const orderDate = document.getElementById('order-date');
+            const orderTotal = document.getElementById('order-total');
+            const orderPayment = document.getElementById('order-payment');
+
+            if (orderNumber) orderNumber.textContent = `Order #${order.number}`;
+            if (orderStatus) {
+                orderStatus.textContent = formatStatus(order.status);
+                orderStatus.className = `px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[order.status] || 'bg-gray-100 text-gray-800'}`;
+            }
+            if (orderDate) orderDate.textContent = formatDate(order.date_created);
+            if (orderTotal) orderTotal.textContent = `${cs}${order.total}`;
+            if (orderPayment) orderPayment.textContent = order.payment_method_title || '';
+
+            if (order.status === 'on-hold' && order.payment_method === 'bacs') {
+                document.getElementById('bacs-notice')?.classList.remove('hidden');
+            }
+
+            const num = (value: any): number => {
+                const parsed = parseFloat(value ?? '0');
+                return Number.isFinite(parsed) ? parsed : 0;
+            };
+
+            // Match the store's cart/order tax display setting: 'incl' stores
+            // show tax-inclusive amounts with an "includes tax" note, 'excl'
+            // stores show ex-tax amounts with a separate Tax row. Orders from
+            // older plugin versions have no tax_display and fall back to 'excl'.
+            const taxInclusive = order.tax_display === 'incl';
+            const lineDisplayTotal = (item: any): string =>
+                (num(item.subtotal) + (taxInclusive ? num(item.subtotal_tax) : 0)).toFixed(2);
+
+            const itemsEl = document.getElementById('order-items');
+            if (itemsEl && order.line_items) {
+                itemsEl.innerHTML = order.line_items.map((item: any) => `
+                    <div class="flex items-center gap-4 py-3 border-b border-outline last:border-0">
+                        ${item.image?.src ? `
+                            <img src="${escapeHtml(item.image.src)}" alt="${escapeHtml(item.name)}" class="w-14 h-14 object-cover rounded-lg border border-outline flex-shrink-0" />
+                        ` : `
+                            <div class="w-14 h-14 bg-surface-alt rounded-lg border border-outline flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-content-lighter" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                            </div>
+                        `}
+                        <div class="flex-1 min-w-0">
+                            <p class="font-medium text-content truncate">${escapeHtml(item.name)}</p>
+                            <p class="text-sm text-content-lighter">Qty: ${item.quantity}</p>
+                        </div>
+                        <p class="font-medium text-content flex-shrink-0">${cs}${lineDisplayTotal(item)}</p>
+                    </div>
+                `).join('');
+            }
+
+            const subtotalTax = (order.line_items || []).reduce((sum: number, item: any) => sum + num(item.subtotal_tax), 0);
+            const subtotal = num(order.subtotal) + (taxInclusive ? subtotalTax : 0);
+            const discount = num(order.discount_total) + (taxInclusive ? num(order.discount_tax) : 0);
+            const shipping = num(order.shipping_total) + (taxInclusive ? num(order.shipping_tax) : 0);
+            const totalTax = num(order.total_tax);
+
+            const orderSubtotal = document.getElementById('order-subtotal');
+            const orderShipping = document.getElementById('order-shipping');
+            const orderTotalBottom = document.getElementById('order-total-bottom');
+
+            if (orderSubtotal) orderSubtotal.textContent = `${cs}${subtotal.toFixed(2)}`;
+            if (discount > 0) {
+                const orderDiscount = document.getElementById('order-discount');
+                if (orderDiscount) orderDiscount.textContent = `-${cs}${discount.toFixed(2)}`;
+                document.getElementById('discount-row')?.classList.remove('hidden');
+            }
+            if (orderShipping) orderShipping.textContent = shipping > 0 ? `${cs}${shipping.toFixed(2)}` : 'Free';
+            if (totalTax > 0) {
+                if (taxInclusive) {
+                    const taxNote = document.getElementById('tax-included-note');
+                    if (taxNote) {
+                        taxNote.textContent = `Includes ${cs}${totalTax.toFixed(2)} in taxes`;
+                        taxNote.classList.remove('hidden');
+                    }
+                } else {
+                    const orderTax = document.getElementById('order-tax');
+                    if (orderTax) orderTax.textContent = `${cs}${totalTax.toFixed(2)}`;
+                    document.getElementById('tax-row')?.classList.remove('hidden');
+                }
+            }
+            if (orderTotalBottom) orderTotalBottom.textContent = `${cs}${order.total}`;
+
+            const billingEl = document.getElementById('billing-address');
+            const shippingEl = document.getElementById('shipping-address');
+            if (billingEl) billingEl.innerHTML = formatAddress(order.billing);
+            if (shippingEl) shippingEl.innerHTML = formatAddress(order.shipping);
+
+        } catch (error) {
+            loadingState?.classList.add('hidden');
+            errorState?.classList.remove('hidden');
+        }
+    }
+
+    function updateUI() {
+        const isLoggedIn = $isLoggedIn.get();
+        if (notLoggedIn) notLoggedIn.classList.toggle('hidden', isLoggedIn);
+        if (orderContent) orderContent.classList.toggle('hidden', !isLoggedIn);
+        if (isLoggedIn) loadOrder();
+    }
+
+    $isLoggedIn.subscribe(() => updateUI());
+    updateUI();
+</script>

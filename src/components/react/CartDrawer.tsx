@@ -14,7 +14,7 @@ import {
     decrementQuantity,
     formatCartPrice,
     type CartItem
-} from '../../lib/carrito';
+} from '../../lib/cart';
 
 export default function CartDrawer() {
     const cart = useStore($cart);

@@ -72,7 +72,7 @@ export const POST: APIRoute = async ({ request }) => {
       do {
         const page = await kv.list({ cursor });
         if (page.keys.length > 0) {
-          await kv.delete(page.keys.map((k) => k.name));
+          await kv.delete(page.keys.map((k: { name: string }) => k.name));
         }
         cursor = page.list_complete ? undefined : page.cursor;
       } while (cursor);

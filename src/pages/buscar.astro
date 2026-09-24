@@ -207,14 +207,12 @@ if (categoryFilter) {
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const PRODUCTS_PER_PAGE = 24;
-        const grid = document.getElementById('product-grid');
+        const grid = document.getElementById('product-grid')!;
         const productCountRange = document.getElementById('product-count-range');
         const paginationControls = document.getElementById('pagination-controls');
         const pagePrev = document.getElementById('page-prev') as HTMLButtonElement;
         const pageNext = document.getElementById('page-next') as HTMLButtonElement;
         const pageNumbers = document.getElementById('page-numbers');
-        
-        if (!grid) return;
         
         const allCards = Array.from(grid.querySelectorAll('[data-product-card]'));
         let currentPage = 1;

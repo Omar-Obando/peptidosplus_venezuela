@@ -200,7 +200,7 @@
       '</div>';
     if (!p.reportes.length) {
       return '<article class="pp-coa-res-grupo pendiente">' + cab +
-        '<p class="pp-coa-res-pendiente">El certificado de este lote se publica cuando llega del laboratorio. Si ya tienes el vial, <a href="contacto.html">escríbenos</a> con el código de la etiqueta.</p></article>';
+        '<p class="pp-coa-res-pendiente">El certificado de este lote se publica cuando llega del laboratorio. Si ya tienes el vial, <a href="/contacto">escríbenos</a> con el código de la etiqueta.</p></article>';
     }
     const filtro = g.tests ? new Set(g.tests) : null;
     const porMg = new Map();
@@ -233,7 +233,7 @@
       if (res === null) { salida.hidden = true; salida.innerHTML = ''; caja.classList.remove('con-resultados'); return; }
       salida.innerHTML = res.length
         ? res.slice(0, 6).map(pintarGrupo).join('') + (res.length > 6 ? '<p class="pp-coa-res-mas">Hay ' + (res.length - 6) + ' productos más; afina la búsqueda.</p>' : '')
-        : '<p class="pp-coa-res-nada">No encontramos nada con «' + esc(q) + '». Revisa el código de la etiqueta (CÓD., seis dígitos) o <a href="contacto.html">escríbenos</a> con una foto del vial.</p>';
+        : '<p class="pp-coa-res-nada">No encontramos nada con «' + esc(q) + '». Revisa el código de la etiqueta (CÓD., seis dígitos) o <a href="/contacto">escríbenos</a> con una foto del vial.</p>';
       salida.hidden = false;
       caja.classList.add('con-resultados');
     };

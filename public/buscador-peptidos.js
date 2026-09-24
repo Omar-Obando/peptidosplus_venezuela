@@ -51,7 +51,7 @@
       if (res === null) { salida.hidden = true; salida.innerHTML = ''; caja.classList.remove('con-resultados'); return; }
       const enlaceCatalogo = 'store.html' + (q || familia ? '?' + [q ? 'q=' + encodeURIComponent(q) : '', familia ? 'cat=' + encodeURIComponent(familia) : ''].filter(Boolean).join('&') : '');
       if (!res.length) {
-        salida.innerHTML = '<p class="pp-busca-pep-nada">No encontramos «' + esc(q) + '»' + (familia ? ' en esa familia' : '') + '. <a href="store.html">Mira el catálogo completo</a> o <a href="contacto.html">escríbenos</a>.</p>';
+        salida.innerHTML = '<p class="pp-busca-pep-nada">No encontramos «' + esc(q) + '»' + (familia ? ' en esa familia' : '') + '. <a href="/store">Mira el catálogo completo</a> o <a href="/contacto">escríbenos</a>.</p>';
       } else {
         const etiqueta = familia && chips.find((c) => c.getAttribute('data-pp-familia') === familia);
         salida.innerHTML =

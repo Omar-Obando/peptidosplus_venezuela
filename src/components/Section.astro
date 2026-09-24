@@ -5,6 +5,7 @@ interface Props {
     padding?: 'sm' | 'md' | 'lg' | 'none';
     title?: string;
     class?: string;
+    id?: string;
 }
 
 const { 
@@ -12,7 +13,8 @@ const {
     size = 'lg',
     padding = 'lg',
     title, 
-    class: className 
+    class: className,
+    id,
 } = Astro.props;
 
 const bgClasses: Record<string, string> = {
@@ -38,7 +40,7 @@ const paddingClasses: Record<string, string> = {
 };
 ---
 
-<section class:list={[bgClasses[bg], paddingClasses[padding], className]}>
+<section class:list={[bgClasses[bg], paddingClasses[padding], className]} id={id}>
     <div class:list={["mx-auto px-6 lg:px-8", sizeClasses[size]]}>
         {title && (
             <h2 class="text-2xl font-semibold mb-8 text-content">{title}</h2>

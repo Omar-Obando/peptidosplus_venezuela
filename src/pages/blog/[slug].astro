@@ -109,7 +109,7 @@ const articleLd = {
       {tags.length > 0 && (
         <div class="pg-tags">
           {tags.map((t: any) => (
-            <a key={t.id} href={`/tag/${t.slug}`} class="pg-tag">{t.name}</a>
+            <a href={`/tag/${t.slug}`} class="pg-tag">{t.name}</a>
           ))}
         </div>
       )}

@@ -72,7 +72,7 @@ async function loadMenuConfig(): Promise<MenuConfig | null> {
         excludedPages: Array.from(new Set([...globalExcludedPages, ...menuExcludedPages])),
         useCustomMenu: true,
         autoSync: firstMenu.autoSync === true,
-        pageOrders: firstMenu.pageOrders || {},
+        pageOrders: ((firstMenu as any).pageOrders as MenuConfig['pageOrders']) || {},
       };
       return menuConfig;
     }

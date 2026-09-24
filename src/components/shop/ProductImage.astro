@@ -10,6 +10,7 @@
  */
 
 import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 import { getLocalProductImageUrl } from '../../lib/product-media';
 
 interface Props {
@@ -49,21 +50,21 @@ const calculatedHeight = height || Math.round(width * aspectRatios[aspectRatio])
 
 // Get local image URL if available
 const localUrl = getLocalProductImageUrl(originalSrc);
-const isLocalImage = localUrl && localUrl.startsWith('/src/media/');
-const isRemoteUrl = localUrl && (localUrl.startsWith('http://') || localUrl.startsWith('https://'));
+const isLocalImage = !!localUrl && localUrl.startsWith('/src/media/');
+const isRemoteUrl = !!localUrl && (localUrl.startsWith('http://') || localUrl.startsWith('https://'));
 const hasValidSrc = isLocalImage || isRemoteUrl;
 
 // Import all product images for Astro Image component
-const productImages = import.meta.glob('/src/media/products/*', { eager: true });
-const localImageModule = isLocalImage && productImages[localUrl];
-const localImageSrc = localImageModule?.default;
+const productImages = import.meta.glob<{ default: ImageMetadata }>('/src/media/products/*', { eager: true });
+const localImageModule = isLocalImage && localUrl ? productImages[localUrl] : undefined;
+const localImageSrc = localImageModule?.default as ImageMetadata | undefined;
 
 // SVG placeholder as data URI
 const placeholderSvg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'%3E%3Cpath stroke='%23999' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'/%3E%3C/svg%3E";
 ---
 
 {localImageSrc ? (
-    <!-- Local image: use Astro Image for optimization -->
+    /* Local image: use Astro Image for optimization */
     <Image 
         src={localImageSrc}
         alt={alt}
@@ -75,9 +76,9 @@ const placeholderSvg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/
         loading={loading}
     />
 ) : isRemoteUrl ? (
-    <!-- Remote image: use standard img with lazy loading -->
+    /* Remote image: use standard img with lazy loading */
     <img 
-        src={localUrl}
+        src={localUrl ?? ''}
         alt={alt}
         width={width}
         height={calculatedHeight}
@@ -87,7 +88,7 @@ const placeholderSvg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/
         onerror={`this.onerror=null; this.src='${placeholderSvg}'; this.classList.add('p-8');`}
     />
 ) : (
-    <!-- No valid image: show placeholder -->
+    /* No valid image: show placeholder */
     <div 
         class={`flex items-center justify-center bg-surface-alt ${className}`}
         style={`aspect-ratio: ${width}/${calculatedHeight}`}

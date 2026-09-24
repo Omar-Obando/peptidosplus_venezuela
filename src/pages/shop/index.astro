@@ -227,7 +227,7 @@ const filterAttributes = Array.from(attributeMap.entries()).map(([name, values])
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const PRODUCTS_PER_PAGE = 24;
-        const grid = document.getElementById('product-grid');
+        const grid = document.getElementById('product-grid')!;
         const productCount = document.getElementById('product-count');
         const productCountRange = document.getElementById('product-count-range');
         const sortSelect = document.getElementById('sort-select') as HTMLSelectElement;
@@ -237,8 +237,6 @@ const filterAttributes = Array.from(attributeMap.entries()).map(([name, values])
         const pagePrev = document.getElementById('page-prev') as HTMLButtonElement;
         const pageNext = document.getElementById('page-next') as HTMLButtonElement;
         const pageNumbers = document.getElementById('page-numbers');
-        
-        if (!grid) return;
         
         const allCards = Array.from(grid.querySelectorAll('[data-product-card]'));
         let currentPage = 1;

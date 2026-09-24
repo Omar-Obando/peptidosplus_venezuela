@@ -7,28 +7,12 @@
  */
 
 import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 import { getLocalProductImageUrl, getPublicProductImageUrl } from '../../lib/product-media';
+import type { WCProduct } from '../../lib/woocommerce';
 
 interface Props {
-    product: {
-        id: number;
-        name: string;
-        slug: string;
-        price: string;
-        regular_price: string;
-        sale_price: string;
-        on_sale: boolean;
-        stock_status: string;
-        purchasable: boolean;
-        is_in_stock?: boolean;
-        is_on_backorder?: boolean;
-        low_stock_remaining?: number | null;
-        images: Array<{ src: string; alt: string; thumbnail?: string }>;
-        average_rating: string;
-        rating_count: number;
-        date_created: string;
-        attributes?: Array<{ name: string; options?: string[]; terms?: Array<{ name: string }>; visible: boolean; has_variations?: boolean }>;
-    };
+    product: WCProduct;
 }
 
 const { product } = Astro.props;
@@ -38,23 +22,26 @@ import { formatPrice, isInStock, getDiscountPercentage } from '../../lib/woocomm
 const mainImage = product.images?.[0];
 const originalUrl = mainImage?.src || mainImage?.thumbnail || '';
 const imageUrl = getLocalProductImageUrl(originalUrl);
-const isLocalImage = imageUrl && imageUrl.startsWith('/src/media/');
-const hasValidImage = imageUrl && (imageUrl.startsWith('/src/media/') || imageUrl.startsWith('http://') || imageUrl.startsWith('https://'));
+const isLocalImage = !!imageUrl && imageUrl.startsWith('/src/media/');
+const hasValidImage = !!imageUrl && (imageUrl.startsWith('/src/media/') || imageUrl.startsWith('http://') || imageUrl.startsWith('https://'));
 const inStock = (product.is_in_stock !== false) && (product.stock_status === 'instock') && product.purchasable;
-const hasVariationOptions = (product.attributes || []).some((attr) => attr.has_variations && ((attr.terms || attr.options || []).length > 0));
+const hasVariationOptions = (product.attributes || []).some((attr) => attr.has_variations && (attr.terms?.length ?? 0) > 0);
 const discount = product.on_sale && product.regular_price && product.sale_price
     ? Math.round(((parseFloat(product.regular_price) - parseFloat(product.sale_price)) / parseFloat(product.regular_price)) * 100)
     : null;
 
 // For local images, we need to dynamically import them for Astro's Image component
 // We'll use a glob pattern to import all product images
-const productImages = import.meta.glob('/src/media/products/*', { eager: true });
-const localImageModule = isLocalImage && productImages[imageUrl];
+const productImages = import.meta.glob<{ default: ImageMetadata }>('/src/media/products/*', { eager: true });
+const localImageModule = isLocalImage && imageUrl ? productImages[imageUrl] : undefined;
 const localImageSrc = localImageModule?.default;
 
 // For cart, use optimized WebP from public folder (fallback to brand catalog)
 const cartImageUrl = getPublicProductImageUrl(originalUrl, product.slug, product.name) || originalUrl;
-const attributesJson = JSON.stringify((product.attributes || []).reduce((acc, attr) => { acc[attr.name.toLowerCase().replace(/\s+/g, '-')] = (attr.terms || attr.options || []).map(t => typeof t === 'string' ? t : t.name); return acc; }, {} as Record<string, string[]>));
+const attributesJson = JSON.stringify((product.attributes || []).reduce((acc, attr) => {
+    acc[attr.name.toLowerCase().replace(/\s+/g, '-')] = (attr.terms || []).map(t => t.name);
+    return acc;
+}, {} as Record<string, string[]>));
 ---
 
 <article 

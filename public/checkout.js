@@ -109,7 +109,7 @@
       '<div class="co-ancho">' + campo('Correo electrónico', 'correo', datos.correo, { ph: 'opcional' }) + '</div>' +
       '<div class="co-ancho">' + campo('Notas del pedido (opcional)', 'notas', datos.notas, { area: true, ph: 'Algo que debamos saber del despacho' }) + '</div>' +
       '</div>' +
-      '<div class="co-acciones"><a class="co-volver" href="store.html">← Seguir comprando</a><button type="button" class="co-btn" data-accion="a-envio"' + (faltan ? ' disabled' : '') + '>Continuar</button></div>';
+      '<div class="co-acciones"><a class="co-volver" href="/store">← Seguir comprando</a><button type="button" class="co-btn" data-accion="a-envio"' + (faltan ? ' disabled' : '') + '>Continuar</button></div>';
   }
 
   function pantallaEnvio() {
@@ -147,11 +147,11 @@
     return '<div class="co-listo"><h1 class="co-h1">Pedido enviado</h1>' +
       '<p class="co-txt">Orden <b>' + esc(orden.id) + '</b> a nombre de <b>' + esc(datos.nombre) + '</b>. Se abrió WhatsApp con tu pedido: envíalo para confirmar la compra.</p>' +
       '<p class="co-gris">Retiras en ' + (envio.oficina ? '<b>Zoom ' + esc(envio.oficina.nombre) + ', ' + esc(envio.ciudad) + '</b>' : 'la oficina elegida') + '.</p>' +
-      '<a class="co-btn" href="store.html">Seguir comprando</a></div>';
+      '<a class="co-btn" href="/store">Seguir comprando</a></div>';
   }
 
   function pantallaVacio() {
-    return '<div class="co-listo"><h1 class="co-h1">Tu carrito está vacío</h1><p class="co-gris">Agrega algún compuesto para continuar con la compra.</p><a class="co-btn" href="store.html">Ver el catálogo</a></div>';
+    return '<div class="co-listo"><h1 class="co-h1">Tu carrito está vacío</h1><p class="co-gris">Agrega algún compuesto para continuar con la compra.</p><a class="co-btn" href="/store">Ver el catálogo</a></div>';
   }
 
   function resumen() {

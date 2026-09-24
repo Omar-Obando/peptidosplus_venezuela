@@ -66,7 +66,7 @@ const pageLd = {
         <h3 class="font-poppins text-sm font-bold uppercase tracking-wide text-[var(--pp-tinta-3)] mb-3">Otras categorías</h3>
         <div class="flex flex-wrap gap-2">
           {others.map((c) => (
-            <a key={c.slug} href={`/categoria/${c.slug}`} class="pg-tag">{c.name}</a>
+            <a href={`/categoria/${c.slug}`} class="pg-tag">{c.name}</a>
           ))}
         </div>
       </div>

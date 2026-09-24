@@ -121,9 +121,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
       cfCtx.waitUntil(kv.put(key, html, { expirationTtl: cfg.ttl }));
     } else {
       // Fallback: escritura sincrónica best-effort.
-      await kv.put(key, html, { expirationTtl: cfg.ttl }).catch((e) => { console.error('[cache] kv.put failed', e); });
+      await kv.put(key, html, { expirationTtl: cfg.ttl }).catch((e: unknown) => { console.error('[cache] kv.put failed', e); });
     }
-  } catch (e) {
+  } catch (e: unknown) {
     console.error('[cache] cache write error', e);
     /* best effort */
   }

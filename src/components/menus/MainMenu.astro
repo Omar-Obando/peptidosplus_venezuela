@@ -16,7 +16,7 @@ const currentPath = Astro.url.pathname;
 const discoveredPages = await getNavigationPages();
 
 // Build menu items: Home + discovered pages
-const menuItems = [
+const menuItems: Array<{ id: string; type: string; label: string; url: string; children?: Array<{ label: string; url: string }> }> = [
     { id: 'home', type: 'home', label: 'Home', url: '/' },
     ...discoveredPages.map(page => ({
         id: 'page_' + page.slug,

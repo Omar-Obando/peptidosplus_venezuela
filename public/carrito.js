@@ -208,7 +208,7 @@
       v.setAttribute('data-pp-vacio', '');
       v.className = 'py-10 text-center';
       v.innerHTML = '<p class="text-sm text-gray-500 mb-4">Tu carrito está vacío.</p>' +
-        '<a href="store.html" class="inline-flex items-center justify-center h-10 px-5 rounded-full bg-black text-white text-sm font-medium">Ver catálogo</a>';
+        '<a href="/store" class="inline-flex items-center justify-center h-10 px-5 rounded-full bg-black text-white text-sm font-medium">Ver catálogo</a>';
       lista.insertBefore(v, lista.firstChild);
     } else {
       const frag = document.createDocumentFragment();
@@ -360,7 +360,7 @@
   //    ya lleva su agua de 3 ml en el kit y la sugerencia confundía.
 
   // 5) Icono de la barra abre; "Finalizar compra" va a la página del carrito
-  $$('button[data-testid="nav-cart-link"], a[href="carrito.html"]').forEach((el) => {
+  $$('button[data-testid="nav-cart-link"], a[href="/carrito"]').forEach((el) => {
     if (montaje.contains(el)) return;
     el.addEventListener('click', (e) => { e.preventDefault(); abrir(); });
   });
@@ -386,7 +386,7 @@
     const vacioPag = document.createElement('div');
     vacioPag.className = 'py-12 text-center';
     vacioPag.innerHTML = '<p class="text-base text-gray-500 mb-5">Tu carrito está vacío.</p>' +
-      '<a href="store.html" class="inline-flex items-center justify-center h-11 px-6 rounded-full bg-black text-white text-sm font-medium">Ver catálogo</a>';
+      '<a href="/store" class="inline-flex items-center justify-center h-11 px-6 rounded-full bg-black text-white text-sm font-medium">Ver catálogo</a>';
     vacioPag.hidden = true;
     if (tabla) tabla.parentElement.insertBefore(vacioPag, tabla);
     const subEl = $('[data-testid="cart-subtotal"]'), envEl = $('[data-testid="cart-shipping"]'), totEl = $('[data-testid="cart-total"]');

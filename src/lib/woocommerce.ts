@@ -121,6 +121,8 @@ export interface WCProduct {
     purchasable?: boolean;
     featured?: boolean;
     rating_count?: number;
+    related_ids?: number[];
+    date_created?: string;
 }
 
 export interface WCProductVariation {

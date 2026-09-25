@@ -20,6 +20,9 @@ const REDIRECTS: Array<{ from: RegExp; to: string }> = [
   { from: /^\/productos\/?$/i, to: '/tienda' },
   { from: /^\/catalogo\/?$/i, to: '/tienda' },
   { from: /^\/shop\/?$/i, to: '/tienda' },
+  { from: /^\/store\/?$/i, to: '/tienda' },
+  { from: /^\/store\.html\/?$/i, to: '/tienda' },
+  { from: /^\/index\/?$/i, to: '/' },
   { from: /^\/shop\/category\/(.*)$/i, to: '/tienda/categoria/$1' },
   { from: /^\/shop\/product\/(.*)$/i, to: '/tienda/producto/$1' },
   // Carrito / pago

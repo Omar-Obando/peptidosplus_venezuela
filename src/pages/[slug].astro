@@ -1,0 +1,58 @@
+---
+/**
+ * Friendly URL — /{slug} → sirve el HTML estático de public/producto-{slug}.html
+ * (SSR on-demand). El Worker renderiza esta página; no depende de ASSETS.
+ *
+ * Fuera de los slugs de producto conocidos → redirige a /404.
+ */
+export const prerender = false;
+
+const PRODUCT_SLUGS = new Set<string>([
+  'agua-bacteriostatica', 'agua-bacteriostatica-hospira', 'cagrilintida',
+  'cjc-1295-ipamorelin', 'cjc-1295-sin-dac', 'dsip', 'epitalon', 'ghk-cu',
+  'glow', 'glutation', 'ipamorelin', 'kisspeptin-10', 'klow', 'kpv',
+  'lemon-bottle', 'melanotan-2', 'mots-c', 'nad', 'pt-141', 'retatrutida',
+  'selank', 'semaglutida', 'semax', 'sermorelin', 'ss-31-elamipretide',
+  'tesamorelin', 'thymosin-alpha-1', 'tirzepatida', 'wolverine-bpc-157-tb-500',
+]);
+
+const PUBLIC_HTML: Record<string, string> = import.meta.glob('../../public/producto-*.html', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+}) as Record<string, string>;
+
+const SITE_URL = 'https://ve.peptidosplus.com';
+
+function sanitizeCanonical(html: string, canonical: string): string {
+  let out = html;
+  if (/rel="canonical"/i.test(out)) {
+    out = out.replace(/<link rel="canonical"[^>]*>/i, `<link rel="canonical" href="${canonical}" />`);
+  } else if (/<\/head>/i.test(out)) {
+    out = out.replace(/<\/head>/i, `<link rel="canonical" href="${canonical}" />\n</head>`);
+  }
+  return out;
+}
+
+const { slug } = Astro.params;
+if (!slug) return new Response('Not Found', { status: 404 });
+
+if (!PRODUCT_SLUGS.has(slug)) {
+  return Astro.redirect('/404');
+}
+
+// El archivo de ss-31 se llama producto-ss-31.html mientras que su slug
+// canónico/sitemap es ss-31-elamipretide → buscar ambos.
+const key = Object.keys(PUBLIC_HTML).find(
+  (k) =>
+    k.endsWith(`/producto-${slug}.html`) ||
+    (slug.endsWith('-elamipretide') && k.endsWith(`/producto-${slug.replace(/-elamipretide$/, '')}.html`))
+);
+const html = key ? (PUBLIC_HTML[key] as string) : null;
+if (!html) return new Response('Not Found', { status: 404 });
+
+const canonical = `${SITE_URL}/${slug}`;
+return new Response(sanitizeCanonical(html, canonical), {
+  headers: { 'Content-Type': 'text/html; charset=utf-8' },
+});
+---

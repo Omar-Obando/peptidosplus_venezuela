@@ -35,7 +35,28 @@ const { slug } = Astro.params;
 if (!slug) return Astro.redirect('/404');
 
 const post = await safePost(slug);
-if (!post) return Astro.redirect('/404');
+
+// Fallback a los artículos estáticos (articulo-{slug}.html) si el post no
+// existe en el CMS (migración previa al headless): sirve el HTML original
+// con canonical /blog/{slug}.
+if (!post) {
+  const PUBLIC_HTML: Record<string, string> = import.meta.glob('../../../public/articulo-*.html', {
+    query: '?raw',
+    import: 'default',
+    eager: true,
+  }) as Record<string, string>;
+  const key = Object.keys(PUBLIC_HTML).find((k) => k.endsWith(`/articulo-${slug}.html`));
+  const html = key ? (PUBLIC_HTML[key] as string) : null;
+  if (!html) return Astro.redirect('/404');
+  const canonical = `${SITE.url}/blog/${slug}`;
+  let out = html;
+  if (/rel="canonical"/i.test(out)) {
+    out = out.replace(/<link rel="canonical"[^>]*>/i, `<link rel="canonical" href="${canonical}" />`);
+  } else if (/<\/head>/i.test(out)) {
+    out = out.replace(/<\/head>/i, `<link rel="canonical" href="${canonical}" />\n</head>`);
+  }
+  return new Response(out, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+}
 
 const title = postTitle(post);
 const description = seoDescription(post, postExcerpt(post, 160));

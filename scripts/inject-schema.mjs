@@ -89,7 +89,7 @@ function itemListLd(html, url) {
     position: (p.orden ?? 0) + 1,
     item: ld('Product', {
       name: p.nombre,
-      url: SITE + '/' + (p.pagina || ''),
+      url: SITE + '/' + (p.pagina || '').replace(/^producto-/, '').replace(/\.html$/, ''),
       image: SITE + '/' + (p.img || '').replace(/^\.?\//, ''),
       offers: ld('Offer', {
         priceCurrency: 'USD',
@@ -109,7 +109,7 @@ function productLd(html, slug, url) {
   return ld('Product', {
     name: pageTitle(html).replace(/\s*\|\s*Peptidos Plus.*$/, '') || slug,
     description: pageDesc(html),
-    url: SITE + '/' + url,
+    url: SITE + '/' + slug,
     image: pageProductImage(html, slug),
     brand: { '@type': 'Brand', name: 'Peptidos Plus' },
     offers: offers.length ? (offers.length === 1 ? offers[0] : ld('AggregateOffer', {
@@ -143,7 +143,7 @@ function articleLd(html, slug) {
     datePublished: POST_DATES[slug] || '2026-09-11',
     author: { '@type': 'Organization', name: 'Peptidos Plus', url: SITE },
     publisher: ORG,
-    mainEntityOfPage: SITE + '/articulo-' + slug + '.html',
+    mainEntityOfPage: SITE + '/blog/' + slug,
   });
 }
 

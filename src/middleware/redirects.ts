@@ -13,6 +13,8 @@
  * Los patrones con grupos de captura ($1) sustituyen el slug capturado.
  */
 
+import { defineMiddleware } from 'astro:middleware';
+
 const REDIRECTS: Array<{ from: RegExp; to: string }> = [
   // Alias del catálogo / tienda (inglés y español antiguo → español canónico)
   { from: /^\/productos\/?$/i, to: '/tienda' },
@@ -37,7 +39,7 @@ const REDIRECTS: Array<{ from: RegExp; to: string }> = [
   { from: /^\/faq\/?$/i, to: '/preguntas-frecuentes' },
 ];
 
-export async function onRequest({ request }: { request: Request }, next: () => Promise<Response>) {
+export const onRequest = defineMiddleware(async ({ request }, next) => {
   const url = new URL(request.url);
 
   for (const rule of REDIRECTS) {
@@ -55,4 +57,4 @@ export async function onRequest({ request }: { request: Request }, next: () => P
   }
 
   return next();
-}
+});

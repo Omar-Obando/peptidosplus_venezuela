@@ -20,6 +20,7 @@ export const GET: APIRoute = async () => {
     const isoDate = new Date().toISOString();
     const entries = [
       `  <sitemap>\n    <loc>${SITE.url}/sitemap-pages.xml</loc>\n    <lastmod>${isoDate}</lastmod>\n  </sitemap>`,
+      `  <sitemap>\n    <loc>${SITE.url}/sitemap-products.xml</loc>\n    <lastmod>${isoDate}</lastmod>\n  </sitemap>`,
       `  <sitemap>\n    <loc>${SITE.url}/sitemap-categories.xml</loc>\n    <lastmod>${isoDate}</lastmod>\n  </sitemap>`,
       `  <sitemap>\n    <loc>${SITE.url}/sitemap-tags.xml</loc>\n    <lastmod>${isoDate}</lastmod>\n  </sitemap>`,
     ];

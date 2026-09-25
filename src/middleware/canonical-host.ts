@@ -1,3 +1,5 @@
+import { defineMiddleware } from 'astro:middleware';
+
 /**
  * Canonical-host middleware (desactivado temporalmente).
  *
@@ -10,6 +12,6 @@
  * Cuando ve.peptidosplus.com esté en Cloudflare, re-activa el 301 con:
  *   if (url.hostname.toLowerCase() !== 've.peptidosplus.com') { ... }
  */
-export async function onRequest({ request }: { request: Request }, next: () => Promise<Response>) {
+export const onRequest = defineMiddleware(async (_context, next) => {
   return next();
-}
+});

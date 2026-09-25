@@ -49,6 +49,25 @@ function ld(type, extra) {
 function pageTitle(html) { const t = html.match(/<title>([^<]*)</); return t ? t[1] : ''; }
 function pageDesc(html) { const d = html.match(/name="description" content="([^"]*)"/); return d ? d[1] : ''; }
 
+// Imagen destacada de la ficha: prefiere la <img> principal (viales-ficha /
+// productos) presente en la página; el mapa local es el fallback.
+function pageProductImage(html, slug) {
+  const imgMatches = [...html.matchAll(/src="(assets\/(?:viales-ficha|productos)\/[^"]+)"/g)].map((x) => x[1]);
+  const local = (PRODUCTOS.find((p) => p.pagina.includes(slug)) || {}).img;
+  if (imgMatches.length) return SITE + '/' + imgMatches[0].replace(/^\.?\//, '');
+  if (local) return SITE + '/' + local.replace(/^\.?\//, '');
+  return SITE + '/assets/productos/' + slug + '.webp';
+}
+
+// Mapa slug → fecha de publicación desde WordPress (posts del CMS).
+const POST_DATES = {};
+try {
+  const wpResp = await fetch('https://ve-cms.peptidosplus.com/wp-json/wp/v2/posts?per_page=100&_fields=slug,date');
+  if (wpResp.ok) {
+    for (const p of await wpResp.json()) if (p?.slug && p?.date) POST_DATES[p.slug] = String(p.date).slice(0, 10);
+  }
+} catch { /* sin red: mantiene fechas por defecto */ }
+
 function siteLd() {
   return [
     ORG,
@@ -91,7 +110,7 @@ function productLd(html, slug, url) {
     name: pageTitle(html).replace(/\s*\|\s*Peptidos Plus.*$/, '') || slug,
     description: pageDesc(html),
     url: SITE + '/' + url,
-    image: SITE + '/' + (PRODUCTOS.find((p) => p.pagina === url)?.img || 'assets/productos/' + slug + '.webp'),
+    image: pageProductImage(html, slug),
     brand: { '@type': 'Brand', name: 'Peptidos Plus' },
     offers: offers.length ? (offers.length === 1 ? offers[0] : ld('AggregateOffer', {
       lowPrice: String(Math.min(...offers.map((o) => parseFloat(o.price)))),
@@ -121,7 +140,7 @@ function articleLd(html, slug) {
   return ld('Article', {
     headline: title || slug,
     description: pageDesc(html),
-    datePublished: '2026-09-11',
+    datePublished: POST_DATES[slug] || '2026-09-11',
     author: { '@type': 'Organization', name: 'Peptidos Plus', url: SITE },
     publisher: ORG,
     mainEntityOfPage: SITE + '/articulo-' + slug + '.html',

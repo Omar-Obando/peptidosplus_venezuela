@@ -6,7 +6,7 @@
  */
 export const prerender = false;
 
-const PUBLIC_HTML: Record<string, string> = import.meta.glob('../../public/store.html', {
+const PUBLIC_HTML: Record<string, string> = import.meta.glob('../../../public/store.html', {
   query: '?raw',
   import: 'default',
   eager: true,

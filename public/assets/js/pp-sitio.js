@@ -14,6 +14,8 @@
   if (mb) mb.addEventListener('click', function () { menu(!m.classList.contains('abierto')); });
   if (m) m.addEventListener('click', function (ev) { if (ev.target.closest('a')) menu(false); });
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && m && m.classList.contains('abierto')) { menu(false); if (mb) mb.focus(); } });
+  // al pasar a escritorio (girar la tableta, ensanchar la ventana) el menú del teléfono se cierra
+  if (window.matchMedia) { var mqEsc = matchMedia('(min-width: 760px)'), alEsc = function () { if (mqEsc.matches) menu(false); }; if (mqEsc.addEventListener) mqEsc.addEventListener('change', alEsc); else if (mqEsc.addListener) mqEsc.addListener(alEsc); }
 
   function unidades() {
     try {

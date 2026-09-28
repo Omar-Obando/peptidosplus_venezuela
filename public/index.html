@@ -14,6 +14,15 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Peptidos Plus - Research Grade Peptides">
 <meta property="og:type" content="website">
+<meta name="robots" content="index, follow">
+<meta name="googlebot" content="index, follow, max-video-preview:-1, max-image-preview:large, max-snippet:-1">
+<meta property="og:url" content="https://ve.peptidosplus.com/">
+<meta property="og:locale" content="es_VE">
+<meta property="og:image" content="https://ve.peptidosplus.com/assets/img/og-peptidos-plus.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Peptidos Plus — Péptidos de investigación en Venezuela">
+<meta name="twitter:description" content="Péptidos de investigación con certificado público en cada lote. Envíos a toda Venezuela.">
+<meta name="twitter:image" content="https://ve.peptidosplus.com/assets/img/og-peptidos-plus.jpg">
 <link rel="icon" href="assets/marca/peptidosplus-isotipo-navy.svg" type="image/svg+xml">
 <link rel="canonical" href="https://ve.peptidosplus.com/" />
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","@id":"https://ve.peptidosplus.com/#organization","name":"Peptidos Plus","url":"https://ve.peptidosplus.com","logo":"https://ve.peptidosplus.com/assets/marca/peptidosplus-logo-navy.svg","sameAs":["https://wa.me/15806436837"],"contactPoint":{"@type":"ContactPoint","contactType":"customer service","telephone":"+1 580 643 6837","availableLanguage":["es"]}}</script>
@@ -883,6 +892,8 @@ details[open] summary svg { transform: rotate(45deg); }
  if(mb) mb.addEventListener("click", function(){ menu(!m.classList.contains("abierto")); });
  if(m) m.addEventListener("click", function(ev){ if(ev.target.closest("a")) menu(false); });
  document.addEventListener("keydown", function(ev){ if(ev.key==="Escape" && m && m.classList.contains("abierto")){ menu(false); if(mb) mb.focus(); } });
+ // al pasar a escritorio (girar la tableta, ensanchar la ventana) el menú del teléfono se cierra
+ if(window.matchMedia){ var mqEsc=matchMedia("(min-width: 760px)"), alEsc=function(){ if(mqEsc.matches) menu(false); }; if(mqEsc.addEventListener) mqEsc.addEventListener("change", alEsc); else if(mqEsc.addListener) mqEsc.addListener(alEsc); }
  var c=document.querySelector("[data-pp-carrito]"), n=document.querySelector("[data-pp-carrito-n]");
  function contar(){ try{ var v=localStorage.getItem("pp_clon_carrito_v1"); if(v!==null){ if(localStorage.getItem("pp_carrito_v1")===null) localStorage.setItem("pp_carrito_v1", v); localStorage.removeItem("pp_clon_carrito_v1"); }
   var it=JSON.parse(localStorage.getItem("pp_carrito_v1")||"[]"); var s=0; (Array.isArray(it)?it:[]).forEach(function(x){ s+=Number(x.cant||x.cantidad||x.qty||x.q||1)||1; }); if(n) n.textContent=String(s);

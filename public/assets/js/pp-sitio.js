@@ -22,7 +22,12 @@
       return s;
     } catch (e) { return 0; }
   }
-  function pintar() { var n = unidades(); document.querySelectorAll('[data-pp-carrito-n]').forEach(function (e) { e.textContent = String(n); }); }
+  function pintar() {
+    var n = unidades();
+    document.querySelectorAll('[data-pp-carrito-n]').forEach(function (e) { e.textContent = String(n); });
+    var b = document.querySelector('[data-pp-carrito]');   // el lector de pantalla también oye la cantidad
+    if (b) b.setAttribute('aria-label', n ? 'Carrito, ' + n + (n === 1 ? ' producto' : ' productos') : 'Carrito vacío');
+  }
   pintar();
   window.addEventListener('storage', pintar);
   window.addEventListener('cart-updated', pintar);

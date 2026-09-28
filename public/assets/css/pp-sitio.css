@@ -32,6 +32,7 @@ header[data-pp-cromo] a[aria-current="page"] { color: #fff !important; backgroun
 [data-pp-salto]:focus { top: 12px; outline: 3px solid #E9C46A; outline-offset: 2px; }
 @media (max-width: 759px) { [data-pp-menu-btn] { width: 44px !important; height: 44px !important; } [data-pp-carrito] { height: 44px !important; } }
 [data-pp-pie] { display: inline-block; padding: 5px 0; margin: -5px 0; }
+@media (min-width: 760px) and (max-width: 899px) { header [data-pp-solo="desk"] > a[href^="https://wa.me/"] { font-size: 0 !important; gap: 0 !important; padding: 0 12px !important; } }
 
 /* 5. Enlace «Saltar al contenido» y botón flotante */
 [data-pp-salto] { position: absolute; left: 16px; top: -120px; z-index: 100; padding: 10px 14px; border-radius: 10px; background: #0A192F; color: #fff; font-family: 'Hanken Grotesk', system-ui, sans-serif; font-weight: 600; font-size: 14px; text-decoration: none; }

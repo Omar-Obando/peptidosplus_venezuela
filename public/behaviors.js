@@ -1,3 +1,15 @@
+/* Etiqueta de «Añadir al carrito» (2026-09-27): el precio va en su propio span para que en
+   teléfonos estrechos se oculte si no cabe junto a «Certificado» (regla de contenedor en
+   marca-navy.css). null = agotado. */
+function ppPonerAnadir(el, precio) {
+  if (precio == null) { el.textContent = 'Agotado'; return; }
+  el.textContent = 'Añadir al carrito';
+  const s = document.createElement('span');
+  s.className = 'pp-anadir-precio';
+  s.textContent = ' · ' + precio;
+  el.appendChild(s);
+}
+
 /* Comportamientos del clon de aminoclub.com
  *
  * La vía de fidelidad captura el HTML YA HIDRATADO y reutiliza las hojas de
@@ -148,7 +160,7 @@
       }
       precios.forEach((e) => { e.textContent = usd(precio); });
       anadir.forEach((b) => {
-        textoAnadir(b).textContent = agotado ? 'Agotado' : 'Añadir al carrito · ' + usd(precio);
+        ppPonerAnadir(textoAnadir(b), agotado ? null : usd(precio));
         b.toggleAttribute('disabled', agotado);
         b.classList.toggle('opacity-50', agotado);
         b.classList.toggle('cursor-not-allowed', agotado);
@@ -231,7 +243,7 @@
       tachado.hidden = !d;
       anadir.forEach((b) => {
         if (b.hasAttribute('disabled')) return;             // agotado: lo maneja 2h
-        textoAnadir(b).textContent = 'Añadir al carrito · ' + usd(total);
+        ppPonerAnadir(textoAnadir(b), usd(total));
       });
     };
 

@@ -1407,12 +1407,14 @@ html, body { overflow-x: clip; }
   h3[data-testid="product-title"] { -webkit-line-clamp: 3; line-clamp: 3; }
   [data-testid="product-wrapper"] p.line-clamp-1 { -webkit-line-clamp: 2; line-clamp: 2; }
 
-  /* 5. ficha: "Añadir" a lo ancho y arriba, "Certificado" debajo, la nota de
-     agotado a lo ancho; en "Se piden juntos" el precio arriba y el botón
-     a lo ancho */
-  main div.items-center.gap-3.mt-auto:has(> [data-pp-anadir]) { flex-wrap: wrap; }
-  main div.mt-auto > [data-pp-anadir] { flex: 1 1 100%; order: -1; }
-  main div.mt-auto > button[aria-label^="Ver certificados"] { flex: 1 1 auto; }
+  /* 5. ficha: «Certificado» y «Añadir al carrito» en la MISMA fila, como Amino Club
+     (2026-09-27); el precio dentro del botón solo aparece si cabe (reglas de
+     contenedor al final del archivo); la nota de agotado a lo ancho; en
+     "Se piden juntos" el precio arriba y el botón a lo ancho */
+  main div.items-center.gap-3.mt-auto:has(> [data-pp-anadir]) { flex-wrap: wrap; gap: 8px; }
+  main div.mt-auto > [data-pp-anadir] { flex: 1 1 0; min-width: 0; padding-left: 16px; padding-right: 16px; }
+  main div.mt-auto > a[aria-label^="Ver certificado"],
+  main div.mt-auto > button[aria-label^="Ver certificados"] { flex: 0 0 auto; padding-left: 14px; padding-right: 14px; }
   main div.mt-auto > [data-pp-aviso-agotado] { flex-basis: 100%; order: 1; margin-top: 0; }
   .flex-none.w-\[180px\] .justify-between.gap-2.mt-auto { flex-wrap: wrap; }
   .flex-none.w-\[180px\] .justify-between.gap-2.mt-auto > button { flex: 1 1 100%; justify-content: center; }
@@ -1443,3 +1445,31 @@ html, body { overflow-x: clip; }
 
 /* Peptidos Plus headless: color navy global para los h1 de articulo (.pg-art sin id). */
 .pg-h1 { color: var(--pp-navy); }
+
+/* ============================================================
+   Ficha: zona de compra como Amino Club (2026-09-27, ficha-compra.js)
+   ------------------------------------------------------------
+   La fila «Certificado | Añadir al carrito» y el enlace del asesor son
+   contenedores: el precio dentro del botón y el «por WhatsApp» del asesor
+   solo se muestran cuando caben en una línea. La descripción del péptido
+   va ahora debajo del asesor.
+   ============================================================ */
+main div.mt-auto:has(> [data-pp-anadir]) { container-type: inline-size; }
+.pp-anadir-precio { display: none; }
+@container (min-width: 365px) { .pp-anadir-precio { display: inline; } }
+main a[data-pp-asesor] { container-type: inline-size; }
+.pp-asesor-canal { display: none; }
+@container (min-width: 380px) { .pp-asesor-canal { display: inline; } }
+[data-pp-desc-ficha] { margin: 16px 2px 2px; }
+/* ficha: filas estrechas y agotados */
+main div.mt-auto > [data-pp-anadir] > span { white-space: nowrap; }
+@container (max-width: 330px) {
+  main div.mt-auto > [data-pp-anadir] { padding-left: 12px; padding-right: 12px; gap: 6px; }
+  main div.mt-auto > a[aria-label^="Ver certificado"],
+  main div.mt-auto > button[aria-label^="Ver certificados"] { padding-left: 12px; padding-right: 12px; }
+}
+@container (max-width: 275px) { main div.mt-auto > [data-pp-anadir] { flex-basis: 100%; } }
+main div.items-center.gap-3.mt-auto:has(> [data-pp-aviso-agotado]) { flex-wrap: wrap; }
+main div.mt-auto > [data-pp-aviso-agotado] { flex-basis: 100%; order: 1; margin-top: 0; }
+/* ficha: asesor en 320 px */
+@media (max-width: 340px) { main a[data-pp-asesor] { padding-left: 8px; padding-right: 8px; gap: 6px; font-size: 13px; } }

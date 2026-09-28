@@ -371,9 +371,9 @@
 
   function confirmar(boton, texto) {
     const span = boton.querySelector('span') || boton;
-    const antes = span.textContent;
+    const antes = span.innerHTML;          // conserva el <span> del precio (2026-09-27)
     span.textContent = texto;
-    setTimeout(() => { span.textContent = antes; }, 1200);
+    setTimeout(() => { span.innerHTML = antes; }, 1200);
   }
 
   /* ---------- página carrito.html: la tabla grande se pinta desde el mismo estado ---------- */

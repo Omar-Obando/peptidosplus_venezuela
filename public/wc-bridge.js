@@ -223,7 +223,10 @@
             if (btn.__wcBridge) return;
             btn.__wcBridge = true;
             btn.addEventListener('click', function (e) {
-                e.preventDefault(); e.stopPropagation();
+                // Sin stopPropagation (2026-09-28): carrito.js también atiende el clic, como en la ficha, y es
+                // quien pinta el panel. Cortándolo aquí, el panel se abría diciendo «Tu carrito está vacío»
+                // (carrito.js no se enteraba del producto hasta recargar la página).
+                e.preventDefault();
                 var card = btn.closest('[data-pp-nombre], article');
                 var name = (btn.getAttribute('aria-label') || '').replace(/^Añadir\s+/i, '').replace(/\s+al carrito$/i, '');
                 var id = 0, precio = 0, dosis = '';
@@ -237,8 +240,11 @@
                     var found = window.PP_PRODUCTOS.productos.find(function (p) { return (p.nombre || '').toLowerCase() === String(name).toLowerCase(); });
                     if (found) id = encodeURIComponent(found.pagina || '');
                 }
+                // la foto de la tarjeta: sin ella la línea del carrito salía sin miniatura
+                var imgEl = card ? card.querySelector('img') : null;
+                var img = imgEl ? (imgEl.getAttribute('src') || '') : '';
                 var items = readItems();
-                items.push({ id: id, nombre: name, cant: 1, precio: precio, img: '', dosis: dosis });
+                items.push({ id: id, nombre: name, cant: 1, precio: precio, img: img, dosis: dosis });
                 writeItems(items);
                 document.querySelector('[data-pp-carrito-abrir]')?.click();
                 var navCart = document.querySelector('[data-testid="nav-cart-link"]');

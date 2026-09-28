@@ -168,6 +168,8 @@
   // De paso repara los carritos guardados antes del paso a WebP (traían .png).
   const miniatura = (src) => String(src || '')
     .replace(/(assets\/(?:productos|viales-ficha)\/[^"']+)\.png/, '$1.webp')
+    // tarjetas con recorte a medida (v/ vertical, c/ cuadrado): la miniatura es el vial recortado en tamaño mini
+    .replace(/assets\/productos\/(?:v|c)\/\d+\//, 'assets/productos/mini/')
     .replace('assets/productos/', 'assets/viales-ficha/');
 
   function widgetCantidad(it) {

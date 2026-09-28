@@ -193,6 +193,11 @@ details[open] summary svg { transform: rotate(45deg); }
 [data-pp-productos] a:focus-visible { outline: 3px solid #0A192F; outline-offset: 2px; }
 /* Héroe fuera de pantalla: animaciones en pausa (el brillo de «en Venezuela.» repintaba sin parar) */
 [data-pp-hero].pp-fuera, [data-pp-hero].pp-fuera * { animation-play-state: paused !important; }
+/* La cinta se puede parar: tocándola (o con el ratón encima) */
+@media (max-width: 759px) { [data-pp-barra].pp-pausa [data-pp-barra-pista] { animation-play-state: paused; } }
+@media (max-width: 759px) and (hover: hover) { [data-pp-barra]:hover [data-pp-barra-pista] { animation-play-state: paused; } }
+/* Destino de «Saltar al contenido»: recibe el foco sin pintar un anillo alrededor de todo el héroe */
+#contenido:focus { outline: none; }
 @media (prefers-reduced-motion: reduce) and (max-width: 759px) { [data-pp-barra] { overflow-x: auto !important; -webkit-mask-image: none; mask-image: none; } [data-pp-barra-pista] { animation: none; } [data-pp-barra-copia] { display: none !important; } }
 /* Productos destacados: en teléfono, fila deslizable con la siguiente tarjeta asomando */
 @media (max-width: 759px) { [data-pp-productos] { grid-template-columns: none !important; grid-auto-flow: column; grid-auto-columns: min(82%, 340px); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: clamp(12.8px, 3.2vw, 32px); scrollbar-width: none; margin-inline: calc(-1 * clamp(12.8px, 3.2vw, 32px)); padding-inline: clamp(12.8px, 3.2vw, 32px); padding-bottom: 6px; } [data-pp-productos]::-webkit-scrollbar { display: none; } [data-pp-productos] > article { scroll-snap-align: start; } }
@@ -231,7 +236,7 @@ details[open] summary svg { transform: rotate(45deg); }
       <a href="/" style="padding: 14px 4px; font-size: calc(14px + (16px - 14px) * var(--ppd-k, 1)); font-weight: 500; color: rgb(255, 255, 255); border-bottom: 1px solid rgba(255, 255, 255, 0.06);"><span class="sc-interp">Inicio</span></a><a href="/tienda" style="padding: 14px 4px; font-size: calc(14px + (16px - 14px) * var(--ppd-k, 1)); font-weight: 500; color: rgb(255, 255, 255); border-bottom: 1px solid rgba(255, 255, 255, 0.06);"><span class="sc-interp">Catálogo</span></a><a href="/certificados.html" style="padding: 14px 4px; font-size: calc(14px + (16px - 14px) * var(--ppd-k, 1)); font-weight: 500; color: rgb(255, 255, 255); border-bottom: 1px solid rgba(255, 255, 255, 0.06);"><span class="sc-interp">Certificados</span></a><a href="/blog" style="padding: 14px 4px; font-size: calc(14px + (16px - 14px) * var(--ppd-k, 1)); font-weight: 500; color: rgb(255, 255, 255); border-bottom: 1px solid rgba(255, 255, 255, 0.06);"><span class="sc-interp">Artículos</span></a><a href="/preguntas-frecuentes" style="padding: 14px 4px; font-size: calc(14px + (16px - 14px) * var(--ppd-k, 1)); font-weight: 500; color: rgb(255, 255, 255); border-bottom: 1px solid rgba(255, 255, 255, 0.06);"><span class="sc-interp">FAQ</span></a>
       <a href="https://wa.me/15806436837?text=Hola%20Peptidos%20Plus%2C%20me%20gustar%C3%ADa%20hacer%20un%20pedido." target="_blank" rel="noopener noreferrer" style="margin-top: 14px; height: calc(44px * var(--ppd-alto, 1)); display: flex; align-items: center; justify-content: center; border-radius: 999px; background: rgb(255, 255, 255); color: rgb(10, 25, 47); font-weight: 700; font-size: calc(14px + (15px - 14px) * var(--ppd-k, 1));">Contacto por WhatsApp</a>
     </div>
-  </div></header><section id="contenido" aria-label="Peptidos Plus — péptidos de investigación en Venezuela" style="position: relative; isolation: isolate; overflow: hidden;">
+  </div></header><section id="contenido" tabindex="-1" aria-label="Peptidos Plus — péptidos de investigación en Venezuela" style="position: relative; isolation: isolate; overflow: hidden;">
   <div aria-hidden="true" style="position: absolute; inset: 0px; z-index: -1; pointer-events: none; overflow: hidden; background: linear-gradient(100deg, rgb(7, 20, 42) 0%, rgb(10, 25, 47) 38%, rgb(14, 36, 70) 70%, rgb(11, 29, 56) 100%);">
     <div style="position: absolute; right: -6%; top: -20%; width: 68%; height: 125%; border-radius: 50%; background: radial-gradient(closest-side, rgba(74, 124, 196, 0.62) 0%, rgba(46, 90, 156, 0.4) 38%, rgba(27, 58, 99, 0.16) 70%, rgba(27, 58, 99, 0) 100%); filter: blur(30px); animation: 18s ease-in-out 0s infinite normal none running ppDrift1;"></div>
     <div style="position: absolute; right: 8%; top: 6%; width: 40%; height: 62%; border-radius: 50%; background: radial-gradient(closest-side, rgba(143, 176, 218, 0.32) 0%, rgba(143, 176, 218, 0) 100%); filter: blur(40px);"></div>
@@ -887,6 +892,7 @@ details[open] summary svg { transform: rotate(45deg); }
  document.querySelectorAll("[data-pp-video]").forEach(function(a){ var v=a.querySelector("video"), b=a.querySelector("button"); if(!v||!b) return;
   b.addEventListener("click", function(){ document.querySelectorAll("[data-pp-video] video").forEach(function(o){ if(o!==v&&!o.paused) o.pause(); });
    b.style.display="none"; v.controls=true; v.setAttribute("tabindex","0"); v.focus({preventScroll:true}); var p=v.play(); if(p&&p.catch) p.catch(function(){}); }); });
+ (function(){ var br=document.querySelector("[data-pp-barra]"); if(br) br.addEventListener("click", function(){ br.classList.toggle("pp-pausa"); }); })();
  /* Portadas de los videos: las cuatro se piden cuando la fila se acerca (la sección está dos pantallas
     más abajo); en el teléfono la fila se desliza y así las de fuera no salen en blanco al deslizar */
  (function(){ var fila=document.querySelector("[data-pp-videos]"), vs=document.querySelectorAll("video[data-pp-poster]");
@@ -906,12 +912,16 @@ details[open] summary svg { transform: rotate(45deg); }
  (function(){ var caja=document.querySelector("[data-pp-certs]"); if(!caja) return;
   var hojas=Array.prototype.slice.call(caja.querySelectorAll(".pp-cert")); if(hojas.length<2) return;
   var nom=document.querySelector("[data-pp-cert-nombre]"), dato=document.querySelector("[data-pp-cert-dato]");
-  var HUECOS=4, PAUSA=3800, frente=0, reloj=null, aLaVista=true, raton=false;
+  var HUECOS=4, PAUSA=3800, frente=0, reloj=null, aLaVista=true, raton=false, foco=false;
+  var pie=nom&&nom.parentElement;   // «Retatrutida 10 mg · Janoshik N.º …»: se anuncia solo cuando lo cambia el visitante
   function pintar(){ hojas.forEach(function(h,i){ var d=(i-frente+hojas.length)%hojas.length; for(var k=0;k<HUECOS;k++) h.classList.toggle("pos-"+k, d===k); });
    if(nom) nom.textContent=hojas[frente].getAttribute("data-nombre")||""; if(dato) dato.textContent=hojas[frente].getAttribute("data-dato")||""; }
   function parar(){ if(reloj){ clearInterval(reloj); reloj=null; } }
-  function andar(){ parar(); if(quieto||!aLaVista||raton||document.hidden) return; reloj=setInterval(function(){ frente=(frente+1)%hojas.length; pintar(); }, PAUSA); }
-  function siguiente(){ frente=(frente+1)%hojas.length; pintar(); andar(); }
+  function andar(){ parar(); if(quieto||!aLaVista||raton||foco||document.hidden) return; reloj=setInterval(function(){ if(pie) pie.setAttribute("aria-live","off"); frente=(frente+1)%hojas.length; pintar(); }, PAUSA); }
+  function siguiente(){ if(pie) pie.setAttribute("aria-live","polite"); frente=(frente+1)%hojas.length; pintar(); andar(); }
+  // solo el foco de teclado la para (un toque también enfoca la caja, y tras un toque debe seguir girando)
+  caja.addEventListener("focusin", function(){ var tecl=false; try{ tecl=caja.matches(":focus-visible"); }catch(e){} if(tecl){ foco=true; parar(); } });
+  caja.addEventListener("focusout", function(){ foco=false; andar(); });
   caja.addEventListener("pointerenter", function(e){ if(e.pointerType==="mouse"){ raton=true; parar(); } });
   caja.addEventListener("pointerleave", function(e){ if(e.pointerType==="mouse"){ raton=false; andar(); } });
   caja.addEventListener("click", function(e){ if(e.pointerType&&e.pointerType!=="mouse") raton=false; siguiente(); });

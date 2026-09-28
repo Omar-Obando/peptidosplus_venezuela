@@ -1,0 +1,93 @@
+/* pp-sitio.css — cabecera, pie y letras del diseño nuevo en las páginas del sitio.
+   GENERADO por output/aminoclub.com/cromo-sitio.js a partir de la portada: no editar a mano. */
+
+/* 1. Letras (las mismas de la portada, servidas desde el sitio) */
+@font-face { font-family: 'Hanken Grotesk'; font-style: normal; font-weight: 100 900; font-display: swap; src: url(/assets/fonts/hanken-grotesk-latin.woff2) format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 100 800; font-display: swap; src: url(/assets/fonts/jetbrains-mono-latin.woff2) format('woff2'); }
+
+/* 2. Escala de escritorio que usan la cabecera y el pie */
+@media (min-width: 1024px) { :root { --ppd-k: 0.8; --ppd-espacio: 0.8; --ppd-ancho: 0.9; --ppd-alto: 0.9; --ppd-bloque: 0.88; } }
+
+/* 3. Cabecera y pie: base (en la portada la heredan de su envoltorio) */
+header[data-pp-cromo], footer[data-pp-cromo] { font-family: 'Hanken Grotesk', system-ui, sans-serif; -webkit-font-smoothing: antialiased; text-align: left; line-height: 1.5; }
+header[data-pp-cromo] { color: #fff; }
+[data-pp-cromo], [data-pp-cromo] *, [data-pp-cromo] *::before, [data-pp-cromo] *::after { box-sizing: border-box; }
+[data-pp-cromo] a { text-decoration: none; }
+[data-pp-cromo] img, [data-pp-cromo] svg { display: inline-block; max-width: none; }
+header[data-pp-cromo] a[aria-current="page"] { color: #fff !important; background: rgba(255,255,255,.1) !important; }
+
+/* 4. Reglas de la portada para esas piezas (variantes de escritorio/teléfono, menú, hover, flotante) */
+.scp0:hover { color: rgb(255, 255, 255) !important; background: rgba(255, 255, 255, 0.08) !important; }
+.scp1:hover { background: rgba(255, 255, 255, 0.08) !important; color: rgb(255, 255, 255) !important; }
+.scpa:hover { background: rgba(255, 255, 255, 0.12) !important; color: rgb(255, 255, 255) !important; }
+.scpb:hover { color: rgb(255, 255, 255) !important; }
+@media (max-width: 759px) { [data-pp-solo="desk"] { display: none !important; } }
+@media (min-width: 760px) { [data-pp-solo="mob"] { display: none !important; } }
+[data-pp-menu] { display: none !important; }
+[data-pp-menu].abierto { display: contents !important; }
+[data-pp-flotante] { position: fixed; right: 16px; bottom: 16px; width: 56px; height: 56px; border-radius: 50%; background: #0A192F; display: none; align-items: center; justify-content: center; box-shadow: 0 10px 24px rgba(10,25,47,.35); z-index: 60; }
+[data-pp-flotante]:focus-visible { outline: 3px solid #E9C46A; outline-offset: 2px; }
+@media (max-width: 759px) { [data-pp-flotante] { display: flex; } }
+[data-pp-salto] { position: absolute; left: 16px; top: -120px; z-index: 100; padding: 10px 14px; border-radius: 10px; background: #0A192F; color: #fff; font-weight: 600; font-size: 14px; }
+[data-pp-salto]:focus { top: 12px; outline: 3px solid #E9C46A; outline-offset: 2px; }
+@media (max-width: 759px) { [data-pp-menu-btn] { width: 44px !important; height: 44px !important; } [data-pp-carrito] { height: 44px !important; } }
+[data-pp-pie] { display: inline-block; padding: 5px 0; margin: -5px 0; }
+
+/* 5. Enlace «Saltar al contenido» y botón flotante */
+[data-pp-salto] { position: absolute; left: 16px; top: -120px; z-index: 100; padding: 10px 14px; border-radius: 10px; background: #0A192F; color: #fff; font-family: 'Hanken Grotesk', system-ui, sans-serif; font-weight: 600; font-size: 14px; text-decoration: none; }
+[data-pp-salto]:focus { top: 12px; outline: 3px solid #E9C46A; outline-offset: 2px; }
+
+/* 6. Letras del diseño nuevo en las páginas heredadas */
+body[class] { --font-anek: 'Hanken Grotesk', system-ui, sans-serif; --font-poppins: 'Hanken Grotesk', system-ui, sans-serif; --font-roboto: 'Hanken Grotesk', system-ui, sans-serif; --font-marcellus: 'Hanken Grotesk', system-ui, sans-serif; --font-fraunces: 'Hanken Grotesk', system-ui, sans-serif; --font-stack-display: 'Hanken Grotesk', system-ui, sans-serif; --font-club-serif: 'Hanken Grotesk', system-ui, sans-serif; --font-stack-mono: 'JetBrains Mono', ui-monospace, monospace; }
+body { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+code, kbd, samp, pre, .font-mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+.roboto_6044e508-module__Xu7tfG__className { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+code,kbd,samp,pre { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+.txt-compact-small-plus { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.\!txt-compact-small { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.txt-compact-small { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.\!txt-medium { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.txt-medium { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.txt-xlarge { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.font-\[Roboto\,sans-serif\] { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.font-mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+.font-serif { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.collectjs-sniff-input { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.anek_telugu_8eaeb384-module__xBJiqG__className { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.poppins_3bd1ccb1-module__LyFgha__className { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.roboto_c765b912-module__em9nNa__className { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.marcellus_4504e001-module__DrfbLW__className { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.fraunces_f13b5b52-module__ytGIqW__className { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.bricolage_grotesque_cca3a420-module__jGv2Va__className { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.ibm_plex_mono_2ba211b2-module__kL3LVG__className { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+.instrument_serif_41dc2f66-module__nfpz5q__className { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.roboto_42a4d4e4-module__F_mQra__className { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pp-marquee-txt b { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-leer { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-indice a::before { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pp-coa-pill { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pp-coa-ficha-labcab b { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pp-coa-ficha-eti, .pp-coa-ficha-eti2 { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pp-coa-ficha-num span { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pp-coa-ficha-num i { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pp-coa-ficha-datos dt { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pp-coa-ficha-datos dd { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pp-coa-ficha-sellos span { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pp-coa-ficha-boton { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pp-coa-ficha-regcab p { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pp-coa-ficha-cuenta { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pp-coa-ficha-mg b { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pp-coa-ficha-chip, .pp-coa-res-chip { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pp-coa-res-nombre { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pp-coa-res-mg { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pp-coa-modal-cab h2 { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pp-coa-modal-verificar { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pp-coa-modal-lista-t { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pp-coa-modal-lista-mg { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pp-busca-pep-chip { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pp-busca-pep-quien b { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pp-busca-pep-coa { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pp-busca-pep-precio { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pp-elige-boton { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.pg-h1 em,.pg-lead h2 em { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.prose code { font-family: 'JetBrains Mono', ui-monospace, monospace; }

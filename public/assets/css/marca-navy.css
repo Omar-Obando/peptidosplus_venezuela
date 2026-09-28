@@ -408,7 +408,7 @@ section[aria-label="Llamado a la acción"] { position: relative; isolation: isol
     radial-gradient(46% 58% at 84% 4%, rgba(216, 214, 226, .55) 0%, rgba(216, 214, 226, 0) 60%),
     radial-gradient(40% 52% at 12% 10%, rgba(243, 238, 235, .55) 0%, rgba(243, 238, 235, 0) 62%);
 }
-:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-cejilla { color: rgba(10, 25, 47, .55); }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-cejilla { color: rgba(10, 25, 47, .68); }   /* .55 no llegaba a 4,5:1 */
 :is([id^="pg-articulo"],[id^="pg-legal"]) .pg-h1 { color: var(--pp-navy); }
 :is([id^="pg-articulo"],[id^="pg-legal"]) .pg-sub { color: var(--pp-tinta-2); }
 :is([id^="pg-articulo"],[id^="pg-legal"]) .pg-nota { color: var(--pp-tinta-3); }
@@ -1169,3 +1169,11 @@ main div.items-center.gap-3.mt-auto:has(> [data-pp-aviso-agotado]) { flex-wrap: 
 main div.mt-auto > [data-pp-aviso-agotado] { flex-basis: 100%; order: 1; margin-top: 0; }
 /* ficha: asesor en 320 px */
 @media (max-width: 340px) { main a[data-pp-asesor] { padding-left: 8px; padding-right: 8px; gap: 6px; font-size: 13px; } }
+
+/* ---- Páginas interiores (2026-09-27) ----
+   La cejilla (Legal · Peptidos Plus, Metabólico · fecha…) es de 11 px en los tokens, pero dentro del
+   artículo «.pg-art p» (16 px) le ganaba por especificidad y salía casi del tamaño del texto. */
+.pg-art p.pg-cejilla { font-size: 11px; line-height: 1.5; margin: 0; }
+/* Artículos del blog que sirve Astro (src/pages/blog/[slug].astro): el mismo aire que main.pg de las
+   páginas estáticas; sin él, la cejilla quedaba pegada a la cabecera */
+.pp-art-wrap { padding-top: 44px; padding-bottom: 80px; }

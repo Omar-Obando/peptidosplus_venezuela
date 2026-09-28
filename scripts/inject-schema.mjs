@@ -29,7 +29,7 @@ const ORG = {
   contactPoint: {
     '@type': 'ContactPoint',
     contactType: 'customer service',
-    telephone: '+58 1 580 643 6837',
+    telephone: '+1 580 643 6837',   // WhatsApp del negocio (número de EE. UU.)
     availableLanguage: ['es'],
   },
 };

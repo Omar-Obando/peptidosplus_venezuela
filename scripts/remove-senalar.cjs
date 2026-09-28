@@ -1,5 +1,5 @@
 // Remove the QA debug script <script src="senalar.js"> from static .html pages
-// (it shows the floating 'Señalar lo heredado' button — dev tool of the clone, not site content).
+// (it shows the floating 'Señalar lo heredado' button — a review tool, not site content).
 const fs = require('fs');
 const path = require('path');
 const PUBLIC = 'D:/codigo6/peptidos/ve.peptidosplus.com-main/ve.peptidosplus.com-main/public';

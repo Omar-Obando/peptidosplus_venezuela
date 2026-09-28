@@ -10,19 +10,13 @@ function ppPonerAnadir(el, precio) {
   el.appendChild(s);
 }
 
-/* Comportamientos del clon de aminoclub.com
+/* Comportamientos de las páginas de Peptidos Plus (tienda, fichas, artículos, certificados…)
  *
- * La vía de fidelidad captura el HTML YA HIDRATADO y reutiliza las hojas de
- * estilo originales, así que casi todo el movimiento del sitio (transiciones,
- * hover, los viales que flotan en el muro de edad) viene gratis en el CSS.
- * Este archivo solo repone lo que dependía del runtime de React, que se
- * eliminó a propósito.
- *
- * Medido en motion-home.json: 0 GSAP, 0 Lenis, 0 scroll-timeline real,
- * 3 IntersectionObserver y 1 carrusel. Nada más que reponer.
- *
- * NO se reconstruye: carrito, checkout ni pasarela. Es un clon de referencia
- * de diseño, no una tienda funcional.
+ * Las páginas son HTML estático: casi todo el movimiento (transiciones, hover) vive en
+ * el CSS. Aquí va lo interactivo: revelados al entrar en pantalla, carruseles, selector
+ * de presentación y precio según la cantidad en la ficha, buscador y filtros del catálogo,
+ * desplegables y globos de ayuda. El carrito vive en carrito.js, el pago en checkout.js
+ * y la cabecera compartida en assets/js/pp-sitio.js.
  */
 (() => {
   'use strict';
@@ -119,7 +113,7 @@ function ppPonerAnadir(el, precio) {
   });
 
   /* 2h. Selector de presentación de la ficha.
-     Copiado del comportamiento real de aminoclub (medido en su ficha de
+     Copiado del comportamiento real de la tienda de referencia (medido en su ficha de
      GHK-Cu el 2026-09-07): al elegir otra talla NO se toca la imagen ni hay
      animación. Solo cambian el estado de los botones (con su propia
      transición de borde y fondo), el precio y la etiqueta del botón de
@@ -181,7 +175,7 @@ function ppPonerAnadir(el, precio) {
     elegir(inicial, false);
   })();
 
-  /* 2j. Precio total según la cantidad, como en aminoclub.
+  /* 2j. Precio total según la cantidad, como en la tienda de referencia.
      Medido en su ficha de GHK-Cu (2026-09-07): al elegir "2 BOTTLES" el
      precio pasa de 19,49 a 37,70 y el botón dice "Add to cart · $37.70";
      además tachan el precio sin descuento (59,98). Aquí igual, pero con
@@ -259,7 +253,7 @@ function ppPonerAnadir(el, precio) {
   })();
 
   /* 2k. Catálogo vivo: buscador, categorías y orden.
-     En el clon los tres eran decoración (el runtime de React se quitó). Aquí
+     En la plantilla los tres eran decoración (el runtime de React se quitó). Aquí
      filtran y ordenan de verdad sobre las tarjetas ya presentes, sin recargar.
      Los datos van en la propia tarjeta: data-pp-busca, data-pp-cat,
      data-pp-precio-num y data-pp-orden (el orden original = "más populares"). */
@@ -343,6 +337,7 @@ function ppPonerAnadir(el, precio) {
      El original los monta en React; sin runtime quedan inertes. Se repone un
      alternador mínimo por atributos ARIA, que es lo que el CSS ya usa. */
   $$('[aria-expanded]').forEach((disparador) => {
+    if (disparador.closest('[data-pp-cromo]')) return;   // cabecera y pie compartidos: los lleva pp-sitio.js
     const id = disparador.getAttribute('aria-controls');
     const panel = id ? document.getElementById(id) : disparador.nextElementSibling;
     if (!panel) return;
@@ -354,20 +349,6 @@ function ppPonerAnadir(el, precio) {
       panel.classList.toggle('hidden', abierto);
     });
   });
-
-  /* 2c. Barra propia: enlace activo y menú móvil (el botón lo abre por
-     aria-expanded, ver 3; aquí se cierra al elegir y se bloquea el scroll). */
-  (() => {
-    const actual = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
-    $$('.pp-nav-links a').forEach((a) => { const h = (a.getAttribute('href') || '').toLowerCase(); if (h === actual || (h === 'store.html' && /^producto-/.test(actual)) || (h === 'articulos.html' && /^articulo-/.test(actual))) a.classList.add('activo'); });
-    const boton = document.querySelector('.pp-nav-menu'), menu = document.getElementById('pp-menu-movil');
-    if (boton && menu) {
-      const sincronizar = () => { const abierto = !menu.hidden; document.body.style.overflow = abierto ? 'hidden' : ''; boton.setAttribute('aria-label', abierto ? 'Cerrar menú' : 'Abrir menú'); boton.innerHTML = abierto ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 18L18 6M6 6l12 12"/></svg>' : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>'; };
-      boton.addEventListener('click', () => setTimeout(sincronizar, 0));
-      $$('a', menu).forEach((a) => a.addEventListener('click', () => { menu.hidden = true; boton.setAttribute('aria-expanded', 'false'); sincronizar(); }));
-      window.addEventListener('resize', () => { if (window.innerWidth >= 768 && !menu.hidden) { menu.hidden = true; boton.setAttribute('aria-expanded', 'false'); sincronizar(); } });
-    }
-  })();
 
   /* 2e. Lluvia de viales sin choques (sección "Pedidos al mayor" y similares).
      El original suelta 50 mosaicos con posiciones al azar y se montan unos
@@ -404,130 +385,6 @@ function ppPonerAnadir(el, precio) {
     window.addEventListener('resize', repartir);
   });
 
-  /* 2d. Partículas del héroe propio (port de Particulas.tsx de peptidosplus.com):
-     puntos navy tenues que suben despacio; se detienen fuera de pantalla y con
-     prefers-reduced-motion. */
-  $$('canvas.pp-hero-particulas').forEach((canvas) => {
-    const ctx = canvas.getContext('2d'); if (!ctx) return;
-    const quieto = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let ancho = 0, alto = 0, particulas = [], raf = 0, visible = true, t = 0;
-    const nueva = (repartir) => ({ x: Math.random() * ancho, y: repartir ? Math.random() * alto : alto + 12, r: 1 + Math.random() * 2.3, vx: (Math.random() - 0.5) * 0.14, vy: 0.10 + Math.random() * 0.26, alfa: 0.10 + Math.random() * 0.26, fase: Math.random() * Math.PI * 2, vaiven: 0.25 + Math.random() * 0.5 });
-    const dimensionar = () => {
-      const caja = canvas.getBoundingClientRect(); if (!caja.width || !caja.height) return;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      ancho = caja.width; alto = caja.height;
-      canvas.width = Math.round(ancho * dpr); canvas.height = Math.round(alto * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const n = Math.round(Math.min(70, Math.max(24, (ancho * alto) / 26000)));
-      particulas = Array.from({ length: n }, () => nueva(true));
-    };
-    const pintar = () => {
-      t += 1; ctx.clearRect(0, 0, ancho, alto);
-      particulas.forEach((p, i) => {
-        p.y -= p.vy; p.x += p.vx + Math.sin(t / 60 + p.fase) * p.vaiven * 0.08;
-        if (p.y < -12 || p.x < -12 || p.x > ancho + 12) particulas[i] = nueva(false);
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fillStyle = 'rgba(10, 25, 47, ' + p.alfa.toFixed(3) + ')'; ctx.fill();
-      });
-      if (visible && !quieto) raf = requestAnimationFrame(pintar);
-    };
-    dimensionar(); pintar();
-    if (quieto) return;
-    window.addEventListener('resize', () => { dimensionar(); });
-    if ('IntersectionObserver' in window) new IntersectionObserver((es) => { visible = es[0].isIntersecting; if (visible && !raf) raf = requestAnimationFrame(pintar); if (!visible) { cancelAnimationFrame(raf); raf = 0; } }).observe(canvas);
-  });
-
-  /* 2f. Reproductor de "La garantía": un solo video vertical (los dos son
-     9:16 y con audio). Los tres iconitos de la lista lo cambian, al terminar
-     pasa solo al siguiente video distinto, y arranca en silencio al entrar en
-     pantalla (se pausa al salir). Quien toca un iconito pidió ese video: se
-     reproduce con sonido; el botón de la barra lo silencia. */
-  $$('[data-pp-player]').forEach((player) => {
-    const video = player.querySelector('video');
-    const seccion = player.closest('section') || document;
-    const items = $$('[data-pp-video]', seccion);
-    if (!video || !items.length) return;
-    const marco = player.querySelector('.pp-player-marco');
-    const play = player.querySelector('.pp-player-play'), pausa = player.querySelector('[data-accion="pausa"]'), sonido = player.querySelector('[data-accion="sonido"]');
-    const prog = player.querySelector('.pp-player-progreso'), barra = prog && prog.firstElementChild, tiempo = player.querySelector('.pp-player-tiempo'), titulo = player.querySelector('.pp-player-titulo');
-    let idx = -1, pausadoPorUsuario = false;
-    const srcDe = (it) => (it.getAttribute('data-pp-video') || '').split('|');
-    const fmt = (s) => { s = Math.max(0, Math.floor(isFinite(s) ? s : 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
-    const pintar = () => {
-      if (play) play.hidden = !video.paused;
-      if (marco) marco.classList.toggle('pausado', video.paused);
-      if (pausa) { pausa.classList.toggle('pausado', video.paused); pausa.setAttribute('aria-label', video.paused ? 'Reproducir' : 'Pausar'); }
-      if (sonido) { sonido.classList.toggle('mudo', video.muted); sonido.setAttribute('aria-label', video.muted ? 'Activar sonido' : 'Silenciar'); }
-      if (barra) barra.style.width = (video.duration ? (video.currentTime / video.duration) * 100 : 0) + '%';
-      if (tiempo) tiempo.textContent = fmt(video.currentTime) + ' / ' + fmt(video.duration);
-    };
-    const reproducir = () => { const pr = video.play(); if (pr && pr.catch) pr.catch(() => { video.muted = true; video.play().catch(() => {}); }); };
-    const cargar = (i, arrancar) => {
-      i = ((i % items.length) + items.length) % items.length;
-      const it = items[i], [src, poster] = srcDe(it), cambia = video.getAttribute('src') !== src;
-      idx = i;
-      items.forEach((el, k) => { const activo = k === i; el.classList.toggle('pp-item-activo', activo); el.setAttribute('aria-pressed', String(activo)); const cue = el.querySelector('.pp-item-cue span'); if (cue) cue.textContent = activo ? 'Viendo' : 'Ver video'; });
-      if (titulo) titulo.textContent = it.getAttribute('data-pp-video-titulo') || '';
-      video.setAttribute('aria-label', 'Video: ' + (it.getAttribute('data-pp-video-titulo') || ''));
-      // Con preload="none" cambiar el src no descarga nada: el archivo se pide
-      // al reproducir, no al cargar la página (eran 3,4 MB en cada visita).
-      if (cambia) { if (poster) video.setAttribute('poster', poster); video.setAttribute('src', src); if (arrancar) video.load(); }
-      else if (arrancar) video.currentTime = 0;
-      if (arrancar) reproducir();
-      pintar();
-    };
-    const siguiente = () => { for (let k = 1; k <= items.length; k++) { const j = (idx + k) % items.length; if (srcDe(items[j])[0] !== video.getAttribute('src')) return j; } return (idx + 1) % items.length; };
-    items.forEach((it, i) => {
-      it.addEventListener('click', () => { pausadoPorUsuario = false; video.muted = false; cargar(i, true); });
-      it.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); it.click(); } });
-    });
-    const alternar = () => { if (video.paused) { pausadoPorUsuario = false; reproducir(); } else { pausadoPorUsuario = true; video.pause(); } };
-    if (play) play.addEventListener('click', alternar);
-    if (pausa) pausa.addEventListener('click', alternar);
-    video.addEventListener('click', alternar);
-    if (sonido) sonido.addEventListener('click', () => { video.muted = !video.muted; if (!video.muted) video.volume = 1; pintar(); });
-    if (prog) prog.addEventListener('click', (e) => { const r = prog.getBoundingClientRect(); if (video.duration && r.width) video.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * video.duration; });
-    ['play', 'pause', 'timeupdate', 'loadedmetadata', 'durationchange', 'volumechange', 'emptied'].forEach((ev) => video.addEventListener(ev, pintar));
-    video.addEventListener('ended', () => cargar(siguiente(), true));
-    cargar(0, false);
-    if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      new IntersectionObserver((es) => {
-        if (es[0].isIntersecting) { if (video.paused && !pausadoPorUsuario) reproducir(); }
-        else if (!video.paused) video.pause();
-      }, { threshold: 0.35 }).observe(player);
-    }
-  });
-
-  /* 3b. Pestañas (aria-selected + aria-controls), como las de "Calidad" del
-     home: al pulsar una, se marca y se muestra solo su panel.
-     2026-09-10: esto ANTES peleaba con el marcado. React dejó el estado
-     horneado en clases —el botón activo con bg-black, el panel activo con
-     "opacity-100 visible relative" y los otros con "opacity-0 invisible
-     absolute"— y este bloque intentaba apagarlas una a una. No funcionaba:
-     la clase `visible` del panel viejo le ganaba a la `invisible` que se le
-     añadía (misma especificidad, decide el orden del CSS, no el del DOM), así
-     que el navy se quedaba clavado en "Masa" y el panel no cambiaba nunca.
-     Ahora el estado lo pinta marca-navy.css desde aria-selected y [hidden], y
-     aquí solo se mueven esos dos atributos. */
-  $$('button[aria-selected][aria-controls]').forEach((tab) => {
-    tab.addEventListener('click', (e) => {
-      e.preventDefault();
-      const grupo = tab.parentElement;
-      $$('button[aria-selected][aria-controls]', grupo).forEach((t) => {
-        const activa = t === tab;
-        t.setAttribute('aria-selected', String(activa));
-        const panel = document.getElementById(t.getAttribute('aria-controls'));
-        if (panel) panel.hidden = !activa;
-      });
-    });
-  });
-  // el estado inicial también viene de las clases: se traduce a [hidden]
-  $$('[role="tablist"]').forEach((lista) => {
-    $$('button[aria-selected][aria-controls]', lista).forEach((t) => {
-      const panel = document.getElementById(t.getAttribute('aria-controls'));
-      if (panel) panel.hidden = t.getAttribute('aria-selected') !== 'true';
-    });
-  });
-
   /* 3c. Globos de ayuda (el botón con el "?"). El marcado del original llega
      con las clases apagadas (opacity-0 invisible pointer-events-none) porque
      era React quien las encendía: sin esto el "?" no muestra nada. Se abre al
@@ -558,11 +415,6 @@ function ppPonerAnadir(el, precio) {
   });
   /* 4. El carrito lo lleva carrito.js (estado real, persistencia, cierre). */
 
-  /* 5. Enlaces muertos — DESACTIVADO en el sitio headless.
-     El original neutralizaba los enlaces internos (href="#" + preventDefault)
-     para que el clon no saliera a aminoclub.com. En Peptidos Plus headless los
-     enlaces reales (/, /tienda, /blog, /certificados, /faq...) son válidos y
-     deben navegar: se omite esta neutralización. */
 })();
 
 /* 3d. Los viales flotantes de los héroes (FAQ, certificados…) perdían el giro.

@@ -1,8 +1,10 @@
 /* pp-sitio.js — menú del teléfono, contador y botón del carrito de la cabecera compartida.
-   GENERADO por output/aminoclub.com/cromo-sitio.js: no editar a mano. */
+   GENERADO a partir de la portada (public/index.html) con cromo-sitio.js: no editar a mano. */
 (function () {
   'use strict';
-  var CLAVE = 'pp_carrito_v1', VIEJA = 'pp_clon_carrito_v1';
+  var CLAVE = 'pp_carrito_v1';
+  // Carritos guardados con la clave anterior: se pasan a la nueva una sola vez (carrito.js hace lo mismo)
+  try { var v = localStorage.getItem('pp_clon_carrito_v1'); if (v !== null) { if (localStorage.getItem(CLAVE) === null) localStorage.setItem(CLAVE, v); localStorage.removeItem('pp_clon_carrito_v1'); } } catch (e) { /* modo privado */ }
   var m = document.querySelector('[data-pp-menu]'), mb = document.querySelector('[data-pp-menu-btn]');
   function menu(abrir) {
     if (!m || !mb) return;
@@ -15,7 +17,7 @@
 
   function unidades() {
     try {
-      var it = JSON.parse(localStorage.getItem(CLAVE) || localStorage.getItem(VIEJA) || '[]'), s = 0;
+      var it = JSON.parse(localStorage.getItem(CLAVE) || '[]'), s = 0;
       (Array.isArray(it) ? it : []).forEach(function (x) { s += Number(x.cant || x.cantidad || x.qty || x.q || 1) || 1; });
       return s;
     } catch (e) { return 0; }

@@ -1,4 +1,4 @@
-/* Carrito FUNCIONAL del clon — capa sobre el marcado capturado de aminoclub.
+/* Carrito de Peptidos Plus — el panel deslizante de las páginas, con estado real.
  *
  * Reutiliza tal cual el panel deslizante (mismas clases, mismo aspecto) y le
  * pone estado real: añadir desde las tarjetas y desde la ficha, cambiar
@@ -17,7 +17,9 @@
  */
 (() => {
   'use strict';
-  const CLAVE = 'pp_clon_carrito_v1';
+  const CLAVE = 'pp_carrito_v1';
+  // La clave vieja (de cuando el sitio se montó sobre otra plantilla) se pasa a la nueva una vez
+  try { const vieja = localStorage.getItem('pp_clon_carrito_v1'); if (vieja !== null) { if (localStorage.getItem(CLAVE) === null) localStorage.setItem(CLAVE, vieja); localStorage.removeItem('pp_clon_carrito_v1'); } } catch (e) { /* modo privado */ }
   // Los códigos ya no existen. Si un navegador guardó uno, se borra al abrir.
   try { localStorage.removeItem('pp_clon_cupon_v1'); } catch (e) { /* modo privado */ }
 
@@ -45,7 +47,7 @@
   let items = [];
   try { items = JSON.parse(localStorage.getItem(CLAVE) || '[]'); if (!Array.isArray(items)) items = []; } catch (e) { items = []; }
   const guardar = () => { try { localStorage.setItem(CLAVE, JSON.stringify(items)); } catch (e) { /* modo privado */ } };
-  // Los tres metabólicos pasaron de llevar el código de aminoclub a llamarse por
+  // Los tres metabólicos pasaron de llevar el código de la tienda de referencia a llamarse por
   // su compuesto. Un carrito guardado antes traería el nombre viejo, un enlace a
   // una página que ya no existe y una imagen borrada: se traduce al abrir.
   const VIEJOS = {
@@ -259,7 +261,10 @@
   }
 
   function pintarBadge(u) {
+    // Cabecera nueva: el contador siempre visible, también con 0 (como en la portada)
+    $$('[data-pp-carrito-n]').forEach((n) => { n.textContent = String(u); });
     $$('button[data-testid="nav-cart-link"]').forEach((b) => {
+      if (b.querySelector('[data-pp-carrito-n]')) { b.setAttribute('aria-label', u ? 'Carrito, ' + u + (u === 1 ? ' producto' : ' productos') : 'Carrito vacío'); return; }
       let badge = b.querySelector('[data-pp-badge]') || $$('span', b).find((s) => /^\d+$/.test(s.textContent.trim()));
       if (!badge) {
         badge = document.createElement('span');
@@ -313,7 +318,7 @@
       const masa = $('[data-pp-pres][aria-pressed="true"]') || $$('button').find((x) => /^\d+\s*(MG|ML|UI)$/i.test(x.textContent.trim()));
       const dosis = masa ? masa.textContent.trim().replace(/(\d)(MG|ML|UI)/i, '$1 $2').toLowerCase() : '';
       const img = $('main img, section img');
-      // El botón muestra el TOTAL (como aminoclub), así que el precio de UN
+      // El botón muestra el TOTAL (como la tienda de referencia), así que el precio de UN
       // vial sale de la talla elegida o del dato de la ficha, nunca del texto.
       const unitario = parseFloat((masa && masa.getAttribute('data-precio')) || b.getAttribute('data-pp-unitario')) || precioEn(b.textContent);
       agregar({ id: slug(nombre), nombre, dosis, precio: unitario, img: img ? img.getAttribute('src') : '' }, leerCant());
@@ -365,7 +370,7 @@
     el.addEventListener('click', (e) => { e.preventDefault(); abrir(); });
   });
   // "Finalizar compra" (en el panel y en carrito.html) → checkout.html
-  $$('button, a').filter((b) => /finalizar compra|proceed to checkout/i.test(b.textContent) && !b.closest('#pp-senalar-lista')).forEach((b) => {
+  $$('button, a').filter((b) => /finalizar compra|proceed to checkout/i.test(b.textContent)).forEach((b) => {
     b.addEventListener('click', (e) => { e.preventDefault(); if (items.length) location.href = 'checkout.html'; else abrir(); });
   });
 

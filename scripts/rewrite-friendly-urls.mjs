@@ -51,12 +51,12 @@ for (const f of files) {
   // 1. Enlaces/URLs internas a las limpias
   html = html.replace(/(["'])\/producto-([a-z0-9-]+)(\/|\?|#|["'])/gi, (m, q, slug, tail) => {
     const clean = `/${slug}${tail === '/' ? '/' : tail}`;
-    return q + clean + q;
+    return q + clean;   // «tail» ya trae la comilla de cierre (o el / ? # que sigue)
   });
   // /producto-{slug}.html → /{slug}
   html = html.replace(/\/producto-([a-z0-9-]+)\.html/g, '/$1');
   html = html.replace(/(["'])\/articulo-([a-z0-9-]+)(\/|\?|#|["'])/gi, (m, q, slug, tail) => {
-    return q + `/blog/${slug}${tail === '/' ? '/' : tail}` + q;
+    return q + `/blog/${slug}${tail === '/' ? '/' : tail}`;   // «tail» ya trae la comilla de cierre
   });
   html = html.replace(/\/articulo-([a-z0-9-]+)\.html/g, '/blog/$1');
 

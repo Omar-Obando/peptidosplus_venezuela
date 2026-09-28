@@ -69,12 +69,9 @@ const detectCountry = Astro.request.headers.get('CF-IPCountry') || '';
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/assets/marca/peptidosplus-isotipo-navy.svg" type="image/svg+xml" />
 
-    <!-- Marca: CSS compilado del sitio original (navy, fuentes, pp-*/pg-*) -->
-    <link rel="stylesheet" href="/assets/css/44599e2480b4e9b7-080b9ca3.css" />
-    <link rel="stylesheet" href="/assets/css/remix-tokens.css" />
+    <!-- Marca: tokens, utilidades compiladas y capa navy (las mismas hojas de las páginas estáticas) -->
+    <link rel="stylesheet" href="/assets/css/pp-tokens.css" />
     <link rel="stylesheet" href="/assets/css/1a78e74ce72d3608-19ad952d.tokenized.css" />
-    <link rel="stylesheet" href="/assets/css/8fd2756b064cd018.css" />
-    <link rel="stylesheet" href="/assets/css/18b678a1602d6429-41fbeeff.css" />
     <link rel="stylesheet" href="/assets/css/marca-navy.css" />
     <!-- Tokens del template (text-primary, bg-surface, etc. para tienda/cuenta) -->
     <link rel="stylesheet" href="/assets/css/template-theme.css" />
@@ -163,7 +160,6 @@ const detectCountry = Astro.request.headers.get('CF-IPCountry') || '';
     <!-- JS de comportamiento, el mismo de las páginas estáticas de public/ -->
     <script src="/behaviors.js" defer></script>
     <script src="/carrito.js" defer></script>
-    <script src="/senalar.js" defer></script>
     <script src="/assets/datos/coas.js" defer></script>
     <script src="/certificados.js" defer></script>
     <script src="/assets/js/pp-sitio.js" defer></script>

@@ -16,6 +16,8 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PUBLIC = path.join(ROOT, 'public');
 const SITE = 'https://ve.peptidosplus.com';
+// El archivo es producto-ss-31.html, pero la ruta de la ficha es /ss-31-elamipretide (ver src/pages/[slug].astro)
+const slugWeb = (s) => (s === 'ss-31' ? 'ss-31-elamipretide' : s);
 const ORG = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
@@ -23,7 +25,7 @@ const ORG = {
   name: 'Peptidos Plus',
   url: SITE,
   logo: SITE + '/assets/marca/peptidosplus-logo-navy.svg',
-  sameAs: ['https://wa.me/15806436837', 'https://t.me/peptidosplus'],
+  sameAs: ['https://wa.me/15806436837'],
   contactPoint: {
     '@type': 'ContactPoint',
     contactType: 'customer service',
@@ -89,7 +91,7 @@ function itemListLd(html, url) {
     position: (p.orden ?? 0) + 1,
     item: ld('Product', {
       name: p.nombre,
-      url: SITE + '/' + (p.pagina || '').replace(/^producto-/, '').replace(/\.html$/, ''),
+      url: SITE + '/' + slugWeb((p.pagina || '').replace(/^producto-/, '').replace(/\.html$/, '')),
       image: SITE + '/' + (p.img || '').replace(/^\.?\//, ''),
       offers: ld('Offer', {
         priceCurrency: 'USD',
@@ -109,7 +111,7 @@ function productLd(html, slug, url) {
   return ld('Product', {
     name: pageTitle(html).replace(/\s*\|\s*Peptidos Plus.*$/, '') || slug,
     description: pageDesc(html),
-    url: SITE + '/' + slug,
+    url: SITE + '/' + slugWeb(slug),
     image: pageProductImage(html, slug),
     brand: { '@type': 'Brand', name: 'Peptidos Plus' },
     offers: offers.length ? (offers.length === 1 ? offers[0] : ld('AggregateOffer', {

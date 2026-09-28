@@ -1,7 +1,7 @@
 /* Peptidos Plus — wc-bridge.js
  *
  * Puente entre el carrito del DISEÑO ORIGINAL (carrito.js, localStorage
- * "pp_clon_carrito_v1") y WooCommerce headless. Se inyecta en las páginas
+ * "pp_carrito_v1") y WooCommerce headless. Se inyecta en las páginas
  * .html originales (store.html, producto-*.html, index.html...) y hace que:
  *
  *  - Los botones "Añadir al carrito" (data-pp-anadir / aria-label "Añadir X
@@ -18,7 +18,7 @@
  */
 (function () {
     'use strict';
-    var CLAVE = 'pp_clon_carrito_v1';
+    var CLAVE = 'pp_carrito_v1';
     var WC_KEY = 'phantomwp_cart';
     var API_BASE = '/wp-json/wc/v3';
 

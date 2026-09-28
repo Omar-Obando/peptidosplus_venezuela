@@ -1177,3 +1177,7 @@ main div.mt-auto > [data-pp-aviso-agotado] { flex-basis: 100%; order: 1; margin-
 /* Artículos del blog que sirve Astro (src/pages/blog/[slug].astro): el mismo aire que main.pg de las
    páginas estáticas; sin él, la cejilla quedaba pegada a la cabecera */
 .pp-art-wrap { padding-top: 44px; padding-bottom: 80px; }
+
+/* Pago (checkout.js pinta el formulario dentro de #pp-checkout, que empieza vacío): se reserva una pantalla
+   para que el pie no aparezca arriba y luego salte hacia abajo (CLS 0,133 en móvil según quién pinte antes) */
+#pp-checkout { min-height: calc(100vh - 64px); }

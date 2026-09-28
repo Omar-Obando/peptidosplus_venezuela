@@ -367,7 +367,7 @@
   //    ya lleva su agua de 3 ml en el kit y la sugerencia confundía.
 
   // 5) Icono de la barra abre; "Finalizar compra" va a la página del carrito
-  $$('button[data-testid="nav-cart-link"], a[href="/carrito"]').forEach((el) => {
+  $$('button[data-testid="nav-cart-link"], a[href="/carrito"], a[href="/carrito.html"]').forEach((el) => {
     if (montaje.contains(el)) return;
     el.addEventListener('click', (e) => { e.preventDefault(); abrir(); });
   });

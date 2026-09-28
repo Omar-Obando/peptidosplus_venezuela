@@ -113,6 +113,14 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // (llamarla como función suelta lanza 'Illegal invocation').
   try {
     const html = await response.clone().text();
+    // Un listado sin entradas es casi siempre WordPress que tardó o falló al pintar: no se guarda,
+    // o el blog saldría vacío hasta que caduque (1 día). Se vuelve a intentar en la próxima visita.
+    if (/^page_(blog|cat|tag|autor)$/.test(cfg.keyPrefix) && !html.includes('pg-entrada')) {
+      console.log('[cache] listado sin entradas: no se guarda', url.pathname);
+      const h = new Headers(response.headers);
+      h.set('X-Astro-Cache', 'SKIP');
+      return new Response(response.body, { headers: h, status: response.status });
+    }
     const cfCtx = (context.locals as any)?.cfContext as
       | { waitUntil?: (p: Promise<unknown>) => void }
       | undefined;

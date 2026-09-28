@@ -44,15 +44,10 @@ body { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
 code, kbd, samp, pre, .font-mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
 code,kbd,samp,pre { font-family: 'JetBrains Mono', ui-monospace, monospace; }
 .txt-compact-small-plus { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.\!txt-compact-small { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
 .txt-compact-small { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.\!txt-medium { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
 .txt-medium { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.txt-xlarge { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
 .font-\[Roboto\,sans-serif\] { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
 .font-mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
-.font-serif { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.collectjs-sniff-input { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
 :is([id^="pg-articulo"],[id^="pg-legal"]) .pg-leer { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
 :is([id^="pg-articulo"],[id^="pg-legal"]) .pg-indice a::before { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
 .pp-coa-pill { font-family: 'Hanken Grotesk', system-ui, sans-serif; }

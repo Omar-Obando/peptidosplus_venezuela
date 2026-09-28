@@ -499,7 +499,7 @@ details[open] summary svg { transform: rotate(45deg); }
       <article style="flex: 1 1 300px; background: rgb(10, 25, 47); color: rgb(255, 255, 255); border-radius: 20px; padding: 19.2px; display: flex; flex-direction: column; justify-content: space-between; gap: 16px; min-height: calc(420px * var(--ppd-bloque, 1)); overflow: hidden; position: relative;">
         <div style="position: absolute; left: 50%; top: 44%; width: 120%; aspect-ratio: 1 / 1; transform: translate(-50%, -50%); background: radial-gradient(closest-side, rgba(93, 138, 194, 0.3), rgba(93, 138, 194, 0));"></div>
         <span style="position: relative; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(143, 176, 218);">01</span>
-        <img src="/assets/viales-ficha/Retatrutida-10mg.webp" srcset="/assets/viales-ficha/chico/Retatrutida-10mg.webp 400w, /assets/viales-ficha/mini/Retatrutida-10mg.webp 640w, /assets/viales-ficha/Retatrutida-10mg.webp 1002w" sizes="(max-width:759px) 60vw, 180px" width="1002" height="1959" alt="Vial de Retatrutida" style="position: relative; width: auto; max-width: 60%; max-height: calc(340px * var(--ppd-bloque, 1)); align-self: center; filter: drop-shadow(rgba(0, 0, 0, 0.4) 0px 24px 30px);">
+        <img src="/assets/viales-ficha/Retatrutida-10mg.webp" srcset="/assets/viales-ficha/chico/Retatrutida-10mg.webp 400w, /assets/viales-ficha/mini/Retatrutida-10mg.webp 640w, /assets/viales-ficha/Retatrutida-10mg.webp 1002w" sizes="(max-width:759px) 45vw, 180px" width="1002" height="1959" alt="Vial de Retatrutida" style="position: relative; width: auto; max-width: 60%; max-height: calc(340px * var(--ppd-bloque, 1)); align-self: center; filter: drop-shadow(rgba(0, 0, 0, 0.4) 0px 24px 30px);">
         <div style="position: relative; display: flex; flex-direction: column; gap: 6px;"><h3 style="margin: 0px; font-size: calc(14px + (20.7px - 14px) * var(--ppd-k, 1)); font-weight: 600;">El péptido de tu elección</h3><p style="margin: 0px; font-size: 14px; line-height: 1.5; color: rgb(201, 213, 230);">En polvo liofilizado, sellado y etiquetado.</p></div>
       </article>
       <div style="flex: 2 1 480px; min-width: 0px; display: flex; flex-direction: column; gap: 16px;">
@@ -899,7 +899,7 @@ details[open] summary svg { transform: rotate(45deg); }
   var it=JSON.parse(localStorage.getItem("pp_carrito_v1")||"[]"); var s=0; (Array.isArray(it)?it:[]).forEach(function(x){ s+=Number(x.cant||x.cantidad||x.qty||x.q||1)||1; }); if(n) n.textContent=String(s);
   if(c) c.setAttribute("aria-label", s ? "Carrito, "+s+(s===1?" producto":" productos") : "Carrito vacío"); }catch(e){} }
  contar(); window.addEventListener("storage", contar);
- if(c) c.addEventListener("click", function(){ location.href="/carrito"; });
+ if(c) c.addEventListener("click", function(){ location.href="/carrito.html"; });
  document.querySelectorAll("[data-pp-video]").forEach(function(a){ var v=a.querySelector("video"), b=a.querySelector("button"); if(!v||!b) return;
   b.addEventListener("click", function(){ document.querySelectorAll("[data-pp-video] video").forEach(function(o){ if(o!==v&&!o.paused) o.pause(); });
    b.style.display="none"; v.controls=true; v.setAttribute("tabindex","0"); v.focus({preventScroll:true}); var p=v.play(); if(p&&p.catch) p.catch(function(){}); }); });

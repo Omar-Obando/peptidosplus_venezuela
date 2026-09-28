@@ -36,7 +36,7 @@
 
   // Con carrito lateral (#pp-carrito-montaje) lo abre carrito.js; sin él, a la página del carrito
   var c = document.querySelector('[data-pp-carrito]');
-  if (c && !document.getElementById('pp-carrito-montaje')) c.addEventListener('click', function () { location.href = '/carrito'; });
+  if (c && !document.getElementById('pp-carrito-montaje')) c.addEventListener('click', function () { location.href = '/carrito.html'; });
 
   // enlace de la sección actual
   var ruta = (location.pathname.replace(/\/+$/, '') || '/').replace(/\.html$/, '');

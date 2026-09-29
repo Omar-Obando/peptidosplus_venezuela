@@ -17,7 +17,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
       response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
       response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
       response.headers.set('X-Frame-Options', 'DENY');
-      response.headers.set('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https:; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; connect-src 'self'");
+      // script-src con 'unsafe-inline' y el contador de Cloudflare (2026-09-29): sin eso el navegador bloqueaba los
+      // scripts escritos dentro de la página — el aviso de país y la animación de preguntas-frecuentes, el buscador y
+      // «Ver más» de /certificados — y el beacon de Cloudflare Web Analytics en todas las páginas con esta cabecera.
+      response.headers.set('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' https:; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; connect-src 'self' https://cloudflareinsights.com");
     }
   }
 

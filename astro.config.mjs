@@ -2,7 +2,7 @@ import { defineConfig } from 'astro/config';
 import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import mdx from '@astrojs/mdx';
-import sitemap from '@astrojs/sitemap';
+// import sitemap from '@astrojs/sitemap';  // deshabilitado: /sitemap.xml lo sirve el SSR custom
 import react from '@astrojs/react';
 import cloudflare from '@astrojs/cloudflare';
 import compress from '@playform/compress';
@@ -47,7 +47,9 @@ export default defineConfig({
   }),
   integrations: [
     mdx(),
-    sitemap(),
+    // sitemap() deshabilitado: /sitemap.xml lo sirve el SSR custom (src/pages/sitemap.xml.ts)
+    // para evitar colisión con el sitemap-index.xml que genera @astrojs/sitemap.
+    // sitemap(),
     react(),
     compress({
       CSS: false,

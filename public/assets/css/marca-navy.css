@@ -1181,3 +1181,23 @@ main div.mt-auto > [data-pp-aviso-agotado] { flex-basis: 100%; order: 1; margin-
 /* Pago (checkout.js pinta el formulario dentro de #pp-checkout, que empieza vacío): se reserva una pantalla
    para que el pie no aparezca arriba y luego salte hacia abajo (CLS 0,133 en móvil según quién pinte antes) */
 #pp-checkout { min-height: calc(100vh - 64px); }
+
+/* ---- Iconos (2026-09-29) ----
+   Normaliza los SVGs de iconos de la ficha/producto (Janoshik, COA, lab…) para que NUNCA se
+   vean descuadrados/deformados: tamaño uniforme, sin estirarse dentro de flex/place-items,
+   y manteniendo la proporción original del viewBox (0 0 24 24). */
+.pp-coa-ficha svg, .pp-coa-ficha-sello svg, .pp-coa-res svg,
+.pp-coa-pill svg, [data-pp-coa-ficha] svg,
+.pp-asev svg, [data-pp-asesor] svg {
+  flex-shrink: 0;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  max-width: 20px;
+  max-height: 20px;
+}
+/* Los sellos grandes (99,83%) conservan su tamaño previsto */
+.pp-coa-ficha-sello svg { width: 34px; height: 34px; max-width: 34px; max-height: 34px; }
+.pp-coa-ficha-num.sin svg { width: 26px; height: 26px; max-width: 26px; max-height: 26px; }
+/* Tarjetas del catálogo: el sello »Certificado« pequeño */
+.pp-coa-pill svg { width: 14px; height: 14px; max-width: 14px; max-height: 14px; }

@@ -46,67 +46,50 @@ img[src^="assets/productos/"]{object-fit:cover !important;width:100% !important;
 img[src^="assets/viales/"]{object-fit:contain !important;}
 
 /* ---- Pago en una sola página (checkout.js, 2026-09-29) ----
-   Pedido, datos, envío y pago en la misma pantalla; un solo botón al final.
-   Tarjetas blancas sobre un lavado claro, esquinas de 10/12 px, navy de marca. */
-.co-pagina{background:#f4f7fb;border-top:1px solid #e6ebf2}
-.co{max-width:1160px;margin:0 auto;padding:32px 16px 72px;color:var(--pp-navy,#0a192f)}
-.co-cab{margin:0 0 22px}
-.co-h1{font-size:26px;line-height:1.15;font-weight:600;letter-spacing:-.02em;margin:0 0 6px}
-.co-sub{color:var(--pp-tinta-2,#4d5a70);font-size:14px;line-height:1.5;margin:0}
-.co-grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:28px;align-items:start}
+   Disposición de la referencia de Angel (captura 4): título grande; a la izquierda UNA tarjeta con los pasos
+   numerados (1 datos · 2 envío · 3 pago) separados por líneas, con una palomita verde al completarse; a la
+   derecha el resumen con los productos (editables), el kit como extra ANTES del total y debajo el botón
+   «Finalizar compra». En el teléfono: resumen, pasos y botón, en ese orden. Esquinas 10/12 px, navy de marca. */
+.co-pagina{background:#f5f7fa;border-top:1px solid #e6ebf2}
+.co{max-width:1180px;margin:0 auto;padding:40px 16px 80px;color:var(--pp-navy,#0a192f)}
+.co-cab{margin:0 0 28px}
+.co-h1{font-size:32px;line-height:1.1;font-weight:600;letter-spacing:-.025em;margin:0 0 8px}
+.co-sub{color:var(--pp-tinta-2,#4d5a70);font-size:15px;line-height:1.5;margin:0}
+@media (max-width:640px){.co{padding-top:28px}.co-h1{font-size:27px}.co-cab{margin-bottom:20px}}
+.co-grid{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:28px;align-items:start}
 .co.co-solo .co-grid{grid-template-columns:1fr}
 .co.co-solo .co-cab{display:none}
-@media (max-width:960px){.co-grid{grid-template-columns:1fr;gap:16px}}
-.co-sec{background:#fff;border:1px solid #e3e9f1;border-radius:12px;padding:22px 22px 24px;margin:0 0 16px;scroll-margin-top:84px}
-.co-sec:last-child{margin-bottom:0}
-@media (max-width:640px){.co-sec{padding:18px 16px 20px}}
-.co-h2{display:flex;align-items:baseline;gap:10px;font-size:17px;font-weight:600;letter-spacing:-.01em;margin:0 0 16px}
-.co-num{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;font-weight:500;color:#4d6fa0}
-.co-sec>.co-sub{margin:-8px 0 16px;font-size:13.5px}
-
-/* 1 · el pedido */
-.co-items{list-style:none;margin:0;padding:0}
-.co-item{display:grid;grid-template-columns:52px minmax(0,1fr) auto 84px 56px;grid-template-areas:"img txt cant precio quitar";column-gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid #eef1f5}
-.co-item:first-child{padding-top:0}
-.co-mini,.co-plus{grid-area:img;width:52px;height:52px;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.co-mini{background:#eef3f9}
-.co-mini img{width:100%;height:100%;object-fit:contain;padding:4px;box-sizing:border-box;display:block}
-.co-plus{background:var(--pp-navy,#0a192f);color:#fff}
-.co-plus svg{width:22px;height:22px;display:block}
-.co-item-txt{grid-area:txt;display:flex;flex-direction:column;gap:2px;min-width:0}
-.co-item-nom{font-size:14.5px;font-weight:600;color:inherit;text-decoration:none;line-height:1.25}
-a.co-item-nom:hover{text-decoration:underline;text-underline-offset:2px}
-.co-item-txt small{font-size:12.5px;color:var(--pp-tinta-3,#616d80);line-height:1.4}
-.co-cant{grid-area:cant;display:inline-flex;align-items:center;height:36px;border:1px solid #dde3ec;border-radius:999px;background:#fff}
-.co-cant button{width:34px;height:34px;border:0;background:none;border-radius:999px;font:inherit;font-size:17px;line-height:1;color:inherit;cursor:pointer}
-.co-cant button:hover{background:#f0f3f8}
-.co-cant button:disabled{color:#c3cad5;cursor:default;background:none}
-.co-cant span{min-width:22px;text-align:center;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
-.co-cant-fija{grid-area:cant;justify-self:center;font-size:13px;color:var(--pp-tinta-2,#4d5a70);font-variant-numeric:tabular-nums}
-.co-precio{grid-area:precio;justify-self:end;font-size:14.5px;font-weight:600;font-variant-numeric:tabular-nums}
-.co-incluido{grid-area:precio;justify-self:end;font-size:13px;font-weight:600;color:var(--pp-navy,#0a192f)}
-.co-quitar{grid-area:quitar;justify-self:end;background:none;border:0;padding:6px 0;font:inherit;font-size:12.5px;color:var(--pp-tinta-3,#616d80);cursor:pointer;text-decoration:underline;text-decoration-color:transparent;text-underline-offset:2px}
-.co-quitar:hover{color:var(--pp-navy,#0a192f);text-decoration-color:currentColor}
-.co-extra{border-bottom:0;padding-bottom:4px}
-.co-extra .co-item-nom{display:flex;align-items:center;gap:8px}
-@media (max-width:640px){
-  .co-item{grid-template-columns:52px minmax(0,1fr) auto;grid-template-areas:"img txt quitar" "img cant precio";row-gap:8px;column-gap:12px}
-  .co-cant,.co-cant-fija{justify-self:start}
-  .co-quitar{align-self:start;padding-top:0}
+.co-form{background:#fff;border:1px solid #e3e8ef;border-radius:12px;padding:0 32px}
+/* fija al bajar; si es más alta que la pantalla, checkout.js baja su «top» para que se pegue por abajo
+   (el botón siempre queda a la vista, sin barra de desplazamiento propia) */
+.co-lado{position:sticky;top:84px}
+@media (max-width:960px){
+  .co-grid{grid-template-columns:1fr;gap:16px}
+  .co-lado{display:contents}
+  .co-resumen{order:1}.co-form{order:2}.co-accion{order:3}
 }
-.co-peldano{margin:14px 0 0;padding:10px 12px;border-radius:10px;background:#eef3f9;font-size:13px;color:var(--pp-tinta-2,#4d5a70)}
-.co-peldano b{color:var(--pp-navy,#0a192f)}
-.co-seguir{display:inline-block;margin-top:14px;font-size:13px;font-weight:500;color:var(--pp-navy,#0a192f);text-underline-offset:3px}
+@media (max-width:640px){.co-form{padding:0 18px}}
 
-/* 2 · datos */
-.co-etq{display:block;font-size:12.5px;font-weight:500;color:#2c3a52;margin:0 0 6px}
+/* los pasos */
+.co-sec{padding:28px 0 30px;border-top:1px solid #edf0f4;scroll-margin-top:84px}
+.co-sec:first-child{border-top:0}
+.co-h2{display:flex;align-items:center;gap:12px;font-size:19px;font-weight:600;letter-spacing:-.01em;margin:0 0 20px}
+.co-paso{flex:0 0 30px;width:30px;height:30px;border-radius:999px;background:var(--pp-navy,#0a192f);color:#fff;font-size:14px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.co-hecho{display:inline-flex;color:#1e6f55}
+.co-hecho[hidden]{display:none}
+.co-hecho svg{width:20px;height:20px;display:block}
+.co-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.co-sec>.co-sub{margin:-8px 0 18px;font-size:14px}
+
+/* campos */
+.co-etq{display:block;font-size:13px;font-weight:500;color:#26344b;margin:0 0 7px}
 .co-opc{font-weight:400;color:var(--pp-tinta-3,#616d80)}
 .co-campo{width:100%;box-sizing:border-box;border:1px solid #d9e0ea;border-radius:10px;padding:11px 14px;font:inherit;font-size:15px;color:inherit;background:#fff;outline:none;transition:border-color .15s,box-shadow .15s}
 .co-campo:focus{border-color:var(--pp-navy,#0a192f);box-shadow:0 0 0 3px rgba(10,25,47,.08)}
 .co-campo:disabled{background:#f6f8fb;color:#8a94a6}
 .co-campo[aria-invalid="true"]{border-color:#b42318}
 textarea.co-campo{min-height:76px;resize:vertical}
-.co-campos{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px}
+.co-campos{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .co-campos>div{min-width:0}
 .co-ancho{grid-column:1/-1}
 @media (max-width:640px){.co-campos{grid-template-columns:1fr}}
@@ -114,6 +97,7 @@ textarea.co-campo{min-height:76px;resize:vertical}
 .co-nota{font-size:12.5px;line-height:1.5;margin:8px 0 0;color:var(--pp-tinta-3,#616d80)}
 
 /* opciones (envío, oficina, pago): radios de verdad dentro de tarjetas */
+.co-grupo{border:0;padding:0;margin:0 0 18px;min-width:0}
 .co-radio{position:absolute;opacity:0;width:1px;height:1px;margin:0;pointer-events:none}
 .co-opcion{position:relative;display:flex;align-items:flex-start;gap:12px;width:100%;box-sizing:border-box;text-align:left;background:#fff;border:1.5px solid #e1e7ef;border-radius:12px;padding:13px 15px;cursor:pointer;transition:border-color .15s,background-color .15s}
 .co-opcion:hover{border-color:#b9c5d6}
@@ -128,7 +112,6 @@ textarea.co-campo{min-height:76px;resize:vertical}
 .co-opcion-txt small{font-size:12px;color:var(--pp-tinta-3,#616d80);line-height:1.4}
 .co-opcion-txt em{font-style:normal;font-size:11.5px;color:#8a94a6}
 .co-moneda{font-style:normal;font-size:11px;font-weight:600;color:var(--pp-tinta-2,#4d5a70);border:1px solid #e1e7ef;border-radius:6px;padding:2px 8px;background:#fff;align-self:center}
-.co-grupo{border:0;padding:0;margin:0 0 16px;min-width:0}
 .co-transportes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media (max-width:420px){.co-transportes{grid-template-columns:1fr}}
 .co-oficinas-cab{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:18px 0 8px}
@@ -140,38 +123,105 @@ textarea.co-campo{min-height:76px;resize:vertical}
 .co-oficinas .co-opcion:last-child{border-bottom:0}
 .co-oficinas .co-opcion:has(.co-radio:focus-visible){outline-offset:-2px}
 .co-oficinas .co-nota{padding:12px 15px;margin:0}
-.co-metodos{display:flex;flex-direction:column;gap:10px}
-.co-metodos .co-opcion{align-items:center}
 
-/* resumen (columna derecha; en el teléfono, al final) */
-.co-resumen{position:sticky;top:84px;background:#fff;border:1px solid #e3e9f1;border-radius:12px;padding:22px}
-@media (max-width:960px){.co-resumen{position:static}}
-.co-resumen .co-h2{margin-bottom:12px}
-.co-totales{margin:0;font-size:14px}
+/* métodos de pago: la tarjeta elegida se abre con los datos para pagar */
+.co-metodos{display:flex;flex-direction:column;gap:10px}
+.co-metodo{border:1.5px solid #e1e7ef;border-radius:12px;background:#fff;transition:border-color .15s}
+.co-metodo:hover{border-color:#b9c5d6}
+.co-metodo:has(.co-radio:checked){border-color:var(--pp-navy,#0a192f)}
+.co-metodo.off,.co-metodo.off:hover{border-color:#e1e7ef}
+.co-metodo .co-opcion{border:0;background:transparent;align-items:center}
+.co-metodo .co-opcion.off{background:#f7f9fc;border-radius:10px}
+.co-metodo:has(.co-radio:checked) .co-opcion{background:#f7f9fc;border-radius:10px 10px 0 0}
+.co-metodo-cuerpo{padding:4px 16px 18px}
+.co-metodo-cuerpo:empty{display:none}
+.co-copiable{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #e1e7ef;border-radius:10px;padding:12px 14px;margin:12px 0 10px;background:#fff}
+.co-copiable>div{min-width:0}
+.co-copiable-etq{margin:0 0 3px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--pp-tinta-3,#616d80)}
+.co-copiable-val{margin:0;font-size:15px;font-weight:600;overflow-wrap:anywhere}
+.co-copiar{flex-shrink:0;height:34px;padding:0 14px;border:1px solid #d5dce7;border-radius:999px;background:#fff;font:inherit;font-size:12.5px;font-weight:600;color:inherit;cursor:pointer}
+.co-copiar:hover{border-color:var(--pp-navy,#0a192f)}
+.co-txt{font-size:13.5px;line-height:1.55;color:var(--pp-tinta-2,#4d5a70);margin:6px 0}
+.co-txt b{color:var(--pp-navy,#0a192f)}
+.co-pasos-pago{list-style:none;margin:10px 0 16px;padding:0;display:flex;flex-direction:column;gap:5px;font-size:13.5px;line-height:1.5;color:var(--pp-tinta-2,#4d5a70)}
+
+/* resumen (derecha; en el teléfono va primero) */
+.co-resumen{background:#fff;border:1px solid #e3e8ef;border-radius:12px;padding:22px 24px}
+@media (max-width:640px){.co-resumen{padding:18px}}
+.co-resumen-cab{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-bottom:16px;border-bottom:1px solid #edf0f4}
+.co-resumen-cab .co-h2{margin:0;font-size:17px}
+.co-cuenta{font-size:13px;color:var(--pp-tinta-3,#616d80);white-space:nowrap}
+.co-cuenta a{color:inherit;text-underline-offset:2px;margin-left:6px}
+.co-cuenta a:hover{color:var(--pp-navy,#0a192f)}
+.co-items{list-style:none;margin:0;padding:0}
+.co-item{display:grid;grid-template-columns:56px minmax(0,1fr) auto;grid-template-areas:"img nom precio" "img det det" "img acc acc";column-gap:14px;row-gap:2px;align-items:center;padding:16px 0;border-bottom:1px solid #edf0f4}
+.co-mini,.co-plus{grid-area:img;align-self:start;width:56px;height:56px;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.co-mini{background:linear-gradient(#f3f6fa,#e9eff7)}
+.co-mini img{width:100%;height:100%;object-fit:contain;padding:4px;box-sizing:border-box;display:block}
+.co-plus{background:var(--pp-navy,#0a192f);color:#fff}
+.co-plus svg{width:24px;height:24px;display:block}
+.co-item-nom{grid-area:nom;font-size:14.5px;font-weight:600;color:inherit;text-decoration:none;line-height:1.3;min-width:0}
+a.co-item-nom:hover{text-decoration:underline;text-underline-offset:2px}
+.co-item-det{grid-area:det;font-size:12.5px;color:var(--pp-tinta-3,#616d80);line-height:1.4}
+.co-precio{grid-area:precio;justify-self:end;font-size:14.5px;font-weight:600;font-variant-numeric:tabular-nums}
+.co-incluido{grid-area:precio;justify-self:end;font-size:13.5px;font-weight:600;color:var(--pp-navy,#0a192f)}
+.co-item-acc{grid-area:acc;display:flex;align-items:center;gap:14px;margin-top:8px}
+.co-cant{display:inline-flex;align-items:center;height:32px;border:1px solid #dde3ec;border-radius:999px;background:#fff}
+.co-cant button{width:30px;height:30px;border:0;background:none;border-radius:999px;font:inherit;font-size:16px;line-height:1;color:inherit;cursor:pointer}
+.co-cant button:hover{background:#f0f3f8}
+.co-cant button:disabled{color:#c3cad5;cursor:default;background:none}
+.co-cant span{min-width:20px;text-align:center;font-size:13.5px;font-weight:600;font-variant-numeric:tabular-nums}
+.co-quitar{background:none;border:0;padding:4px 0;font:inherit;font-size:12.5px;color:var(--pp-tinta-3,#616d80);cursor:pointer;text-decoration:underline;text-decoration-color:transparent;text-underline-offset:2px}
+.co-quitar:hover{color:var(--pp-navy,#0a192f);text-decoration-color:currentColor}
+.co-extra .co-item-det{grid-row:2/4;align-self:start}
+.co-peldano{margin:14px 0 0;padding:10px 12px;border-radius:10px;background:#eef3f9;font-size:12.5px;color:var(--pp-tinta-2,#4d5a70)}
+.co-peldano b{color:var(--pp-navy,#0a192f)}
+.co-totales{margin:16px 0 0;font-size:14px}
 .co-totales>div{display:flex;justify-content:space-between;gap:12px;padding:5px 0}
 .co-totales dt{color:var(--pp-tinta-2,#4d5a70)}
 .co-totales dd{margin:0;font-variant-numeric:tabular-nums;text-align:right}
 .co-totales .co-envio dd{color:var(--pp-tinta-2,#4d5a70)}
 .co-totales .co-dto dd{font-weight:600}
-.co-totales .co-total{border-top:1px solid #e6ebf2;margin-top:8px;padding-top:12px;align-items:baseline}
-.co-totales .co-total dt{font-size:15px;font-weight:600;color:inherit}
-.co-totales .co-total dd{font-size:22px;font-weight:700;letter-spacing:-.01em}
-.co-totales .co-bs dt,.co-totales .co-bs dd{font-size:13px;color:var(--pp-tinta-3,#616d80)}
-.co-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--pp-navy,#0a192f);color:#fff;border:0;border-radius:999px;height:50px;padding:0 26px;font:inherit;font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;transition:background-color .15s}
+.co-totales .co-total{border-top:1px solid #edf0f4;margin-top:10px;padding-top:14px;align-items:baseline}
+.co-totales .co-total dt{font-size:16px;font-weight:600;color:inherit}
+.co-totales .co-total dd{font-size:24px;font-weight:700;letter-spacing:-.01em}
+.co-orden{margin:14px 0 0;padding-top:12px;border-top:1px solid #edf0f4;font-size:12px;color:var(--pp-tinta-3,#616d80);display:flex;justify-content:space-between;gap:12px}
+.co-orden span:last-child{font-family:"JetBrains Mono",ui-monospace,monospace}
+
+/* el botón y lo que pasa al pulsarlo */
+.co-accion{margin-top:14px}
+@media (max-width:960px){.co-accion{margin-top:0;background:#fff;border:1px solid #e3e8ef;border-radius:12px;padding:18px}}
+.co-accion-total{display:none;justify-content:space-between;align-items:baseline;margin:0 0 12px;font-weight:600}
+.co-accion-total b{font-size:22px;font-variant-numeric:tabular-nums}
+@media (max-width:960px){.co-accion-total{display:flex}}
+.co-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--pp-navy,#0a192f);color:#fff;border:0;border-radius:999px;height:52px;padding:0 26px;font:inherit;font-size:15.5px;font-weight:600;cursor:pointer;text-decoration:none;transition:background-color .15s}
 .co-btn:hover{background:var(--pp-navy-700,#112240)}
 .co-btn:active{background:var(--pp-navy-500,#1b3a63)}
 .co-btn:focus-visible{outline:2px solid var(--pp-navy,#0a192f);outline-offset:3px}
-.co-enviar{width:100%;margin-top:18px}
+.co-btn:disabled{cursor:progress;background:var(--pp-navy-500,#1b3a63)}
+.co-btn svg{width:18px;height:18px;flex-shrink:0}
+.co-finalizar{width:100%}
+.co-girando{width:18px;height:18px;border-radius:999px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;box-sizing:border-box;animation:co-giro .8s linear infinite}
+@keyframes co-giro{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.co-girando{animation-duration:2.4s}}
 .co-falta{margin:10px 0 0;font-size:12.5px;line-height:1.5;color:var(--pp-tinta-2,#4d5a70);text-align:center}
 .co-falta.co-alerta{color:#b42318}
-.co-orden{margin:14px 0 0;padding-top:12px;border-top:1px solid #eef1f5;font-size:12px;color:var(--pp-tinta-3,#616d80);display:flex;justify-content:space-between;gap:12px}
-.co-orden span:last-child{font-family:"JetBrains Mono",ui-monospace,monospace}
+.co-falta:empty{display:none}
+.co-aviso{margin-top:14px;background:#fff;border:1px solid #efd3ce;border-radius:12px;padding:20px 18px;text-align:center}
+.co-aviso-ico{width:36px;height:36px;margin:0 auto 10px;border-radius:999px;background:#fbeceb;color:#b42318;display:flex;align-items:center;justify-content:center}
+.co-aviso-ico svg{width:20px;height:20px}
+.co-aviso p{margin:0 0 14px;font-size:14px;line-height:1.55;color:var(--pp-tinta-2,#4d5a70)}
+.co-aviso p b{display:block;font-size:15px;color:var(--pp-navy,#0a192f);margin-bottom:2px}
+.co-aviso .co-btn{width:100%}
+.co-aviso .co-ws-num{margin:10px 0 0;font-size:14px;font-weight:600;color:var(--pp-navy,#0a192f);font-variant-numeric:tabular-nums}
+.co-aviso .co-ws-num a{color:inherit;text-decoration:none}
 
-/* listo / vacío */
-.co-listo{max-width:560px;margin:24px auto;text-align:center;background:#fff;border:1px solid #e3e9f1;border-radius:12px;padding:40px 24px}
+/* vacío */
+.co-listo{max-width:560px;margin:24px auto;text-align:center;background:#fff;border:1px solid #e3e8ef;border-radius:12px;padding:40px 24px}
 .co-listo .co-h1{font-size:24px;margin-bottom:12px}
-.co-listo .co-txt{font-size:14px;line-height:1.55;color:var(--pp-tinta-2,#4d5a70);margin:8px 0}
+.co-listo .co-txt{font-size:14px}
 .co-listo .co-btn{margin-top:22px}
+.co-form .co-listo{border:0;margin:0 auto}
 
 /* ---- Kit de aplicación en el carrito lateral: el «+» de la marca ---- */
 .pp-kit{display:flex;align-items:center;gap:10px;padding:12px 0}

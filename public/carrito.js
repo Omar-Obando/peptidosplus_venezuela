@@ -222,8 +222,23 @@
     const u = unidades();
     if (contadorCabecera) contadorCabecera.textContent = String(u);
     pintarTotales();
+    pintarKit();
     pintarBadge(u);
     if (pintarPagina) pintarPagina();
+    // la página de pago (checkout.js) escucha para repintar el pedido si se cambia desde el panel
+    try { document.dispatchEvent(new CustomEvent('pp:carrito')); } catch (e) { /* navegador viejo */ }
+  }
+
+  /* ---------- el kit de aplicación, como extra (2026-09-29) ----------
+   * Una fila con el «+» de la marca: cuántos kits van (uno por péptido) e «Incluido».
+   * Sin péptidos en el carrito (solo agua, o vacío) no se muestra. */
+  const filaKit = dialogo.querySelector('[data-pp-kit]');
+  function pintarKit() {
+    if (!filaKit) return;
+    const n = unidadesPeptidos();
+    filaKit.style.display = n ? '' : 'none';
+    const t = filaKit.querySelector('[data-pp-kit-n]');
+    if (t) t.textContent = n > 1 ? 'Kit de aplicación × ' + n : 'Kit de aplicación';
   }
 
   /* ---------- totales del panel ----------
@@ -445,8 +460,8 @@
             '<span class="font-semibold text-[#1e6f55]">−' + usd(d) + '</span>';
         }
       }
-      // El flete nunca va incluido: se paga en la agencia al retirar.
-      if (envEl) { envEl.textContent = 'Se paga al retirar (MRW / Zoom)'; envEl.classList.remove('text-green-600'); envEl.setAttribute('data-value', '0'); }
+      // El flete nunca va incluido: es cobro a destino, en la agencia.
+      if (envEl) { envEl.textContent = 'Cobro a destino (MRW / Zoom)'; envEl.classList.remove('text-green-600'); envEl.setAttribute('data-value', '0'); }
     };
     pintarPagina();
   }

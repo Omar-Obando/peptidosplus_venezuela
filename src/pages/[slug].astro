@@ -69,5 +69,8 @@ if (INTERNAL_PAGES.has(slug)) {
   });
 }
 
-return new Response('Not Found', { status: 404 });
+// Fuera de los slugs conocidos: a la página 404 del sitio (cabecera, pie, estilos), como antes de servir las páginas
+// internas por aquí. Un «Not Found» en texto plano dejaba al visitante en una página en blanco (2026-09-29).
+// (Astro.rewrite('/404') no sirve: 404.astro está pre-renderizada y el worker no tiene su componente → error 500.)
+return Astro.redirect('/404');
 ---

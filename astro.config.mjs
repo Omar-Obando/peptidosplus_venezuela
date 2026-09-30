@@ -52,9 +52,9 @@ export default defineConfig({
     // sitemap(),
     react(),
     compress({
-      CSS: false,
-      HTML: false,
-      JavaScript: false,
+      CSS: true,
+      HTML: true,
+      JavaScript: true,
       Image: false,
       SVG: false,
     }),

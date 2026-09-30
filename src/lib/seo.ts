@@ -42,11 +42,15 @@ export function stripHtml(html: string): string {
   return wpStripHtml(html);
 }
 
-/** Hosts that count as internal (root + www only — other subdomains like the CMS are external). */
+/** Hosts that count as internal (root, www y cualquier subdominio de peptidosplus.com —
+ *  así los sitios por país (ni., colombia., pa., us., es.) pasan autoridad sin nofollow). */
 const INTERNAL_LINK_HOSTS = new Set(['ve.peptidosplus.com', 'www.ve.peptidosplus.com']);
 
 function isInternalHost(host: string): boolean {
-  return INTERNAL_LINK_HOSTS.has(host.toLowerCase());
+  const h = host.toLowerCase();
+  if (INTERNAL_LINK_HOSTS.has(h)) return true;
+  // Cualquier subdominio de peptidosplus.com es interno (red multi-país).
+  return h === 'peptidosplus.com' || h.endsWith('.peptidosplus.com');
 }
 
 /** Is `href` navigational internal authority (relative / same-site / anchor / mailto: / tel:)? */
@@ -162,7 +166,11 @@ export function seoTitle(post: any, fallback = ''): string {
   if (!post) return fallback;
   try {
     const seo = extractSEOData(post);
-    return seo.title || post.title?.rendered || fallback;
+    let t = seo.title || post.title?.rendered || fallback;
+    // Normaliza el sufijo de sitio genérico/duplicado:
+    // "…- Site Title" -> "…"  (si el CMS lo trae incrustado)
+    t = t.replace(/\s*[-–—]\s*Site Title\s*$/i, '').trim();
+    return t;
   } catch {
     return post?.title?.rendered || fallback;
   }

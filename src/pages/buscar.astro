@@ -10,6 +10,7 @@ import XIcon from '@lucide/astro/icons/x';
 export const prerender = false;
 
 const query = Astro.url.searchParams.get('q')?.trim() || '';
+const safeQuery = query.replace(/</g, '&lt;').replace(/>/g, '&gt;'); // sanitiza para reflejar de forma segura
 const categoryFilter = Astro.url.searchParams.get('category') || '';
 
 const allProducts = await getLocalProducts();
@@ -38,25 +39,28 @@ if (categoryFilter) {
         (product.categories || []).some((c: any) => c.slug === categoryFilter)
     );
 }
+
+// JSON-LD construido en frontmatter para escapar "<" y evitar XSS/parse issues.
+const ldJson = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: safeQuery ? `Búsqueda: ${safeQuery}` : 'Buscar productos',
+    url: 'https://ve.peptidosplus.com/buscar',
+    potentialAction: {
+        '@type': 'SearchAction',
+        target: 'https://ve.peptidosplus.com/buscar?q={search_term_string}',
+        'query-input': 'required name=search_term_string',
+    },
+}).replace(/</g, '\\u003c');
 ---
 
 <BaseLayout
-  title={query ? `Búsqueda: ${query}` : 'Buscar productos'}
+  title={safeQuery ? `Búsqueda: ${safeQuery}` : 'Buscar productos'}
   description="Busca péptidos de investigación en el catálogo de Peptidos Plus."
   canonicalUrl={`/buscar${query ? `?q=${encodeURIComponent(query)}` : ''}`}
 >
   <slot name="head">
-    <script type="application/ld+json" is:inline set:html={JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'WebPage',
-      name: query ? `Búsqueda: ${query}` : 'Buscar productos',
-      url: `https://ve.peptidosplus.com/buscar`,
-      potentialAction: {
-        '@type': 'SearchAction',
-        target: 'https://ve.peptidosplus.com/buscar?q={search_term_string}',
-        'query-input': 'required name=search_term_string',
-      },
-    })} />
+    <script type="application/ld+json" is:inline set:html={ldJson} />
   </slot>
 
     <main id="main-content">
@@ -74,7 +78,7 @@ if (categoryFilter) {
                             <input
                                 type="text"
                                 name="q"
-                                value={query}
+                                value={safeQuery}
                                 placeholder="What are you looking for?"
                                 autocomplete="off"
                                 class="w-full pl-12 pr-28 py-4 rounded-2xl border border-outline bg-surface text-content text-lg placeholder:text-content-lighter focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary shadow-sm"
@@ -132,7 +136,7 @@ if (categoryFilter) {
                 <div class="flex items-center justify-between mb-8">
                     <p class="text-content-light">
                         <span id="product-count-range"></span>{results.length === 0 ? 'No results' : `${results.length} result${results.length === 1 ? '' : 's'}`} for
-                        <span class="font-semibold text-content">"{query}"</span>
+                        <span class="font-semibold text-content">"{safeQuery}"</span>
                         {categoryFilter && (
                             <span> in <span class="font-semibold text-content">{categories.find(c => c.slug === categoryFilter)?.name || categoryFilter}</span></span>
                         )}

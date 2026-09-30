@@ -38,7 +38,7 @@ const {
   twitter,
 } = Astro.props;
 
-const fullTitle = rawTitle || `${title} — ${SITE.name}`;
+const fullTitle = rawTitle || (title && (title.includes(SITE.name) || /- Site Title/i.test(title)) ? title : `${title} — ${SITE.name}`);
 const ogTitle = openGraph?.title || fullTitle;
 const ogDescription = openGraph?.description || description;
 const ogImage = openGraph?.image || image || '/assets/img/og-peptidos-plus.jpg';

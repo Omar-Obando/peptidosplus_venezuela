@@ -5,6 +5,7 @@
  */
 import BrandLayout from '@/layouts/BrandLayout.astro';
 import { safePosts, safeCategories, postTitle, postExcerpt, postImage, catName, esDate, readTime } from '@/lib/blog';
+import { seoTitle } from '@/lib/seo';
 import { SITE } from '@/lib/site';
 
 const posts = await safePosts(100);
@@ -23,7 +24,7 @@ const blogLd = {
   description,
   blogPost: posts.slice(0, 10).map((p) => ({
     '@type': 'BlogPosting',
-    headline: postTitle(p),
+    headline: seoTitle(p, postTitle(p)),
     url: `${SITE.url}/blog/${p.slug}`,
     datePublished: p.date,
     image: postImage(p) || undefined,
@@ -37,7 +38,7 @@ const itemListLd = {
     '@type': 'ListItem',
     position: i + 1,
     url: `${SITE.url}/blog/${p.slug}`,
-    name: postTitle(p),
+    name: seoTitle(p, postTitle(p)),
   })),
 };
 ---
@@ -62,7 +63,7 @@ const itemListLd = {
         {posts.map((p) => (
           <a class="pg-entrada" href={`/blog/${p.slug}`} data-cat={catName(p)}>
             <span class="pg-entrada-meta"><b class="font-poppins">{catName(p)}</b><span>{esDate(p.date)} · {readTime(p)} min</span></span>
-            <h3>{postTitle(p)}</h3>
+            <h3>{seoTitle(p, postTitle(p))}</h3>
             <p>{postExcerpt(p, 150)}</p>
           </a>
         ))}

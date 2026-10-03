@@ -29,6 +29,10 @@ pnpm-debug.log*
 .env.local
 .jwt-public-key
 
+# Secretos locales de wrangler dev (claves de WooCommerce y de Gmail para /api/pedido). NUNCA a git.
+.dev.vars
+.dev.vars.*
+
 # macOS-specific files
 .DS_Store
 

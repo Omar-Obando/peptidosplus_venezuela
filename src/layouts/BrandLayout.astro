@@ -1,7 +1,7 @@
 ---
 /**
  * BrandLayout — layout global con el diseño de marca de Peptidos Plus
- * (el de la portada: navy #0a192f, Hanken Grotesk + JetBrains Mono).
+ * (el de la portada: navy #0a192f, Anek Telugu + Poppins + JetBrains Mono).
  *
  * El CSS vive en /assets/css/: 1a78e74ce72d3608-19ad952d.tokenized.css
  * (utilidades), pp-tokens.css, marca-navy.css, template-theme.css y
@@ -15,6 +15,9 @@ import GeoCountryBanner from '@/components/GeoCountryBanner.astro';
 import cabecera from '../cromo/cabecera.html?raw';
 import pie from '../cromo/pie.html?raw';
 import flotante from '../cromo/flotante.html?raw';
+// El carrito lateral (el mismo de las páginas estáticas): lo abre carrito.js al pulsar el carrito de la
+// cabecera. Sale de public/store.html con panel-portada.js. No editar aquí.
+import panel from '../cromo/panel.html?raw';
 
 interface Props {
   title: string;
@@ -75,7 +78,7 @@ const detectCountry = Astro.request.headers.get('CF-IPCountry') || '';
     <link rel="stylesheet" href="/assets/css/marca-navy.css" />
     <!-- Tokens del template (text-primary, bg-surface, etc. para tienda/cuenta) -->
     <link rel="stylesheet" href="/assets/css/template-theme.css" />
-    <link rel="preload" href="/assets/fonts/hanken-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/assets/fonts/anek-telugu-latin.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="/assets/css/pp-sitio.css" />
 
     <!-- Open Graph -->
@@ -102,12 +105,12 @@ const detectCountry = Astro.request.headers.get('CF-IPCountry') || '';
 
   <style is:global>
     /* Letras de marca: el CSS compilado usa var(--font-poppins)/var(--font-anek)/
-       var(--font-roboto). Todas apuntan a Hanken Grotesk, la letra del diseño
-       nuevo (pp-sitio.css hace lo mismo en el body). */
+       var(--font-roboto). Apuntan a las letras del sitio (las de Amino Club), que define
+       pp-sitio.css: --pp-letra (Anek Telugu) y --pp-letra-boton (Poppins). */
     :root {
-      --font-poppins: "Hanken Grotesk", system-ui, sans-serif;
-      --font-anek: "Hanken Grotesk", system-ui, sans-serif;
-      --font-roboto: "Hanken Grotesk", system-ui, sans-serif;
+      --font-poppins: var(--pp-letra-boton);
+      --font-anek: var(--pp-letra);
+      --font-roboto: var(--pp-letra);
     }
 
     /* Reveal-on-scroll: paired with public/behaviors.js (IntersectionObserver
@@ -155,6 +158,7 @@ const detectCountry = Astro.request.headers.get('CF-IPCountry') || '';
 
     <Fragment set:html={pie} />
     <Fragment set:html={flotante} />
+    <Fragment set:html={panel} />
 
     <!-- JS de comportamiento, el mismo de las páginas estáticas de public/ -->
     <script src="/behaviors.js" defer></script>

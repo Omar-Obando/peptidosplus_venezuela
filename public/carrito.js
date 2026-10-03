@@ -107,6 +107,8 @@
   $$('[data-testid="cart-item"]', lista).forEach((n) => n.remove());   // las líneas capturadas eran de ejemplo
 
   const contadorCabecera = dialogo.querySelector('h2 span');
+  // el contador de «Tu carrito», en una pastilla verde suave (estilos en pp-tokens.css)
+  if (contadorCabecera) contadorCabecera.className = 'pp-cnt';
   const subtotalEl = (() => {
     const s = $$('span', dialogo).find((x) => x.textContent.trim() === 'Subtotal');
     const e = s ? s.parentElement.querySelector('.text-xl') : null;
@@ -115,6 +117,10 @@
     if (e) e.setAttribute('data-pp-total', '');
     return e;
   })();
+  // el botón del pie: «Finalizar compra» con productos, «Ver el catálogo» con el carrito vacío
+  const botonFin = $$('button', dialogo).find((b) => /finalizar compra|ver el cat[aá]logo/i.test(b.textContent)) || null;
+  const textoFin = botonFin ? (botonFin.querySelector('span') || botonFin) : null;
+  if (botonFin) botonFin.setAttribute('data-pp-finalizar', '');
   /* ---------- el hueco del panel ----------
    * Con pocas líneas quedaba un vacío enorme entre la venta cruzada y el pie.
    * El área que hace scroll pasa a columna flexible y abajo del todo se ancla
@@ -130,9 +136,51 @@
     zonaScroll.appendChild(notaUso);
   }
 
+  /* ---------- el «?» del kit de aplicación (2026-10-03) ----------
+   * Junto al nombre del kit va un botón pequeño que abre un globo con lo que trae. Se abre con clic, toque o
+   * teclado (Enter o espacio sobre el botón) y se cierra igual, con Escape o al pulsar en cualquier otro sitio.
+   * aria-expanded y aria-controls se ponen AQUÍ y no en el HTML: behaviors.js carga antes y alterna por su
+   * cuenta todo [aria-expanded] y todo button[aria-describedby] que encuentra (el globo se abría y se cerraba
+   * en el mismo clic). */
+  /* Desde el 2026-10-03 (tarde) la fila es pequeña y de un renglón, como la «Shipment Protection … Free» de la
+   * referencia: círculo verde con palomita · «Kit de aplicación» · «?» · «Incluido» en verde. Sin icono y sin «× n».
+   * La fila ENTERA se escribe aquí al montar: así no depende del marcado que traiga cada página (las 73 estáticas,
+   * la portada y las que pinta el servidor llevan la misma, pero una página vieja en caché también queda bien). */
+  const KIT_HTML = '<svg class="pp-kit-ok" viewBox="0 0 18 18" width="18" height="18" aria-hidden="true" focusable="false"><circle cx="9" cy="9" r="9" fill="#22c55e"></circle><path d="M5.3 9.3l2.5 2.5 5-5.3" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path></svg>' +
+    '<span class="pp-kit-n" data-pp-kit-n>Kit de aplicación</span>' +
+    '<button type="button" class="pp-kit-ayuda" data-pp-kit-ayuda aria-label="Qué trae el kit de aplicación">?</button>' +
+    '<span class="pp-kit-globo" id="pp-kit-globo" role="note" hidden>Agua bacteriostática de 3 ml, 10 jeringas y 10 toallitas con alcohol por cada péptido.</span>' +
+    '<span class="pp-kit-incl">Incluido</span>';
+  let filaKit = dialogo.querySelector('[data-pp-kit]');
+  if (!filaKit) { filaKit = document.createElement('div'); filaKit.setAttribute('data-pp-kit', ''); lista.appendChild(filaKit); }
+  filaKit.className = 'pp-kit';
+  filaKit.innerHTML = KIT_HTML;
+  const ayudaKit = filaKit ? filaKit.querySelector('[data-pp-kit-ayuda]') : null;
+  const globoKit = filaKit ? filaKit.querySelector('.pp-kit-globo') : null;
+  if (ayudaKit && globoKit) { ayudaKit.setAttribute('aria-controls', globoKit.id); ayudaKit.setAttribute('aria-expanded', 'false'); }
+  const globoAbierto = () => !!(ayudaKit && globoKit && !globoKit.hidden);
+  function verGlobo(si) {
+    if (!ayudaKit || !globoKit) return;
+    globoKit.hidden = !si;
+    ayudaKit.setAttribute('aria-expanded', String(si));
+    // la flecha del globo apunta al «?»
+    if (si) globoKit.style.setProperty('--pp-kit-x', (ayudaKit.offsetLeft + ayudaKit.offsetWidth / 2) + 'px');
+  }
+  if (ayudaKit) ayudaKit.addEventListener('click', (e) => { e.preventDefault(); verGlobo(!globoAbierto()); });
+  document.addEventListener('click', (e) => { if (globoAbierto() && !ayudaKit.contains(e.target) && !globoKit.contains(e.target)) verGlobo(false); }, true);
+
   /* ---------- abrir / cerrar ---------- */
+  // Abierto con el teclado (Enter sobre el carrito de la cabecera): el foco entra al panel y al cerrar vuelve al botón
+  const botonCerrar = dialogo.querySelector('[aria-label="Cerrar carrito"], [aria-label="Close cart"], [aria-label="Cerrar"]');
+  let vuelveA = null;
   const abrir = () => { montaje.hidden = false; document.body.style.overflow = 'hidden'; render(); };
-  const cerrar = () => { montaje.hidden = true; document.body.style.overflow = ''; };
+  const cerrar = () => {
+    const dentro = panel.contains(document.activeElement);
+    verGlobo(false);
+    montaje.hidden = true; document.body.style.overflow = '';
+    if (vuelveA && dentro && document.contains(vuelveA)) vuelveA.focus();
+    vuelveA = null;
+  };
 
   // Fuera del panel = cerrar (el fondo oscuro y el envoltorio están fuera del panel)
   // Se decide en fase de captura: si el clic re-pinta las líneas, el botón
@@ -141,7 +189,11 @@
   dialogo.addEventListener('click', (e) => { clicDentro = panel.contains(e.target); }, true);
   dialogo.addEventListener('click', () => { if (!clicDentro) cerrar(); });
   $$('[aria-label="Close cart"], [aria-label="Cerrar carrito"], [aria-label="Cerrar"]', dialogo).forEach((b) => b.addEventListener('click', (e) => { e.preventDefault(); cerrar(); }));
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !montaje.hidden) cerrar(); });
+  // Escape cierra primero el globo del kit (y devuelve el foco a su «?»); si no hay globo, el panel
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || montaje.hidden) return;
+    if (globoAbierto()) { verGlobo(false); ayudaKit.focus(); } else cerrar();
+  });
   $$('a[href="#"]', dialogo).forEach((a) => a.addEventListener('click', (e) => e.preventDefault()));
 
   /* ---------- operaciones ---------- */
@@ -159,6 +211,9 @@
   function vaciar() { items = []; guardar(); render(); }
   // Ficha de cada producto: producto-<id>.html (la genera generar-fichas.js)
   const fichaDe = (it) => 'producto-' + it.id + '.html';
+  // Rutas desde la raíz del sitio: el panel también va en páginas con ruta anidada (/blog/…), donde
+  // «assets/…», «producto-….html» o «checkout.html» a secas apuntarían dentro de /blog/
+  const raiz = (u) => (!u || /^(?:[a-z][a-z0-9+.-]*:|\/)/i.test(u) ? u : '/' + u);
 
   /* ---------- pintado ---------- */
   // La miniatura del carrito: el RECORTE del vial (assets/viales-ficha), no la
@@ -185,13 +240,33 @@
     return w;
   }
 
-  function lineaDe(it) {
+  /* ---- lo que paga cada línea (2026-10-03) ----
+   * Con descuento por cantidad, cada péptido enseña su importe original tachado y al lado lo que paga, en verde.
+   * El descuento se reparte al céntimo: cada línea lleva su porcentaje redondeado y el ÚLTIMO péptido absorbe lo
+   * que sobre o falte, para que la suma de las líneas sea exactamente total(). El agua ni cuenta ni recibe.
+   * Devuelve, en el orden del carrito: { id, dosis, cant, antes, ahora } (en dólares). */
+  function preciosLineas() {
+    const d = descuentoPorCantidad();
+    const pep = peptidos(), ultimo = pep[pep.length - 1];
+    let resto = d ? Math.round(d.monto * 100) : 0;
+    return items.map((it) => {
+      const bruto = Math.round(subtotalLinea(it.precio, it.cant) * 100);
+      let dto = 0;
+      if (d && esPeptido(it)) {
+        dto = it === ultimo ? resto : Math.min(resto, Math.round(bruto * d.pct / 100));
+        resto -= dto;
+      }
+      return { id: it.id, dosis: it.dosis, cant: it.cant, antes: bruto / 100, ahora: (bruto - dto) / 100 };
+    });
+  }
+
+  function lineaDe(it, pl) {
     const n = plantilla.cloneNode(true);
     const q = n.querySelector('[aria-label^="Remove"], [aria-label^="Quitar"]');
     if (q) { q.setAttribute('aria-label', 'Quitar ' + it.nombre); q.addEventListener('click', (e) => { e.preventDefault(); quitar(it.id, it.dosis); }); }
     const img = n.querySelector('img');
-    if (img) { img.src = miniatura(it.img); img.alt = it.nombre; img.removeAttribute('srcset'); img.className = 'object-contain p-1.5 sm:p-2'; }
-    const enlaces = $$('a', n); enlaces.forEach((a) => { a.href = fichaDe(it); a.removeAttribute('data-href-original'); });
+    if (img) { img.src = raiz(miniatura(it.img)); img.alt = it.nombre; img.removeAttribute('srcset'); img.className = 'object-contain p-1.5 sm:p-2'; }
+    const enlaces = $$('a', n); enlaces.forEach((a) => { a.href = raiz(fichaDe(it)); a.removeAttribute('data-href-original'); });
     const nombre = enlaces.find((a) => a.textContent.trim().length > 0);
     if (nombre) nombre.textContent = it.nombre;
     const dosis = n.querySelector('.text-xs');
@@ -200,7 +275,19 @@
     if (listbox) listbox.parentElement.replaceChild(widgetCantidad(it), listbox);
     const precio = n.querySelector('[data-testid="product-price"]') || n.querySelector('.font-bold.text-black:last-child');
     if (precio) {
-      precio.textContent = usd(subtotalLinea(it.precio, it.cant));
+      const antes = pl ? pl.antes : subtotalLinea(it.precio, it.cant), ahora = pl ? pl.ahora : antes;
+      const conDto = ahora < antes;
+      precio.className = 'pp-precio' + (conDto ? ' pp-precio-dto' : '');
+      precio.textContent = usd(ahora);
+      const caja = precio.parentElement;
+      if (caja && caja !== n) caja.className = 'pp-linea-precio';
+      if (conDto) {
+        const t = document.createElement('span');
+        t.className = 'pp-tachado';
+        t.setAttribute('data-pp-antes', '');
+        t.textContent = usd(antes);
+        precio.parentElement.insertBefore(t, precio);
+      }
     }
     return n;
   }
@@ -211,12 +298,13 @@
       const v = document.createElement('div');
       v.setAttribute('data-pp-vacio', '');
       v.className = 'py-10 text-center';
-      v.innerHTML = '<p class="text-sm text-gray-500 mb-4">Tu carrito está vacío.</p>' +
-        '<a href="/store" class="inline-flex items-center justify-center h-10 px-5 rounded-full bg-black text-white text-sm font-medium">Ver catálogo</a>';
+      // el botón del pie pasa a ser «Ver el catálogo»: aquí solo va el aviso
+      v.innerHTML = '<p class="text-sm text-gray-500">Tu carrito está vacío.</p>';
       lista.insertBefore(v, lista.firstChild);
     } else {
       const frag = document.createDocumentFragment();
-      items.forEach((it) => frag.appendChild(lineaDe(it)));
+      const pls = preciosLineas();
+      items.forEach((it, i) => frag.appendChild(lineaDe(it, pls[i])));
       lista.insertBefore(frag, lista.firstChild);
     }
     const u = unidades();
@@ -229,58 +317,75 @@
     try { document.dispatchEvent(new CustomEvent('pp:carrito')); } catch (e) { /* navegador viejo */ }
   }
 
-  /* ---------- el kit de aplicación, como extra (2026-09-29) ----------
-   * Una fila con el «+» de la marca: cuántos kits van (uno por péptido) e «Incluido».
-   * Sin péptidos en el carrito (solo agua, o vacío) no se muestra. */
-  const filaKit = dialogo.querySelector('[data-pp-kit]');
+  /* ---------- el kit de aplicación (2026-09-29; fila pequeña con palomita verde desde 2026-10-03) ----------
+   * La fila la escribe este archivo al montar (KIT_HTML). Aquí solo se muestra o se esconde:
+   * sin péptidos en el carrito (solo agua, o vacío) no sale. */
   function pintarKit() {
     if (!filaKit) return;
     const n = unidadesPeptidos();
     filaKit.style.display = n ? '' : 'none';
-    const t = filaKit.querySelector('[data-pp-kit-n]');
-    if (t) t.textContent = n > 1 ? 'Kit de aplicación × ' + n : 'Kit de aplicación';
+    if (!n) verGlobo(false);
   }
 
-  /* ---------- totales del panel ----------
-   * Sin descuento se ve igual que siempre: una fila "Subtotal". Con descuento se
-   * desglosa —subtotal y descuento— y el número grande pasa a ser el Total. */
+  /* ---------- totales del panel (2026-10-03: con color, como el carrito de la referencia) ----------
+   *   · barra verde por tramos (3 · 6 · 10 péptidos) hacia el siguiente escalón, con «Lleva N péptidos más y el
+   *     descuento sube a X %» a un lado y el porcentaje que ya se lleva, en verde, al otro;
+   *   · «Subtotal»: con descuento, el importe original tachado y al lado lo que se paga, en negrita;
+   *   · «Descuento por cantidad (−5 %)» y su monto, en verde.
+   * Con el carrito vacío no hay barra y el botón del pie pasa a «Ver el catálogo». */
   const filaSubtotal = subtotalEl ? subtotalEl.closest('div.flex.items-center.justify-between') : null;
   const etiquetaSubtotal = filaSubtotal ? filaSubtotal.querySelector('span') : null;
-  let bloqueDto = null;
+  const pie = filaSubtotal ? filaSubtotal.parentElement : null;
+  const TRAMOS = ESCALERA.slice().reverse();   // 3 · 6 · 10
+  let bloqueEsc = null, bloqueDto = null, antesEl = null;
   function pintarTotales() {
     if (!subtotalEl) return;
     const s = subtotalItems(), d = descuento();
     subtotalEl.textContent = usd(total());
-    if (etiquetaSubtotal) etiquetaSubtotal.textContent = d > 0 ? 'Total' : 'Subtotal';
-    if (!bloqueDto && filaSubtotal && filaSubtotal.parentElement) {
-      bloqueDto = document.createElement('div');
-      bloqueDto.className = 'mt-3 space-y-1';
-      bloqueDto.setAttribute('data-pp-dto', '');
-      filaSubtotal.parentElement.insertBefore(bloqueDto, filaSubtotal);
+    if (etiquetaSubtotal) etiquetaSubtotal.textContent = 'Subtotal';
+    if (textoFin) textoFin.textContent = items.length ? 'Finalizar compra' : 'Ver el catálogo';
+    if (!antesEl && subtotalEl.parentElement) {
+      antesEl = document.createElement('span');
+      antesEl.className = 'pp-tachado pp-tachado-total';
+      antesEl.setAttribute('data-pp-antes', '');
+      subtotalEl.parentElement.insertBefore(antesEl, subtotalEl);
     }
-    if (!bloqueDto) return;
-    const m = descuentoPorCantidad(), sig = siguientePeldano();
-    bloqueDto.hidden = !(d > 0 || sig);
-    if (bloqueDto.hidden) return;
-    bloqueDto.innerHTML =
-      (d > 0
-        ? '<div class="flex items-center justify-between text-[13px]"><span class="text-black/55">Subtotal</span>' +
-          '<span class="text-black/75 tabular-nums">' + usd(s) + '</span></div>' +
-          '<div class="flex items-center justify-between text-[13px]"><span class="font-medium text-[#1e6f55]">' + m.nombre +
-          ' <span class="font-normal text-black/45">(−' + m.pct + ' %)</span></span>' +
-          '<span class="font-semibold text-[#1e6f55] tabular-nums">−' + usd(d) + '</span></div>'
-        : '') +
-      // Empujoncito: cuánto falta para el siguiente peldaño, solo si mejora
-      (sig && sig.pct > (m ? m.pct : 0)
-        ? '<p class="text-[12px] text-black/50 pt-0.5">Lleva ' + sig.faltan + (sig.faltan === 1 ? ' péptido más' : ' péptidos más') +
-          ' y el descuento sube a <b class="font-semibold text-[#1e6f55]">' + sig.pct + ' %</b>.</p>'
-        : '');
+    if (antesEl) { antesEl.hidden = !(d > 0); antesEl.textContent = d > 0 ? usd(s) : ''; }
+    if (!pie) return;
+    if (!bloqueEsc) {
+      bloqueEsc = document.createElement('div');
+      bloqueEsc.className = 'pp-esc';
+      bloqueEsc.setAttribute('data-pp-escalon', '');
+      pie.insertBefore(bloqueEsc, filaSubtotal);
+      bloqueDto = document.createElement('div');
+      bloqueDto.className = 'pp-dto-fila';
+      bloqueDto.setAttribute('data-pp-dto', '');
+      pie.insertBefore(bloqueDto, filaSubtotal.nextSibling);
+    }
+    const m = descuentoPorCantidad(), sig = siguientePeldano(), n = unidadesPeptidos();
+    bloqueEsc.hidden = !items.length;
+    if (items.length) {
+      let ini = 0;
+      const barra = TRAMOS.map((t) => {
+        const lleno = Math.max(0, Math.min(1, (n - ini) / (t.desde - ini))), ancho = t.desde - ini;
+        ini = t.desde;
+        return '<span class="pp-esc-tramo" style="flex-grow:' + ancho + '"><i style="width:' + Math.round(lleno * 100) + '%"></i></span>';
+      }).join('');
+      bloqueEsc.innerHTML = '<div class="pp-esc-barra" aria-hidden="true">' + barra + '</div>' +
+        '<p class="pp-esc-txt"><span>' +
+        (sig
+          ? 'Lleva <b>' + sig.faltan + (sig.faltan === 1 ? ' péptido más' : ' péptidos más') + '</b> y el descuento sube a <b>' + sig.pct + ' %</b>.'
+          : 'Ya tienes el descuento más alto.') +
+        '</span>' + (m ? '<span class="pp-esc-pct" data-pp-pct>−' + m.pct + ' %</span>' : '') + '</p>';
+    } else bloqueEsc.innerHTML = '';
+    bloqueDto.hidden = !(d > 0);
+    bloqueDto.innerHTML = d > 0 ? '<span>' + m.nombre + ' (−' + m.pct + ' %)</span><b>−' + usd(d) + '</b>' : '';
   }
 
   function pintarBadge(u) {
     // Cabecera nueva: el contador siempre visible, también con 0 (como en la portada)
     $$('[data-pp-carrito-n]').forEach((n) => { n.textContent = String(u); });
-    $$('button[data-testid="nav-cart-link"]').forEach((b) => {
+    $$('button[data-testid="nav-cart-link"], button[data-pp-carrito]').forEach((b) => {
       if (b.querySelector('[data-pp-carrito-n]')) { b.setAttribute('aria-label', u ? 'Carrito, ' + u + (u === 1 ? ' producto' : ' productos') : 'Carrito vacío'); return; }
       let badge = b.querySelector('[data-pp-badge]') || $$('span', b).find((s) => /^\d+$/.test(s.textContent.trim()));
       if (!badge) {
@@ -381,14 +486,28 @@
   //    Bacteriostática" se quitó del panel por decisión del dueño: cada péptido
   //    ya lleva su agua de 3 ml en el kit y la sugerencia confundía.
 
-  // 5) Icono de la barra abre; "Finalizar compra" va a la página del carrito
-  $$('button[data-testid="nav-cart-link"], a[href="/carrito"], a[href="/carrito.html"]').forEach((el) => {
+  // 5) El carrito de la cabecera abre el panel -también en la portada, cuyo botón solo lleva data-pp-carrito-;
+  //    "Finalizar compra" va a la página del pago
+  $$('button[data-testid="nav-cart-link"], [data-pp-carrito], a[href="/carrito"], a[href="/carrito.html"]').forEach((el) => {
     if (montaje.contains(el)) return;
-    el.addEventListener('click', (e) => { e.preventDefault(); abrir(); });
+    el.addEventListener('click', (e) => {
+      e.preventDefault(); abrir();
+      // e.detail es 0 cuando el clic viene del teclado; e.isTrusted descarta el clic que wc-bridge.js da por código tras añadir
+      if (e.isTrusted && e.detail === 0 && botonCerrar) { vuelveA = el; botonCerrar.focus(); }
+    });
   });
   // "Finalizar compra" (en el panel y en carrito.html) → checkout.html
-  $$('button, a').filter((b) => /finalizar compra|proceed to checkout/i.test(b.textContent)).forEach((b) => {
-    b.addEventListener('click', (e) => { e.preventDefault(); if (items.length) location.href = 'checkout.html'; else abrir(); });
+  // Con el carrito vacío el botón del panel dice «Ver el catálogo» y lleva a la tienda (o cierra el panel si ya se está en ella)
+  const botones = $$('button, a').filter((b) => /finalizar compra|proceed to checkout/i.test(b.textContent));
+  if (botonFin && botones.indexOf(botonFin) < 0) botones.push(botonFin);
+  botones.forEach((b) => {
+    b.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (items.length) location.href = '/checkout.html';
+      else if (b !== botonFin) abrir();
+      else if (/^\/(?:tienda|store)(?:\.html)?\/?$/.test(location.pathname)) cerrar();
+      else location.href = '/tienda';
+    });
   });
 
   function confirmar(boton, texto) {
@@ -474,6 +593,8 @@
     // el descuento por cantidad: importe, detalle y cuánto falta para el siguiente peldaño
     subtotalItems, descuento, descuentoPorCantidad, siguientePeldano,
     unidadesPeptidos, baseDescontable,
+    // lo que paga cada línea con el descuento repartido al céntimo: [{ id, dosis, cant, antes, ahora }]
+    lineas: preciosLineas,
   };
   render();
   // behaviors.js carga ANTES que este archivo, así que cuando la ficha pintó

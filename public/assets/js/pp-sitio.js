@@ -34,9 +34,10 @@
   window.addEventListener('storage', pintar);
   window.addEventListener('cart-updated', pintar);
 
-  // Con carrito lateral (#pp-carrito-montaje) lo abre carrito.js; sin él, a la página del carrito
+  // Con carrito lateral (#pp-carrito-montaje) lo abre carrito.js; sin él, o si carrito.js no llegó a montarse,
+  // a la página del pago. Se mira al pulsar: carrito.js puede cargar después que este archivo.
   var c = document.querySelector('[data-pp-carrito]');
-  if (c && !document.getElementById('pp-carrito-montaje')) c.addEventListener('click', function () { location.href = '/checkout.html'; });
+  if (c) c.addEventListener('click', function () { if (!window.ppCarrito) location.href = '/checkout.html'; });
 
   // enlace de la sección actual
   var ruta = (location.pathname.replace(/\/+$/, '') || '/').replace(/\.html$/, '');

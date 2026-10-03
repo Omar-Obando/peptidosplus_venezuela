@@ -2,14 +2,20 @@
    GENERADO a partir de la portada (public/index.html) con cromo-sitio.js: no editar a mano. */
 
 /* 1. Letras (las mismas de la portada, servidas desde el sitio) */
-@font-face { font-family: 'Hanken Grotesk'; font-style: normal; font-weight: 100 900; font-display: swap; src: url(/assets/fonts/hanken-grotesk-latin.woff2) format('woff2'); }
+/* letras:inicio — las de Amino Club: Anek Telugu (texto y títulos) y Poppins (botones, enlaces y etiquetas) (fuente-amino.js) */
+@font-face { font-family: 'Anek Telugu'; font-style: normal; font-weight: 100 800; font-display: swap; src: url(/assets/fonts/anek-telugu-latin.woff2) format('woff2'); }
+@font-face { font-family: 'Poppins'; font-style: normal; font-weight: 400; font-display: swap; src: url(/assets/fonts/poppins-400-latin.woff2) format('woff2'); }
+@font-face { font-family: 'Poppins'; font-style: normal; font-weight: 500; font-display: swap; src: url(/assets/fonts/poppins-500-latin.woff2) format('woff2'); }
+@font-face { font-family: 'Poppins'; font-style: normal; font-weight: 600; font-display: swap; src: url(/assets/fonts/poppins-600-latin.woff2) format('woff2'); }
+:root { --pp-letra: 'Anek Telugu', system-ui, sans-serif; --pp-letra-boton: 'Poppins', 'Anek Telugu', system-ui, sans-serif; }
+/* letras:fin */
 @font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 100 800; font-display: swap; src: url(/assets/fonts/jetbrains-mono-latin.woff2) format('woff2'); }
 
 /* 2. Escala de escritorio que usan la cabecera y el pie */
 @media (min-width: 1024px) { :root { --ppd-k: 0.8; --ppd-espacio: 0.8; --ppd-ancho: 0.9; --ppd-alto: 0.9; --ppd-bloque: 0.88; } }
 
 /* 3. Cabecera y pie: base (en la portada la heredan de su envoltorio) */
-header[data-pp-cromo], footer[data-pp-cromo] { font-family: 'Hanken Grotesk', system-ui, sans-serif; -webkit-font-smoothing: antialiased; text-align: left; line-height: 1.5; }
+header[data-pp-cromo], footer[data-pp-cromo] { font-family: var(--pp-letra); -webkit-font-smoothing: antialiased; text-align: left; line-height: 1.5; }
 header[data-pp-cromo] { color: #fff; }
 [data-pp-cromo], [data-pp-cromo] *, [data-pp-cromo] *::before, [data-pp-cromo] *::after { box-sizing: border-box; }
 [data-pp-cromo] a { text-decoration: none; }
@@ -28,48 +34,65 @@ header[data-pp-cromo] a[aria-current="page"] { color: #fff !important; backgroun
 [data-pp-flotante] { position: fixed; right: 16px; bottom: 16px; width: 56px; height: 56px; border-radius: 50%; background: #0A192F; display: none; align-items: center; justify-content: center; box-shadow: 0 10px 24px rgba(10,25,47,.35); z-index: 60; }
 [data-pp-flotante]:focus-visible { outline: 3px solid #E9C46A; outline-offset: 2px; }
 @media (max-width: 759px) { [data-pp-flotante] { display: flex; } }
-[data-pp-salto] { position: absolute; left: 16px; top: -120px; z-index: 100; padding: 10px 14px; border-radius: 10px; background: #0A192F; color: #fff; font-family: "Hanken Grotesk", system-ui, sans-serif; font-weight: 600; font-size: 14px; text-decoration: none; }
+[data-pp-salto] { position: absolute; left: 16px; top: -120px; z-index: 100; padding: 10px 14px; border-radius: 10px; background: #0A192F; color: #fff; font-family: var(--pp-letra-boton); font-weight: 600; font-size: 14px; text-decoration: none; }
 [data-pp-salto]:focus { top: 12px; outline: 3px solid #E9C46A; outline-offset: 2px; }
 @media (max-width: 759px) { [data-pp-menu-btn] { width: 44px !important; height: 44px !important; } [data-pp-carrito] { height: 44px !important; } }
 [data-pp-pie] { display: inline-block; padding: 5px 0; margin: -5px 0; }
 @media (min-width: 760px) and (max-width: 899px) { header [data-pp-solo="desk"] > a[href^="https://wa.me/"] { font-size: 0 !important; gap: 0 !important; padding: 0 12px !important; } }
 
 /* 5. Enlace «Saltar al contenido» y botón flotante */
-[data-pp-salto] { position: absolute; left: 16px; top: -120px; z-index: 100; padding: 10px 14px; border-radius: 10px; background: #0A192F; color: #fff; font-family: 'Hanken Grotesk', system-ui, sans-serif; font-weight: 600; font-size: 14px; text-decoration: none; }
+[data-pp-salto] { position: absolute; left: 16px; top: -120px; z-index: 100; padding: 10px 14px; border-radius: 10px; background: #0A192F; color: #fff; font-family: var(--pp-letra-boton); font-weight: 600; font-size: 14px; text-decoration: none; }
 [data-pp-salto]:focus { top: 12px; outline: 3px solid #E9C46A; outline-offset: 2px; }
 
 /* 6. Letras del diseño nuevo en las páginas heredadas */
-body[class] { --font-anek: 'Hanken Grotesk', system-ui, sans-serif; --font-poppins: 'Hanken Grotesk', system-ui, sans-serif; --font-roboto: 'Hanken Grotesk', system-ui, sans-serif; --font-marcellus: 'Hanken Grotesk', system-ui, sans-serif; --font-fraunces: 'Hanken Grotesk', system-ui, sans-serif; --font-stack-display: 'Hanken Grotesk', system-ui, sans-serif; --font-club-serif: 'Hanken Grotesk', system-ui, sans-serif; --font-stack-mono: 'JetBrains Mono', ui-monospace, monospace; }
-body { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+body[class] { --font-anek: var(--pp-letra); --font-poppins: var(--pp-letra-boton); --font-roboto: var(--pp-letra); --font-marcellus: var(--pp-letra); --font-fraunces: var(--pp-letra); --font-stack-display: var(--pp-letra); --font-club-serif: var(--pp-letra); --font-stack-mono: 'JetBrains Mono', ui-monospace, monospace; }
+body { font-family: var(--pp-letra); }
 code, kbd, samp, pre, .font-mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
 code,kbd,samp,pre { font-family: 'JetBrains Mono', ui-monospace, monospace; }
-.txt-compact-small-plus { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.txt-compact-small { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.txt-medium { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.font-\[Roboto\,sans-serif\] { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+.txt-compact-small-plus { font-family: var(--pp-letra); }
+.txt-compact-small { font-family: var(--pp-letra); }
+.txt-medium { font-family: var(--pp-letra); }
+.font-\[Roboto\,sans-serif\] { font-family: var(--pp-letra); }
 .font-mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
-:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-leer { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-indice a::before { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.pp-coa-pill { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.pp-coa-ficha-labcab b { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.pp-coa-ficha-eti, .pp-coa-ficha-eti2 { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.pp-coa-ficha-num span { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.pp-coa-ficha-num i { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.pp-coa-ficha-datos dt { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.pp-coa-ficha-datos dd { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.pp-coa-ficha-sellos span { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.pp-coa-ficha-boton { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.pp-coa-ficha-regcab p { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.pp-coa-ficha-cuenta { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.pp-coa-ficha-mg b { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.pp-coa-ficha-chip, .pp-coa-res-chip { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.pp-coa-res-nombre { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.pp-coa-res-mg { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.pp-coa-modal-cab h2 { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.pp-coa-modal-verificar { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.pp-coa-modal-lista-t { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.pp-coa-modal-lista-mg { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.pp-busca-pep-quien b { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.pp-busca-pep-coa { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
-.pp-busca-pep-precio { font-family: 'Hanken Grotesk', system-ui, sans-serif; }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-leer { font-family: var(--pp-letra); }
+:is([id^="pg-articulo"],[id^="pg-legal"]) .pg-indice a::before { font-family: var(--pp-letra); }
+.pp-coa-pill { font-family: var(--pp-letra-boton); }
+.pp-coa-ficha-labcab b { font-family: var(--pp-letra); }
+.pp-coa-ficha-eti, .pp-coa-ficha-eti2 { font-family: var(--pp-letra); }
+.pp-coa-ficha-num span { font-family: var(--pp-letra); }
+.pp-coa-ficha-num i { font-family: var(--pp-letra); }
+.pp-coa-ficha-datos dt { font-family: var(--pp-letra); }
+.pp-coa-ficha-datos dd { font-family: var(--pp-letra); }
+.pp-coa-ficha-sellos span { font-family: var(--pp-letra); }
+.pp-coa-ficha-boton { font-family: var(--pp-letra-boton); }
+.pp-coa-ficha-regcab p { font-family: var(--pp-letra); }
+.pp-coa-ficha-cuenta { font-family: var(--pp-letra); }
+.pp-coa-ficha-mg b { font-family: var(--pp-letra); }
+.pp-coa-ficha-chip, .pp-coa-res-chip { font-family: var(--pp-letra-boton); }
+.pp-coa-res-nombre { font-family: var(--pp-letra); }
+.pp-coa-res-mg { font-family: var(--pp-letra); }
+.pp-coa-modal-cab h2 { font-family: var(--pp-letra); }
+.pp-coa-modal-verificar { font-family: var(--pp-letra-boton); }
+.pp-coa-modal-lista-t { font-family: var(--pp-letra); }
+.pp-coa-modal-lista-mg { font-family: var(--pp-letra); }
+.pp-busca-pep-quien b { font-family: var(--pp-letra); }
+.pp-busca-pep-coa { font-family: var(--pp-letra); }
+.pp-busca-pep-precio { font-family: var(--pp-letra); }
 .prose code { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+/* 7. Ajustes por el cambio de letra */
+/* ajustes de letra:inicio (fuente-amino.js; no editar a mano) */
+/* el <body> de BrandLayout lleva la clase font-poppins: el texto corrido es Anek igualmente */
+body.font-poppins { font-family: var(--pp-letra); }
+/* los títulos, siempre en la letra de texto aunque estén dentro de un enlace (en Amino Club todos los h1–h3 son Anek) */
+h1, h2, h3, h4, h5, h6 { font-family: var(--pp-letra); }
+/* los campos, en la letra de texto (como Amino Club): con Poppins el texto de ejemplo del buscador de certificados no cabía en el teléfono */
+input.font-poppins, textarea.font-poppins, select.font-poppins { font-family: var(--pp-letra); }
+/* los párrafos de lectura que la plantilla marcaba como Poppins (certificados) son texto; las etiquetas (mayúsculas, cejillas) siguen en Poppins */
+p.font-poppins:not(.uppercase):not(.pg-cejilla) { font-family: var(--pp-letra); }
+/* los filtros de Artículos son botones (su all:unset los dejaba en la letra de texto) */
+.pg-filtro { font-family: var(--pp-letra-boton); }
+/* pie: las listas de enlaces van en la letra de texto (así los países con enlace y los «próximamente», que no lo tienen, salen iguales y caben en un renglón); el enlace del aviso legal, como su frase */
+footer span ~ a { font-family: var(--pp-letra); }
+footer p a { font-family: inherit; }
+/* ajustes de letra:fin */

@@ -53,7 +53,10 @@ export default defineConfig({
     react(),
     compress({
       CSS: true,
-      HTML: true,
+      // HTML apagado (2026-10-03): el minificador de HTML rompía los estilos en línea que llevan &quot;.
+      // En la portada dejaba <div style=font-family:&quot;background:#fff> (sin "Hanken Grotesk") y todo el
+      // inicio salía en letra Times. Las páginas de public/ ya vienen optimizadas a mano.
+      HTML: false,
       JavaScript: true,
       Image: false,
       SVG: false,

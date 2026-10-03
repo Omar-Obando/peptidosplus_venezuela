@@ -20,6 +20,7 @@ const STATIC_PATHS: Array<{ path: string; priority: string; changefreq: string }
   { path: '/certificados', priority: '0.7', changefreq: 'weekly' },
   { path: '/privacidad', priority: '0.2', changefreq: 'yearly' },
   { path: '/terminos', priority: '0.2', changefreq: 'yearly' },
+  { path: '/descargo-de-responsabilidad', priority: '0.2', changefreq: 'yearly' },
 ];
 
 export const GET: APIRoute = async () => {

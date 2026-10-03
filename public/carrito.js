@@ -196,12 +196,27 @@
   });
   $$('a[href="#"]', dialogo).forEach((a) => a.addEventListener('click', (e) => e.preventDefault()));
 
+  /* ---------- existencias (2026-10-03) ----------
+   * Angel: «si los productos están agotados no permitas que los agreguen al carrito… y si ya los había agregado,
+   * que se le quiten». La lista sale de /api/existencias (WooCommerce, con caché): { 'semaglutida': '*',
+   * 'mots c': ['10 mg'] } con los nombres normalizados igual que aquí. Mientras no llegue (o si falla) no se
+   * bloquea nada: /api/pedido rechaza igual lo agotado al finalizar. */
+  const llano = (s) => String(s == null ? '' : s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9+]+/g, ' ').trim();
+  let agotados = null;
+  const estaAgotado = (nombre, dosis) => {
+    const a = agotados && agotados[llano(nombre)];
+    return !!a && (a === '*' || (Array.isArray(a) && a.indexOf(llano(dosis)) >= 0));
+  };
+
   /* ---------- operaciones ---------- */
+  // Devuelve false (y no añade nada) si esa presentación está agotada
   function agregar(p, cant) {
+    if (estaAgotado(p.nombre, p.dosis)) return false;
     cant = Math.max(1, Number(cant) || 1);
     const i = items.findIndex((x) => x.id === p.id && x.dosis === p.dosis);
     if (i >= 0) items[i].cant += cant; else items.push(Object.assign({}, p, { cant }));
     guardar(); render(); abrir();
+    return true;
   }
   function cambiar(id, dosis, delta) {
     items = items.map((x) => (x.id === id && x.dosis === dosis ? Object.assign({}, x, { cant: x.cant + delta }) : x)).filter((x) => x.cant > 0);
@@ -414,8 +429,8 @@
       for (let k = 0; k < 6 && card && !card.querySelector('img'); k++) card = card.parentElement;
       const img = card && card.querySelector('img');
       const src = img ? img.getAttribute('src') : '';
-      agregar({ id: slug(nombre), nombre, dosis: dosisDeRuta(src), precio: precioEn(card && card.textContent), img: src }, 1);
-      confirmar(b, 'Añadido ✓');
+      const ok = agregar({ id: slug(nombre), nombre, dosis: dosisDeRuta(src), precio: precioEn(card && card.textContent), img: src }, 1);
+      confirmar(b, ok ? 'Añadido ✓' : 'Agotado');
     });
   });
 
@@ -443,8 +458,8 @@
       // El botón muestra el TOTAL (como la tienda de referencia), así que el precio de UN
       // vial sale de la talla elegida o del dato de la ficha, nunca del texto.
       const unitario = parseFloat((masa && masa.getAttribute('data-precio')) || b.getAttribute('data-pp-unitario')) || precioEn(b.textContent);
-      agregar({ id: slug(nombre), nombre, dosis, precio: unitario, img: img ? img.getAttribute('src') : '' }, leerCant());
-      confirmar(b, 'Añadido ✓');
+      const ok = agregar({ id: slug(nombre), nombre, dosis, precio: unitario, img: img ? img.getAttribute('src') : '' }, leerCant());
+      confirmar(b, ok ? 'Añadido ✓' : 'Agotado');
     });
   });
 
@@ -595,8 +610,85 @@
     unidadesPeptidos, baseDescontable,
     // lo que paga cada línea con el descuento repartido al céntimo: [{ id, dosis, cant, antes, ahora }]
     lineas: preciosLineas,
+    estaAgotado,
   };
   render();
+
+  /* ---------- lo agotado, al llegar /api/existencias ---------- */
+  // Lo que ya estaba en el carrito y se agotó sale de él, con un aviso que dice qué se quitó
+  function avisarAgotados(fuera) {
+    const nombres = fuera.map((x) => x.nombre + (x.dosis ? ' ' + x.dosis : ''));
+    const lista = nombres.length < 2 ? nombres.join('') : nombres.slice(0, -1).join(', ') + ' y ' + nombres[nombres.length - 1];
+    let t = document.getElementById('pp-aviso-agotado');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'pp-aviso-agotado';
+      t.setAttribute('role', 'status');
+      // estilos en línea: la portada no carga pp-tokens.css
+      t.style.cssText = 'position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:10000;width:min(92vw,460px);display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:12px;background:#0a192f;color:#fff;box-shadow:0 10px 30px rgba(10,25,47,.28);font-size:14px;line-height:1.45';
+      document.body.appendChild(t);
+    }
+    t.textContent = '';
+    const p = document.createElement('p');
+    p.style.cssText = 'margin:0;flex:1';
+    p.textContent = fuera.length === 1 ? 'Quitamos ' + lista + ' de tu carrito porque se agotó.' : 'Quitamos de tu carrito ' + lista + ' porque se agotaron.';
+    const x = document.createElement('button');
+    x.type = 'button';
+    x.setAttribute('aria-label', 'Cerrar aviso');
+    x.textContent = '×';
+    x.style.cssText = 'flex:0 0 auto;background:none;border:0;color:#c9d5e6;font-size:20px;line-height:1;cursor:pointer;padding:0 2px';
+    x.addEventListener('click', () => t.remove());
+    t.append(p, x);
+    clearTimeout(avisarAgotados.reloj);
+    avisarAgotados.reloj = setTimeout(() => t.remove(), 9000);
+  }
+  function quitarAgotados() {
+    const fuera = items.filter((x) => estaAgotado(x.nombre, x.dosis));
+    if (!fuera.length) return;
+    items = items.filter((x) => fuera.indexOf(x) < 0);
+    guardar(); render();
+    avisarAgotados(fuera);
+  }
+  // Botones de la página: tarjetas «Añadir» (tienda, «Se piden juntos») y la ficha con sus presentaciones
+  const apagar = (b, etiqueta) => {
+    b.disabled = true;
+    b.setAttribute('aria-disabled', 'true');
+    if (etiqueta) b.setAttribute('aria-label', etiqueta);
+    b.classList.add('opacity-50', 'cursor-not-allowed');
+  };
+  function marcarAgotadosEnPagina() {
+    $$('button[aria-label^="Añadir "]').forEach((b) => {
+      const nombre = (b.getAttribute('aria-label') || '').replace(/^Añadir\s+/i, '').replace(/\s+al carrito$/i, '').trim();
+      if (agotados[llano(nombre)] !== '*') return;     // con alguna talla disponible se elige en la ficha
+      b.textContent = 'Agotado';                       // mismo botón que SS-31 en la tienda
+      apagar(b, nombre + ', sin existencias');
+    });
+    const nombre = h1 ? h1.textContent.trim() : '';
+    const a = nombre && agotados[llano(nombre)];
+    if (!a) return;
+    const pres = $$('[data-pp-pres]');
+    pres.forEach((x) => { if (estaAgotado(nombre, x.getAttribute('data-dosis'))) { x.setAttribute('data-agotado', '1'); x.title = 'Agotado'; } });
+    const libre = pres.find((x) => x.getAttribute('data-agotado') !== '1');
+    const elegida = $('[data-pp-pres][aria-pressed="true"]');
+    // si la talla elegida se agotó, pasa a la primera disponible (behaviors.js enciende el botón de añadir al elegir)
+    if (a !== '*' && libre && elegida && elegida.getAttribute('data-agotado') === '1') { libre.click(); return; }
+    if (a === '*' || !libre) {
+      $$('[data-pp-anadir]').concat($$('button').filter((b) => /añadir al carrito/i.test(b.textContent) && !b.getAttribute('aria-label'))).forEach((b) => {
+        const span = $$('span', b).find((s) => /añadir al carrito/i.test(s.textContent)) || b;
+        if (typeof window.ppPonerAnadir === 'function') window.ppPonerAnadir(span, null); else span.textContent = 'Agotado';
+        apagar(b);
+      });
+    }
+  }
+  fetch('/api/existencias', { credentials: 'omit' })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((j) => {
+      if (!j || !j.ok || !j.agotados || typeof j.agotados !== 'object') return;
+      agotados = j.agotados;
+      quitarAgotados();
+      marcarAgotadosEnPagina();
+    })
+    .catch(() => { /* sin datos de existencias: no se bloquea nada */ });
   // behaviors.js carga ANTES que este archivo, así que cuando la ficha pintó
   // su precio todavía no existía window.ppCarrito y no pudo mirar si había
   // promoción: salía el precio de tarifa y solo se corregía al tocar algo.
